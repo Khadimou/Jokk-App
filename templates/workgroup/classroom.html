@@ -1,0 +1,421 @@
+{% include "base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_styles %}
+    <style>
+        .workgroup-container {
+            max-width: 800px;
+            margin: auto;
+            margin-top: 60px;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .workgroup-title {
+            text-align: center;
+            color: #333;
+        }
+        .workgroup-description {
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        .workgroup-avatar {
+            display: block;
+            max-width: 100px;
+            height: auto;
+            margin: 0 auto 20px;
+        }
+        .members-title {
+            margin-top: 20px;
+        }
+        .member-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .member-list li {
+            background-color: #e7e7e7;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .workgroup-actions {
+            display: flex;
+            justify-content: space-between; /* Cela place un bouton à chaque extrémité */
+            width: 100%; /* Assure que le conteneur prend toute la largeur */
+        }
+
+
+        /* Style pour les modales */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* Réduit la marge supérieure pour élever le conteneur */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%; /* Réduit la largeur du conteneur */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Ajoute une ombre pour un effet de profondeur */
+            border-radius: 10px; /* Arrondit les coins du conteneur */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal-content form {
+            width: 100%; /* Utilise la pleine largeur du conteneur modal */
+        }
+
+        .modal-content form input,
+        .modal-content form textarea,
+        .modal-content form button {
+            width: calc(100% - 40px); /* Calcule la largeur en soustrayant le padding */
+            margin-bottom: 15px; /* Réduit l'espace entre les champs */
+            padding: 10px; /* Ajoute un peu de padding à l'intérieur des champs */
+            border: 1px solid #ccc; /* Uniformise la bordure des champs */
+            border-radius: 4px; /* Arrondit les coins des champs */
+        }
+
+        .modal-content form textarea {
+            height: 100px; /* Ajuste la hauteur du champ textarea */
+        }
+
+        .modal-content form button {
+            background-color: #5cb85c; /* Change la couleur d'arrière-plan */
+            color: white; /* Change la couleur du texte */
+            border-color: #4cae4c; /* Change la couleur de la bordure */
+            border-radius: 4px; /* Assure que le bouton a des coins arrondis */
+            font-weight: bold; /* Rend le texte du bouton plus gras */
+        }
+
+        .modal-content form button:hover {
+            background-color: #4cae4c; /* Assombrit le bouton au survol */
+        }
+
+        /* Style pour fermer le bouton (x) */
+        .close {
+            color: #aaa;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Style pour la barre de recherche */
+        #userSearch {
+            width: 100%; /* Utilise la pleine largeur de la modale */
+            padding: 10px; /* Ajoute du padding pour un meilleur aspect */
+            margin-bottom: 20px; /* Ajoute un espace en dessous de la barre de recherche */
+            border: 1px solid #ccc; /* Ajoute une bordure subtile */
+            border-radius: 4px; /* Arrondit les coins */
+        }
+
+        /* Style pour les résultats de recherche */
+        #userSearchResults {
+            width: 100%; /* Utilise la pleine largeur de la modale */
+            /* Ajoutez d'autres styles ici pour vos résultats de recherche */
+        }
+        .search-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .search-result-item div {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-result-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 5px; /* Réduisez cette valeur pour diminuer l'espace */
+            border-radius: 50%; /* Rend l'image circulaire, si souhaité */
+        }
+        .create-new-btn .plus-icon {
+            background-color: #ccc; /* Sets the background color of the plus icon */
+            font-size: 50px; /* Sets the size of the plus icon */
+            margin-right: 5px; /* Adds a margin to the right of the plus icon */
+            padding: 2px; /* Adds some padding inside the gray square */
+            display: inline-flex; /* Ensures the plus sign is centered inside the square */
+            justify-content: center; /* Centers the plus sign horizontally */
+            align-items: center; /* Centers the plus sign vertically */
+            width: 200px; /* Sets a fixed width for the square */
+            height: 200px; /* Sets a fixed height for the square */
+            border-radius: 2px; /* Optional: rounds the corners of the gray square */
+        }
+        .invite-button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .invite-button:hover {
+            background-color: #45a049;
+        }
+        .workgroup-edit-actions {
+            /* Exemple : aligner les boutons à droite */
+            text-align: center;
+            margin-top: 10px; /* Espace au-dessus des boutons */
+        }
+
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="workgroup-container">
+        {% if workgroup.avatar %}
+            <img src="{{ workgroup.avatar.url }}" alt="{{ workgroup.name }}" class="workgroup-avatar">
+        {% endif %}
+
+        <h1 class="workgroup-title">{{ workgroup.name }}</h1>
+        <h3 class="members-title">{% trans 'Description:' %}</h3>
+        <p class="workgroup-description">{{ workgroup.description }}</p>
+
+        <h3 class="members-title">{% trans 'Members:' %}</h3>
+        <ul>
+            {% for member in members_info %}
+                <li>{{ member.user.username }} - {{ member.status }}</li>
+            {% endfor %}
+        </ul>
+
+    <div class="workgroup-actions">
+        {% if is_creator %}
+            <button data-workgroup-id="{{ workgroup.id }}" id="addMembersButton" class="btn btn-info">{% trans 'Add members' %}</button>
+            <!-- Modale pour 'Add members' -->
+            <div id="addMembersModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>{% trans 'Add Members' %}</h2>
+                    <input type="text" id="userSearch" placeholder="{% trans 'Search for users...' %}">
+                    <div id="userSearchResults">
+                        <!-- Les résultats de la recherche seront affichés ici -->
+                    </div>
+                    <div id="alert-container"></div>
+                </div>
+            </div>
+            <a href="{% url 'create_chat_room' workgroup.id %}" class="btn btn-info">{% trans 'Launch Discussion Room' %}</a>
+
+            <h3>{% trans 'Discussion Rooms' %}</h3>
+            <ul>
+                {% for chat_room in chat_rooms %}
+                    <li>
+                        <a href="{% url 'chat_room' chat_room.id %}">{% trans 'Join Room' %} {{ chat_room.id }}</a>
+                        <!-- Vous pouvez afficher plus de détails sur chaque salon ici -->
+                    </li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            {% if is_accepted %}
+                <h3>{% trans 'Discussion Rooms' %}</h3>
+                <ul>
+                    {% for chat_room in chat_rooms %}
+                        <li>
+                            <a href="{% url 'chat_room' chat_room.id %}">{% trans 'Join Room' %} {{ chat_room.id }}</a>
+                            <!-- Vous pouvez afficher plus de détails sur chaque salon ici -->
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <!-- Affichez les boutons 'Join' et 'Refuse' uniquement si l'utilisateur n'est pas accepté -->
+                <form action="{% url 'refuse_invitation' workgroup.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">{% trans 'Refuse' %}</button>
+                </form>
+
+                <form action="{% url 'accept_invitation' workgroup.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">{% trans 'Join' %}</button>
+                </form>
+            {% endif %}
+
+        {% endif %}
+    </div>
+    </div>
+    {% if is_creator %}
+        <!-- Boutons 'Edit' et 'Delete' en dehors du conteneur 'workgroup-container' -->
+        <div class="workgroup-edit-actions">
+            <a href="{% url 'edit_workgroup' workgroup.id %}" class="btn btn-primary">{% trans 'Edit' %}</a>
+            <a href="{% url 'delete_workgroup' workgroup.id %}" class="btn btn-danger">{% trans 'Delete' %}</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // JavaScript pour la gestion de la modale et de la barre de recherche
+    document.addEventListener("DOMContentLoaded", function() {
+        // Obtenez la modale pour 'Add members'
+        var addMembersModal = document.getElementById("addMembersModal");
+
+        // Obtenez le bouton qui ouvre le modal
+        var addMembersBtn = document.querySelector("button[data-workgroup-id]");
+
+        // Obtenez l'élément <span> qui ferme la modale 'Add members'
+        var spanCloseAddMembers = addMembersModal.getElementsByClassName("close")[0];
+
+        // Quand l'utilisateur clique sur le bouton, ouvrez le modal
+        addMembersBtn.onclick = function() {
+            addMembersModal.style.display = "block";
+        }
+
+        // Quand l'utilisateur clique sur <span> (x), fermez la modale 'Add members'
+        spanCloseAddMembers.onclick = function() {
+            addMembersModal.style.display = "none";
+        };
+
+        // Quand l'utilisateur clique n'importe où en dehors du modal, fermez-le
+        window.onclick = function(event) {
+            if (event.target == addMembersModal) {
+                addMembersModal.style.display = "none";
+            }
+        }
+
+        // Gestion de la recherche d'utilisateurs
+        var searchInput = document.getElementById("userSearch");
+        var resultsContainer = document.getElementById("userSearchResults");
+        var workgroupId = addMembersBtn.getAttribute('data-workgroup-id');  // Récupère l'ID du groupe de travail
+
+        searchInput.addEventListener("input", function() {
+            var query = this.value;
+            if (query.length > 1) {
+                fetch(`/search?search=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsContainer.innerHTML = ''; // Efface les résultats précédents
+                        data.results.forEach(result => {
+                            // Construire et ajouter chaque élément de résultat
+                            // ...
+                            var resultDiv = document.createElement("div");
+                            resultDiv.className = "search-result-item";
+                            resultDiv.style.display = "flex";
+                            resultDiv.style.justifyContent = "space-between";
+                            resultDiv.style.alignItems = "center";
+                            resultDiv.style.marginBottom = "10px";
+
+                            var userInfoDiv = document.createElement("div");
+                            userInfoDiv.style.display = "flex";
+                            userInfoDiv.style.alignItems = "center";
+
+                            if (result.type === 'profile' && result.avatar) {
+                                var img = document.createElement("img");
+                                img.src = result.avatar;
+                                img.alt = "Avatar";
+                                img.width = 50;
+                                img.height = 50;
+                                img.style.marginRight = "10px";
+                                userInfoDiv.appendChild(img);
+
+                                var usernameSpan = document.createElement("span");
+                                usernameSpan.textContent = result.username;
+                                userInfoDiv.appendChild(usernameSpan);
+                                resultDiv.appendChild(userInfoDiv);
+
+
+                                var inviteButton = document.createElement("button");
+                                inviteButton.textContent = "+ Invite";
+                                inviteButton.onclick = function () {
+                                    inviteUser(result.username, workgroupId);  // Utilisation de workgroupId
+                                };
+                                inviteButton.className = "invite-button";
+                                resultDiv.appendChild(inviteButton);
+
+                                resultsContainer.appendChild(resultDiv);
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
+    function inviteUser(username, workgroupId) {
+        console.log('Inviting:', username);
+        fetch("{% url 'send_invitation' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ 'username': username, 'workgroup_id': workgroupId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Invitation sent successfully to ' + username);
+                    showAlert('Invitation sent successfully to ' + username);
+                } else {
+                    console.error(data.message);
+                    alert('Failed to send invitation: ' + data.message);
+                    showAlert('Failed to send invitation', true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending invitation');
+            });
+    }
+
+
+    function showAlert(message, error = false) {
+        const alertBox = document.createElement('div');
+        alertBox.textContent = message;
+        alertBox.className = error ? 'alert alert-danger' : 'alert alert-success';
+
+        // Positionnement de l'alerte
+        alertBox.style.marginTop = '20px';
+        alertBox.style.textAlign = 'center';
+
+        // Ajout de l'alerte au conteneur spécifique
+        const container = document.getElementById('alert-container');
+        container.appendChild(alertBox);
+
+        // Disparaître après quelques secondes
+        setTimeout(() => alertBox.remove(), 3000);
+    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

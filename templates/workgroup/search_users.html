@@ -1,0 +1,20 @@
+{% load i18n %}
+
+{% for result in results %}
+    {% if result.type == 'profile' %}
+        <div class="search-result-item">
+            <img src="{{ result.avatar }}" alt="Avatar" width="50" height="50">
+            <span>{{ result.username }}</span>
+        </div>
+    {% elif result.type == 'assistant' %}
+        <div class="search-result-item">
+            <!-- Utilisez l'image statique pour l'avatar de l'assistant -->
+            <img src="{% static 'images/assistant_avatar.png' %}" alt="Assistant Avatar" width="50" height="50">
+            <span>{{ result.name }}</span>
+            <p>{{ result.description }}</p>
+        </div>
+    {% endif %}
+{% empty %}
+    <p>{% trans 'No results found.' %}</p>
+{% endfor %}
+

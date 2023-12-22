@@ -1,0 +1,83 @@
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{% trans 'My Mentor' %}{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
+    {% if predicted_score_optim %}
+        <p>{% trans 'Predicted Score:' %}</p>
+        <ul>
+            {% for mentor_info in predicted_score_optim %}
+                <li>
+                    {% trans 'Matching with' %} {{ mentor_info.Score|floatformat:2|multiply:100 }}%:
+                    <ul>
+                        <li>{% trans 'First Name: ' %}{{ mentor_info.FirstName }}</li>
+                        <li>{% trans 'Name:' %}{{ mentor_info.LastName }}</li>
+                        <li>{% trans 'Skills:'%} {{ mentor_info.Skills }}</li>
+                        <li>{% trans 'Job:' %}{{ mentor_info.Job }}</li>
+                        <li>{% trans 'Rating: ' %}{{ mentor_info.Rating }}/5</li>
+                    </ul>
+                    <button class="btn btn-primary" data-mentor-id="{{ mentor_info.ID }}">{% trans 'Send a request' %}</button>
+                </li>
+                <h1><a class="btn btn-link" href="{% url 'view_mentor_profile' mentor_info.ID %}">{% trans 'View full profile' %}</a></h1>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+        $(".btn-primary").click(function() {
+            var mentorId = $(this).data('mentor-id');
+            var mentorFirstName = $(this).data("mentor-first-name");
+            var mentorLastName = $(this).data("mentor-last-name");
+
+            // Récupération de la date et de l'heure actuelles
+            var currentDate = new Date();
+            var dateString = currentDate.toISOString().split('T')[0];  // Format 'YYYY-MM-DD'
+            var timeString = currentDate.toTimeString().split(' ')[0];  // Format 'HH:MM:SS'
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'send_request' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    mentor_first_name: mentorFirstName,
+                    mentor_last_name: mentorLastName,
+                    mentor_id: mentorId,
+                    mentore_id: '{{ user.id }}',
+                    date: dateString,
+                    time: timeString
+                },
+                success: function(data) {
+                    if(data.success) {
+                        alert("Request sent!");
+                    } else {
+                        alert("Error sending request!");
+                    }
+                }
+            });
+        });
+    });
+
+
+</script>

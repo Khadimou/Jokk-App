@@ -1,0 +1,65 @@
+{% include "base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_styles %}
+    <style>
+        /* Styling for the notification container */
+        .notification-container {
+            width: 100%; /* Full width */
+            max-width: 800px; /* Increase the maximum width */
+            margin: 30px auto; /* Center the container and increase spacing around */
+            padding: 20px; /* Increased padding */
+            border: 2px solid #e0e0e0; /* Thicker border */
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: auto;
+            font-size: 1.5em; /* Increase the base font size */
+        }
+
+        /* Styling for each notification item */
+        .notification-item {
+            padding: 20px 0; /* Increase spacing between notifications */
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Styling for notification links */
+        .notification-item a {
+            text-decoration: none; /* Remove underline */
+            color: #0097B2; /* Dark text color */
+        }
+
+        /* Styling for bold notifications */
+        .font-weight-bold {
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="notification-container">
+        <h1>{% trans 'Notifications' %}</h1>
+        <ul class="notification-list">
+            {% for notification in notifications %}
+                <li>
+                    <a href="{% url 'notification_detail' notification.id %}">
+                        <h2>{{ notification.title }}</h2>
+                        <p>{{ notification.body }}</p>
+                        <small>{% trans 'Received on: '%}{{ notification.created_at }}</small>
+                    </a>
+                </li>
+            {% empty %}
+                <p>{% trans 'No notifications.' %}</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}

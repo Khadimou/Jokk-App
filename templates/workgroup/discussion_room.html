@@ -1,0 +1,337 @@
+{% extends 'base_site.html' %}
+{% load i18n static %}
+
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        input, button {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: row; /* Utilisez row pour une disposition latérale ou column pour une disposition verticale */
+            height: 100vh;
+            width: 100%;
+            background-color: aliceblue;
+            overflow: hidden; /* Cela pourrait être nécessaire pour empêcher le défilement global */
+        }
+
+        .online-user {
+            background-color: #2ecc71; /* Vert pour indiquer qu'ils sont en ligne */
+            color: white; /* Couleur du texte pour les utilisateurs en ligne */
+            padding: 5px;
+            border-radius: 5px;
+            display: inline-block; /* Ajoutez ceci pour limiter la largeur au contenu */
+            margin-right: 10px; /* Ajoutez un peu d'espace à droite si nécessaire */
+        }
+
+
+        .chat-room {
+            flex-grow: 1; /* Occupe l'espace restant après que la sidebar a pris sa largeur fixe */
+            display: flex;
+            flex-direction: column; /* Organise les enfants verticalement */
+        }
+
+        #chat-log {
+            flex-grow: 1; /* Prend l'espace restant dans chat-room */
+            overflow-y: auto; /* Permet le défilement pour les messages */
+            padding: 10px;
+        }
+
+        .sidebar .user {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #34495e;
+            border-radius: 5px;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .user img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            color: #e0e0e0;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 75%;
+        }
+
+        .message-outgoing {
+            align-self: flex-end;
+            background-color: #f0f0f0;
+            color: #417893;
+        }
+
+        .message-incoming {
+            align-self: flex-start;
+            color: #333333;
+            background-color: #dcf8c6;
+        }
+
+        .message-username {
+            font-weight: bold;
+            margin-right: 8px;
+            color: #333; /* Couleur pour le nom d'utilisateur */
+        }
+
+        #chat-message-submit {
+            background-color: #007bff;
+            border: none;
+            padding: 15px 30px;
+            margin: 0;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #chat-message-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .chat-message-input-container {
+            display: flex;
+            padding: 15px;
+            background-color: aliceblue;
+            flex-grow: 0;
+        }
+
+        #chat-message-input {
+            flex-grow: 1;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            margin-right: 15px;
+            color: #333333;
+            background-color: #fff;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        #chat-leave {
+            background-color: #dc3545; /* Couleur rouge pour le bouton Leave */
+            color: white;
+            padding: 10px 20px;
+            margin-left: 10px; /* Ajoutez de l'espace entre les boutons */
+            border: none;
+            cursor: pointer;
+        }
+        #chat-leave:hover {
+            background-color: #c82333; /* Couleur plus sombre au survol */
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="chat-container">
+        <!-- Zone de chat principal -->
+        <div class="chat-room">
+            <!-- Log des messages de chat -->
+            <div id="chat-log" class="chat-log">
+                <!-- Les messages et les utilisateurs seront ajoutés ici par le WebSocket -->
+            </div>
+            <!-- Zone de saisie des messages -->
+            <div class="chat-message-input-container">
+                <input id="chat-message-input" type="text" placeholder="{% trans 'Type your message here...' %}" autocomplete="off">
+                <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
+                <!-- Bouton Leave -->
+                <button id="chat-leave" class="btn btn-danger" data-redirect-url="{% url 'workgroup_list' %}">
+                    {% trans 'Leave' %}
+                </button>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script>
+    // Fonction pour générer une couleur en fonction du nom d'utilisateur
+    function getUsernameColor(username) {
+        // Hash le nom d'utilisateur
+        let hash = 0;
+        for (let i = 0; i < username.length; i++) {
+            hash = username.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        // Convertit le hash en couleur hexadécimale
+        let color = '#';
+        for (let i = 0; i < 3; i++) {
+            const value = (hash >> (i * 8)) & 0xFF;
+            color += ('00' + value.toString(16)).substr(-2);
+        }
+        return color;
+    }
+
+    const chatRoomId = "{{ chat_room.id }}";
+    const userId = "{{ request.user.id }}";
+
+    const chatSocket = new WebSocket(
+    (window.location.protocol === "https:" ? "wss://" : "ws://") +
+    window.location.host + '/ws/chat/' + chatRoomId + '/');
+
+    // Ajoutez ceci pour charger la liste des utilisateurs connectés
+    const userSidebar = document.querySelector('.sidebar');
+
+    chatSocket.onmessage = function(e) {
+
+        const data = JSON.parse(e.data);
+
+
+        if (data.type === 'chat_message') {
+
+            const chatLog = document.querySelector('#chat-log');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('chat-message');
+
+
+            // Si un avatar est fourni
+            if (data.avatar_url) {
+                console.log("URL de l'avatar:", data.avatar_url); // Débogage : afficher l'URL de l'avatar
+                const avatarImage = document.createElement('img');
+                avatarImage.src = data.avatar_url;
+                avatarImage.alt = 'Avatar';
+                avatarImage.classList.add('avatar');
+                messageContainer.appendChild(avatarImage);
+            } else {
+                console.log("Aucun avatar fourni pour ce message."); // Débogage : indiquer l'absence d'avatar
+            }
+
+            // Créez un élément pour le nom d'utilisateur
+            const usernameElement = document.createElement('span');
+            usernameElement.textContent = data.username + ': ';
+            usernameElement.classList.add('message-username');
+            usernameElement.style.color = getUsernameColor(data.username); // Appliquer la couleur
+
+            // Déterminez si le message est entrant ou sortant
+            if (data.user_id == userId) {
+                messageContainer.classList.add('message-outgoing');
+            } else {
+                messageContainer.classList.add('message-incoming');
+            }
+
+            // Ajoutez le nom d'utilisateur et le message au conteneur du message
+            messageContainer.appendChild(usernameElement);
+            messageContainer.appendChild(document.createTextNode(data.message));
+
+            // Ajoutez le conteneur du message au journal de chat
+            chatLog.appendChild(messageContainer);
+            chatLog.scrollTop = chatLog.scrollHeight; // Fait défiler automatiquement vers le bas
+            {#console.log("Message ajouté au DOM:", messageContainer);#}
+        }else if (data.type === 'user_list') {
+            // Créez ou sélectionnez une div pour la liste des utilisateurs
+            const userListDiv = document.querySelector('#user-list') || createUserListDiv();
+
+            // Effacez la liste des utilisateurs précédente
+            userListDiv.innerHTML = '';
+
+            // Ajoutez chaque utilisateur à la liste
+            data.users.forEach(function(user) {
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('user');
+                const usernameSpan = document.createElement('span');
+                usernameSpan.classList.add('online-user');
+                usernameSpan.textContent = user.username;
+                usernameSpan.style.backgroundColor = 'green'; // ou une autre couleur pour indiquer qu'ils sont en ligne
+
+                userDiv.appendChild(usernameSpan);
+                if(user.avatar_url) {
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = user.avatar_url;
+                    avatarImg.alt = `${user.username}`;
+                    avatarImg.classList.add('avatar');
+                    userDiv.appendChild(avatarImg);
+                }
+
+                // Ajoutez userDiv à userListDiv au lieu de chatLog
+                userListDiv.appendChild(userDiv);
+            });
+
+            // Assurez-vous que userListDiv est ajouté à votre chat-container ou à un autre endroit approprié
+            // Si elle n'est pas déjà présente dans le DOM
+            if (!document.querySelector('#user-list')) {
+                const chatContainer = document.querySelector('.chat-container');
+                chatContainer.appendChild(userListDiv);
+            }
+        }
+
+    };
+
+    function createUserListDiv() {
+        const div = document.createElement('div');
+        div.id = 'user-list';
+        return div;
+    }
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+        'message': message,
+        'user_id': userId  // Assurez-vous d'envoyer l'ID de l'utilisateur avec le message
+        }));
+        messageInputDom.value = '';
+    };
+    document.querySelector('#chat-message-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Empêche le comportement par défaut de la touche "Entrée"
+
+        const messageInputDom = this;
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+        'message': message,
+        'user_id': userId
+        }));
+        messageInputDom.value = '';
+    }
+    });
+
+    document.querySelector('#chat-leave').onclick = function(e) {
+        // Fermez la connexion WebSocket proprement
+        chatSocket.close();
+
+        // Récupérez l'URL de redirection de l'attribut data-redirect-url
+        var redirectUrl = this.getAttribute('data-redirect-url');
+
+        // Redirigez l'utilisateur vers l'URL récupérée
+        window.location.href = redirectUrl;
+    };
+
+    // Cette fonction pourrait être appelée pour demander la liste des utilisateurs connectés
+    function requestUserList() {
+        chatSocket.send(JSON.stringify({ 'command': 'fetch_users' }));
+    }
+    // Appeler cette fonction à l'ouverture du socket ou à intervalles réguliers
+    chatSocket.onopen = function(e) {
+        requestUserList();
+    };
+    </script>
+{% endblock %}

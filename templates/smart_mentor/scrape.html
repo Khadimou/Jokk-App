@@ -1,0 +1,96 @@
+{% extends 'base_site.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home_fixed.html' %}
+{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Hauteur totale de la fenêtre de visualisation */
+            margin: 0;
+            padding-top: 80px;
+        }
+        /* Utilisez Flexbox pour centrer les conteneurs */
+        .centered-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 0; /* Enlève le padding supplémentaire si nécessaire */
+        }
+
+        /* Styles pour les conteneurs individuels */
+        .container, .file-upload-container {
+            background-color: #79aec8;
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 20px; /* Ajoute un espace entre les conteneurs */
+            border-radius: 4px; /* Coins arrondis */
+            font-weight: bold;
+        }
+        h1{
+            color: darkolivegreen;
+        }
+        /* Styles pour les titres et le texte en général */
+        h2, h3, h4, h5, p, li, a {
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="centered-container">
+    <h1>{% trans 'Give knowledge to your assistant here then test it with chatting' %}</h1>
+    <div class="container mt-5" style="margin-top: 120px;">
+        <h5 class="card-title">{% trans 'Scrape Website' %}</h5>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="website_url">{% trans 'Enter a website URL:' %}</label>
+                <input type="text" class="form-control" name="website_url" id="website_url" placeholder="{% trans 'Enter URL' %}">
+            </div>
+            <button type="submit" class="btn btn-primary" name="scrape">{% trans 'Feed' %}</button>
+        </form>
+
+    </div>
+
+    <!-- Nouveau container pour le bouton de sélection de fichier -->
+    <div class="file-upload-container mt-3">
+        <h5 class="card-title">{% trans 'Upload a file' %}</h5>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="fileInput">{% trans 'Select a file' %}</label>
+                <input type="file" class="form-control-file" id="fileInput" name="file">
+            </div>
+            <button type="submit" class="btn btn-primary" name="upload">{% trans 'Feed' %}</button>
+        </form>
+    </div>
+    </div>
+    </div>
+
+    {% if file_id %}
+        <form action="{% url 'chat' %}" method="get">
+            <input type="hidden" name="file_id" value="{{ file_id }}">
+            <button type="submit" class="btn btn-link">{% trans 'Chat with smart mentor' %}</button>
+        </form>
+    {% else %}
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="#" title="{% trans 'Feed assistant first' %}" onclick="alert('{% trans 'Feed assistant first' %}'); return false;">
+                    {% trans 'Chat with smart mentor' %}
+                </a>
+            </li>
+        </ul>
+    {% endif %}
+
+{% endblock %}

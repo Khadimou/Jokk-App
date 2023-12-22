@@ -1,0 +1,26 @@
+{% extends 'base_site.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% trans 'Register Page' %}{% endblock %}
+{% block extra_styles %}
+    <style>
+
+
+    </style>
+
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+    <h2>{% trans 'Your Assessment Results' %}</h2>
+    <p>{% trans 'Your score:' %} {{ score }}</p>
+    {% if score >= 7 %}
+        <p>{% trans 'Congratulations, you have passed the assessment!' %}</p>
+    {% else %}
+        <p>{% trans 'Unfortunately, you did not pass. Please try again!' %}</p>
+    {% endif %}
+{% endblock %}

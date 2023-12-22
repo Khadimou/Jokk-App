@@ -1,0 +1,14 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{% trans 'Account Settings' %}</h1>
+        <!-- Options de gestion du compte, y compris la suppression du compte -->
+        <a href="{% url 'delete_account' %}" class="btn btn-danger">{% trans 'Delete Account' %}</a>
+    </div>
+{% endblock %}

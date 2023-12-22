@@ -1,0 +1,74 @@
+{% extends 'base_site.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% trans 'Mentor Page' %}{% endblock %}
+{% block extra_styles %}
+    <style>
+        /* Conteneur du formulaire */
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px; /* Bordures arrondies */
+            padding: 20px; /* Espacement intérieur */
+            background-color: #f8f9fa; /* Couleur d'arrière-plan */
+            margin-top: 20px; /* Espacement supérieur */
+        }
+
+        /* Champs de formulaire */
+        .form-control {
+            border-radius: 4px; /* Bordures arrondies */
+            border: 1px solid #ced4da; /* Bordure */
+        }
+
+        /* Bouton de soumission */
+        .btn-primary {
+            background-color: #007bff; /* Couleur d'arrière-plan */
+            border-color: #007bff; /* Couleur de la bordure */
+            color: white; /* Couleur du texte */
+            padding: 10px 20px; /* Espacement intérieur */
+            border-radius: 5px; /* Bordures arrondies */
+            cursor: pointer; /* Style du curseur */
+            transition: background-color 0.3s; /* Transition pour l'effet de survol */
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3; /* Couleur au survol */
+        }
+        /* Style pour le conteneur du formulaire */
+        .form-container {
+            max-width: 600px; /* Largeur maximale du formulaire */
+            margin: 0 auto; /* Centrer le formulaire */
+            padding: 20px; /* Ajouter un peu de padding */
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .card {
+                margin: 10px; /* Réduire la marge sur les petits appareils */
+            }
+            .form-container {
+                max-width: 100%; /* Le formulaire peut occuper plus de place sur les petits écrans */
+                padding: 10px; /* Réduire le padding sur les petits écrans */
+            }
+        }
+    </style>
+{% endblock %}
+
+
+{% block navbar %}
+    {% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 text-center mb-4" style="margin-top: 120px;">
+        <h1>{% trans 'Fill in this form to start:' %}</h1>
+    </div>
+
+    <div class="card p-4 form-container">
+        <form method="post" action="{% url 'register_page' %}">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">{% trans 'Register' %}</button>
+        </form>
+    </div>
+{% endblock %}

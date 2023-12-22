@@ -1,0 +1,28 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="notification-details">
+        <h1>{{ notification.title }}</h1>
+        <p>{{ notification.body }}</p>
+        <small>{% trans 'Received on: '%}{{ notification.created_at }}</small>
+    </div>
+    {% if notification.workgroup %}
+        <!-- Lien pour voir les détails du groupe de travail -->
+        <div>
+            <a href="{% url 'workgroup_detail' notification.workgroup.id %}">
+                {% trans 'View Workgroup' %}
+            </a>
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+
+
+{% endblock %}

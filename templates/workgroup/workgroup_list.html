@@ -1,0 +1,30 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block navbar%}
+{% include 'nav_workgroup.html' %}
+{% endblock %}
+
+{% block title %}{% trans 'Workgroups List' %}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{% trans 'Workgroups' %}</h1>
+
+        <!-- Liste des workgroups -->
+        <div class="workgroup-list">
+            {% for workgroup in workgroups %}
+                <div class="workgroup-item">
+                    <h2><a href="{% url 'workgroup_detail' workgroup.id %}">{{ workgroup.name }}</a></h2>
+                    <p>{{ workgroup.description }}</p>
+                    {% if workgroup.avatar %}
+                        <img src="{{ workgroup.avatar.url }}" alt="{{ workgroup.name }}" style="width: 100px; height: auto;">
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>{% trans 'No workgroups available.' %}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

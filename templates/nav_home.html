@@ -1,0 +1,21 @@
+{% load static %}
+
+<style>
+    nav {
+        background-color: #333;
+        padding: 10px 20px;
+        text-align: center;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+</style>
+
+<nav style="background-color: #3A3A3A; padding: 10px 20px; text-align: center; display: flex; justify-content: space-between; align-items: center;">
+    <div style="margin-left: 20px;">
+        <a href="{% url 'home' %}">
+            <img src="{% static 'images/logo.svg' %}" alt="Logo" style="height: 100px;">
+        </a>
+    </div>
+
+</nav>

@@ -1,0 +1,93 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_styles %}
+    <style>
+        .profile-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .profile-picture {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border: 3px solid #ddd;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .profile-picture {
+                width: 200px; /* Taille ajustée pour les petits écrans */
+                height: 200px;
+            }
+        }
+        .list-unstyled li {
+            margin-bottom: 10px; /* Ajustez cette valeur selon vos besoins */
+        }
+
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container my-4">
+        <div class="profile-card p-4 shadow">
+            <div class="row">
+                <!-- Section Photo -->
+                <div class="col-md-4 text-center">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Profile Picture" class="img-fluid rounded-circle profile-picture">
+                    {% endif %}
+                </div>
+
+                <!-- Section Informations -->
+                <div class="col-md-8">
+                    <h2>{{ profile.user.username }}</h2>
+
+                    <ul class="list-unstyled">
+                        {% if profile.birthdate %}
+                            <li><strong>{% trans 'Birthdate:' %}</strong> {{ profile.birthdate }}</li>
+                        {% endif %}
+
+                        {% if profile.gender %}
+                            <li><strong>{% trans 'Gender:' %}</strong> {{ profile.get_gender_display }}</li>
+                        {% endif %}
+
+                        {% if profile.get_country_display %}
+                            <li><strong>{% trans 'Country:' %}</strong> {{ profile.get_country_display }} </li>
+                        {% endif %}
+
+                        {% if profile.education_level %}
+                            <li><strong>{% trans 'Education Level:' %}</strong> {{ profile.education_level }}</li>
+                        {% endif %}
+
+                        {% if profile.skills %}
+                            <li><strong>{% trans 'Skills:' %}</strong> {{ profile.skills }}</li>
+                        {% endif %}
+
+                        {% if profile.phone %}
+                            <li><strong>{% trans 'Phone:' %}</strong> {{ profile.phone }}</li>
+                        {% endif %}
+
+                        {% if profile.bio %}
+                            <li><strong>{% trans 'Bio:' %}</strong> {{ profile.bio }}</li>
+                        {% endif %}
+
+                        {% if profile.social_media_links %}
+                            <li><strong>{% trans 'Social Media Links:' %}</strong> <a href="{{ profile.social_media_links }}">{{ profile.social_media_links }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Bouton de modification du profil -->
+        <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">{% trans 'Edit Profile' %}</a>
+    </div>
+{% endblock %}
+

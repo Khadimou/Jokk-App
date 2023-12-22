@@ -1,0 +1,352 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans 'Online revision platform' %}{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        nav {
+            background-color: #333;
+            padding: 10px 20px;
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        body {
+            padding-top: 60px; /* Espace pour la navbar */
+            padding-bottom: 60px; /* Espace pour le footer */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex; /* Align horizontally */
+            justify-content: center;
+            align-items: center;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+        }
+        .button {
+            background-color: #e7e7e7;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            display: block;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        img {
+            width: 100px; /* ou la taille souhaitée */
+            height: auto;
+        }
+        /* Styles pour la barre de recherche */
+        .search-container {
+            text-align: center; /* Centre la barre de recherche */
+            margin: 20px 0; /* Ajoute de l'espace autour de la barre de recherche */
+        }
+
+        .search-container form {
+            display: inline-block; /* Affiche le formulaire en ligne */
+        }
+
+        .search-container input[type="text"] {
+            padding: 10px; /* Ajoute du padding dans le champ de saisie */
+            margin-right: -4px; /* Corrige un écart potentiel entre l'input et le bouton */
+            border: 1px solid #ddd; /* Ajoute une bordure au champ de saisie */
+            font-size: 16px; /* Taille de la police pour le champ de saisie */
+        }
+
+        .search-container button {
+            padding: 10px; /* Ajoute du padding dans le bouton */
+            background: #007bff; /* Couleur de fond du bouton */
+            color: white; /* Couleur du texte du bouton */
+            border: none; /* Supprime la bordure du bouton */
+            cursor: pointer; /* Change le curseur pour indiquer qu'il s'agit d'un bouton */
+        }
+
+        .search-container button:hover {
+            background: #0056b3; /* Couleur de fond du bouton au survol */
+        }
+        .notification-unread {
+            font-weight: bold;
+        }
+        .badge {
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 12px;
+            position: relative;
+            top: -10px;
+            right: -10px;
+        }
+
+        #notificationBadge {
+            position: absolute;
+            top: 0px; /* Ajustez cette valeur pour positionner verticalement */
+            right: 0px; /* Ajustez cette valeur pour positionner horizontalement */
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            padding: 2px 5px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    <nav style="background-color: #3A3A3A; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <!-- Logo et lien vers la page d'accueil -->
+        <div>
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/logo.svg' %}" alt="Logo" style="height: 100px;">
+            </a>
+        </div>
+
+        <!-- Onglets Notifications et Utilisateur regroupés -->
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- Onglet Notifications -->
+            <div style="position: relative;">
+
+                <a class="nav-link" href="#" id="notificationDropdownToggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white; text-decoration: none;">
+                    <i class="fa fa-bell" id="notificationIcon" style="font-size: 1.5em;"></i>
+                    <span id="notificationBadge" class="badge badge-danger"></span>
+                </a>
+
+
+                <div class="dropdown-menu" aria-labelledby="notificationDropdownToggle">
+                    <!-- Ici, insérez dynamiquement les notifications -->
+                </div>
+            </div>
+
+            <!-- Onglet Utilisateur -->
+            <div style="position: relative;">
+                <a class="nav-link" href="#" id="userDropdownToggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white; text-decoration: none;">
+                    {% if user.is_authenticated %}
+                        {% if user_profile.avatar %}
+                            <img src="{{ user_profile.avatar.url }}" alt="Avatar" style="height: 30px; width: 30px; border-radius: 15px;">
+                        {% endif %}
+                        {{ user.username }}
+                    {% else %}
+                        {% trans 'User' %}
+                    {% endif %}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="userDropdownToggle">
+                    {% if user.is_authenticated %}
+                        <a class="dropdown-item" href="{% url 'profile' user_id=user.id %}">{% trans 'My profile' %}</a>
+                        <a class="dropdown-item" href="{% url 'account_settings' %}">{% trans 'Account' %}</a> <!-- Lien vers les paramètres du compte -->
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'logout' %}">{% trans 'Logout' %}</a>
+                    {% else %}
+                        <a class="dropdown-item" href="{% url 'login' %}">{% trans 'Login' %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+
+{% block content %}
+    <!-- Barre de recherche -->
+    <div class="search-container" style="margin-bottom: 150px;">
+        <form action="{% url 'search_view' %}" method="get"> <!-- Remplacez 'your_search_view' par le nom de votre vue de recherche -->
+            <input type="text" placeholder="{% trans 'Search...' %}" name="search">
+            <button type="submit">{% trans 'Search' %}</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <div class="button-container">
+            <img src="{% static 'images/virtual_class.png' %}" loading="lazy" width="300px" alt="{% trans 'Virtual Classroom' %}">
+            <a href="{% url 'revision_group' %}" class="button" id="virtual-classroom">{% trans 'Create Workgroups' %}</a>
+        </div>
+
+        <div class="button-container">
+            <img src="{% static 'images/workspace.png' %}" loading="lazy" width="300px" alt="{% trans 'Mentoring' %}">
+            <a href="{% url 'mentoring_page' %}" class="button" id="mentoring">{% trans 'Mentoring' %}</a>
+        </div>
+
+        <div class="button-container">
+            <img src="{% static 'images/switch.png' %}" loading="lazy" width="300px" alt="{% trans 'Smart Assistant' %}">
+            <a href="{% url 'scrape' %}" class="button" id="smart-assistant">{% trans 'Smart Assistant' %}</a>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            fetchNotifications();
+
+            function fetchNotifications() {
+                fetch('{% url 'get-notifications' %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateNotificationsDropdown(data.notifications, data.unread_count);
+                    });
+            }
+
+            function updateNotificationsDropdown(notifications, unreadCount) {
+                const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
+                const notificationsIcon = document.getElementById('notificationIcon');
+                const notificationCounter = document.getElementById('notificationCounter');
+
+                notifications.forEach(notification => {
+                    const notificationElement = document.createElement('a');
+
+                    notificationElement.setAttribute('data-id', notification.id);
+                    notificationElement.href = `/notifications/${notification.id}/`;
+                    notificationElement.classList.add('dropdown-item');
+                    if (!notification.read) {
+                        notificationElement.classList.add('notification-unread');
+                    }
+                    notificationElement.textContent = notification.title;
+                    notificationElement.addEventListener('click', async function() {
+                        await markAsRead(notification.id); // Marquer la notification comme lue
+                        showNotificationDetails(notification); // Afficher les détails
+                    });
+                    notificationsDropdown.appendChild(notificationElement);
+                });
+
+                const notificationBadge = document.getElementById('notificationBadge');
+                if (unreadCount > 0) {
+                    notificationBadge.textContent = unreadCount;
+                    notificationBadge.style.display = 'inline-block'; // Assurez-vous que le badge est visible
+                } else {
+                    notificationBadge.style.display = 'none'; // Cachez le badge s'il n'y a pas de notifications non lues
+                }
+
+                const allNotificationsElement = document.createElement('a');
+                allNotificationsElement.href = '{% url 'all_notifications' %}';
+                allNotificationsElement.classList.add('dropdown-item');
+                allNotificationsElement.textContent = '{% trans "See all notifications" %}';
+                notificationsDropdown.appendChild(allNotificationsElement);
+            }
+            function showNotificationDetails(notification) {
+                // Ici, affichez les détails de la notification
+                // Par exemple, ouvrez une modale avec le message et les boutons Accepter/Refuser
+                const modalContent = document.getElementById('modalContent');
+                modalContent.textContent = notification.body;
+                const acceptButton = document.getElementById('acceptButton');
+                const denyButton = document.getElementById('denyButton');
+
+                acceptButton.onclick = function() { handleInvitation(notification.id, true); };
+                denyButton.onclick = function() { handleInvitation(notification.id, false); };
+
+                // Ouvrir la modale
+                $('#notificationModal').modal('show');
+            }
+
+            function handleInvitation(notificationId, accepted) {
+                // Envoyer une requête au backend pour traiter l'invitation
+                const url = accepted ? 'accept-invitation-url' : 'deny-invitation-url';
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notificationId: notificationId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Traiter la réponse
+                        $('#notificationModal').modal('hide');
+                        // Mettre à jour l'interface utilisateur
+                    });
+            }
+
+            async function markAsRead(notificationId) {
+                const response = await fetch(`/mark_notification_as_read/${notificationId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    // Changez le style mais gardez l'élément dans le DOM
+                    const notificationElement = document.querySelector(`.dropdown-item[data-id="${notificationId}"]`);
+                    if (notificationElement) {
+                        notificationElement.classList.remove('notification-unread');
+                        notificationElement.classList.add('notification-read');
+                    }
+
+                    // Mise à jour de la liste de notifications pour refléter le changement
+                    fetchNotifications();
+                }
+            }
+
+
+            function updateNotificationCounter() {
+                const unreadNotifications = document.querySelectorAll('.dropdown-item.notification-unread');
+                const notificationCounter = document.getElementById('notificationBadge');
+                const newCount = unreadNotifications.length;
+                notificationCounter.textContent = newCount > 0 ? newCount : '';
+                notificationCounter.style.display = newCount > 0 ? 'inline-block' : 'none';
+            }
+
+
+        });
+    </script>
+
+
+{% endblock %}
+
+{% block footer %}
+    <footer style="background-color: #333; color: white; text-align: center; padding: 20px 0; position: absolute; bottom: 0; width: 100%;">
+        <p>&copy; Copyright {% now 'Y' %} &middot; Jokk {% trans 'Personalised Learning Platform' %} &middot; {% trans 'All rights reserved!' %}</p>
+    </footer>
+{% endblock %}

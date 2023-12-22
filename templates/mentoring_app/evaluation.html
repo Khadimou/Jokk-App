@@ -1,0 +1,57 @@
+{% extends 'base_site.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_styles %}
+    <style>
+        .assessment-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .question-answer-block {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .question-label, .answer-label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .question-label {
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>{% trans 'Do you confirm your results?' %}</h1>
+    </div>
+    <form method="post" action="{% url 'waiting' %}" class="assessment-container">
+        {% csrf_token %}
+        {% for question, answer in answers.items %}
+            <div class="question-answer-block">
+                <label class="question-label">{{ question }}</label>
+                <!-- Champ caché pour la question -->
+                <input type="hidden" name="question_{{ forloop.counter }}" value="{{ question }}">
+                <!-- Champ modifiable pour la réponse ou caché si vous ne souhaitez pas que l'utilisateur puisse modifier -->
+                <input type="text" name="answer_{{ forloop.counter }}" value="{{ answer }}">
+            </div>
+        {% endfor %}
+        <div class="button-group" style="display: flex; justify-content: space-between; margin-top: 20px;">
+{#            <button type="button" class="btn btn-secondary" onclick="window.history.back();">{% trans 'Go Back' %}</button>#}
+            <button type="submit" class="btn btn-primary">{% trans 'Confirm Answers' %}</button>
+        </div>
+    </form>
+
+{% endblock %}

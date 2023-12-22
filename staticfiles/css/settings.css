@@ -1,0 +1,33 @@
+/* Style par défaut (thème clair) */
+body.light-mode {
+    --background-color: #fff; /* Couleur de fond pour le thème clair */
+    --text-color: #333; /* Couleur de texte pour le thème clair */
+    --button-bg-color: #007bff; /* Couleur de fond pour les boutons */
+    --button-text-color: #fff; /* Couleur de texte pour les boutons */
+}
+
+/* Style pour le thème sombre */
+body.dark-mode {
+    --background-color: #212529; /* Couleur de fond pour le thème sombre */
+    --text-color: #f8f9fa; /* Couleur de texte pour le thème sombre */
+    --button-bg-color: #28a745; /* Couleur de fond pour les boutons */
+    --button-text-color: #f8f9fa; /* Couleur de texte pour les boutons */
+}
+
+/* Utilisation des variables CSS */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.btn {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+}
+
+/* Autres styles personnalisés */
+/* Ajoutez ici vos autres styles personnalisés pour votre application */
+.theme-content {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}

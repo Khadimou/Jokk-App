@@ -1,0 +1,281 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}{% trans 'Workgroup' %}{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        .create-new-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #ccc; /* Makes the button background transparent */
+            border: 1px solid #ccc; /* Adds a border to the button */
+            font-size: 16px; /* Sets the font size */
+            cursor: pointer; /* Changes the cursor on hover */
+            padding: 5px 10px; /* Adds some padding around the text and icon */
+            display: inline-flex; /* Aligns the icon and text side by side */
+            align-items: center; /* Aligns items vertically */
+            color: #000; /* Sets the text color */
+            border-radius: 4px; /* Optional: rounds the corners of the button border */
+            width: auto;
+            margin: 100px; /* Spacing between buttons */
+        }
+
+        .create-new-btn .plus-icon {
+            background-color: #ccc; /* Sets the background color of the plus icon */
+            font-size: 50px; /* Sets the size of the plus icon */
+            margin-right: 5px; /* Adds a margin to the right of the plus icon */
+            padding: 2px; /* Adds some padding inside the gray square */
+            display: inline-flex; /* Ensures the plus sign is centered inside the square */
+            justify-content: center; /* Centers the plus sign horizontally */
+            align-items: center; /* Centers the plus sign vertically */
+            width: 200px; /* Sets a fixed width for the square */
+            height: 200px; /* Sets a fixed height for the square */
+            border-radius: 2px; /* Optional: rounds the corners of the gray square */
+        }
+        .button-container {
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            height: 100vh; /* Full height of the viewport */
+            margin-top: -50px; /* Adjust as per the header's height if needed */
+        }
+        /* Style pour les modales */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* Réduit la marge supérieure pour élever le conteneur */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%; /* Réduit la largeur du conteneur */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Ajoute une ombre pour un effet de profondeur */
+            border-radius: 10px; /* Arrondit les coins du conteneur */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal-content form {
+            width: 100%; /* Utilise la pleine largeur du conteneur modal */
+        }
+
+        .modal-content form input,
+        .modal-content form textarea,
+        .modal-content form button {
+            width: calc(100% - 40px); /* Calcule la largeur en soustrayant le padding */
+            margin-bottom: 15px; /* Réduit l'espace entre les champs */
+            padding: 10px; /* Ajoute un peu de padding à l'intérieur des champs */
+            border: 1px solid #ccc; /* Uniformise la bordure des champs */
+            border-radius: 4px; /* Arrondit les coins des champs */
+        }
+
+        .modal-content form textarea {
+            height: 100px; /* Ajuste la hauteur du champ textarea */
+        }
+
+        .modal-content form button {
+            background-color: #5cb85c; /* Change la couleur d'arrière-plan */
+            color: white; /* Change la couleur du texte */
+            border-color: #4cae4c; /* Change la couleur de la bordure */
+            border-radius: 4px; /* Assure que le bouton a des coins arrondis */
+            font-weight: bold; /* Rend le texte du bouton plus gras */
+        }
+
+        .modal-content form button:hover {
+            background-color: #4cae4c; /* Assombrit le bouton au survol */
+        }
+
+        /* Style pour fermer le bouton (x) */
+        .close {
+            color: #aaa;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Style pour la barre de recherche */
+        #userSearch {
+            width: 100%; /* Utilise la pleine largeur de la modale */
+            padding: 10px; /* Ajoute du padding pour un meilleur aspect */
+            margin-bottom: 20px; /* Ajoute un espace en dessous de la barre de recherche */
+            border: 1px solid #ccc; /* Ajoute une bordure subtile */
+            border-radius: 4px; /* Arrondit les coins */
+        }
+
+        .search-result-item div {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-result-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 5px; /* Réduisez cette valeur pour diminuer l'espace */
+            border-radius: 50%; /* Rend l'image circulaire, si souhaité */
+        }
+
+         nav {
+             background-color: #333;
+             padding: 10px 20px;
+             text-align: center;
+             width: 100%;
+             top: 0;
+             left: 0;
+         }
+
+    </style>
+
+
+{% endblock %}
+
+{% block navbar %}
+    <nav style="background-color: #3A3A3A; padding: 10px 20px; text-align: center; display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-left: 20px;">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/logo.svg' %}" alt="Logo" style="height: 100px;">
+            </a>
+        </div>
+
+        <!-- Lien vers la liste des workgroups -->
+        <div>
+            <a href="{% url 'workgroup_list' %}" style="color: white; text-decoration: none; margin-right: 20px;">
+                {% trans 'Your Workgroups' %}
+            </a>
+        </div>
+    </nav>
+{% endblock %}
+
+
+{% block content %}
+    <h3 class="text-center">{% trans 'Working groups are a kind of virtual classroom in which you can add your colleagues and share your knowledge ' %}</h3>
+    <div class="button-container">
+        <button class="create-new-btn" >
+            <span class="plus-icon">+</span> {% trans 'Create a workgroup' %}
+        </button>
+        <button class="create-new-btn">
+            <span class="plus-icon">+</span> {% trans 'Create a workgroup with your assistant' %}
+        </button>
+    </div>
+    <!-- Modale pour 'Create a workgroup' -->
+    <div id="createWorkgroupModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+
+                <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modale pour 'Create a workgroup with your assistant' -->
+    <div id="createWorkgroupAssistantModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+
+                <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // Obtenez les modales
+        var modal = document.getElementById("createWorkgroupModal");
+        var modalAssistant = document.getElementById("createWorkgroupAssistantModal");
+
+        // Obtenez les boutons qui ouvrent les modales
+        var btn = document.getElementsByClassName("create-new-btn")[0];
+        var btnAssistant = document.getElementsByClassName("create-new-btn")[1];
+
+        // Obtenez l'élément <span> qui ferme les modales
+        var span = document.getElementsByClassName("close")[0];
+        var spanAssistant = document.getElementsByClassName("close")[1];
+
+        // Quand l'utilisateur clique sur le bouton, ouvrez la modale
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+        btnAssistant.onclick = function() {
+            modalAssistant.style.display = "block";
+        }
+
+        // Quand l'utilisateur clique sur <span> (x), fermez la modale
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        spanAssistant.onclick = function() {
+            modalAssistant.style.display = "none";
+        }
+
+        // Quand l'utilisateur clique n'importe où en dehors de la modale, fermez-la
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            } else if (event.target == modalAssistant) {
+                modalAssistant.style.display = "none";
+            }
+        }
+
+
+        // Fonction pour obtenir le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+       {% comment %} var socket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+
+        socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if (data.notifications) {
+                data.notifications.forEach(function(notification) {
+                    // Affichez la notification à l'utilisateur
+                    console.log(notification.title, notification.body);
+                });
+            }
+        };{% endcomment %}
+
+
+    </script>
+
+{% endblock %}

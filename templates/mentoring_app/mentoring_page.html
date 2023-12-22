@@ -1,0 +1,72 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}{% trans 'Mentoring page' %}{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        body {
+            padding-top: 60px; /* Espace pour la navbar */
+            padding-bottom: 60px; /* Espace pour le footer */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #3A3A3A;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex; /* Align horizontally */
+            justify-content: center;
+            align-items: center;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 100px;
+        }
+        .button {
+            background-color: #e7e7e7;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            display: block;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        img {
+            width: 100px; /* ou la taille souhaitée */
+            height: auto;
+        }
+
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_home_fixed.html' %}
+{% endblock %}
+
+{% block content %}
+    <h1>{% trans 'Choose your hat:' %}</h1>
+    <h2>{% trans 'Be a mentee and boost your skills / Become a mentor and share your knowledge' %}</h2>
+    <div class="container">
+        <div class="button-container">
+            <img src="{% static 'images/oldyoung.png' %}" loading="lazy" width="300px" alt="{% trans 'Virtual Classroom' %}">
+            <a href="{% url 'mentor_page' %}" class="button" id="virtual-classroom">{% trans 'Mentor' %}</a>
+        </div>
+
+        <div class="button-container">
+            <img src="{% static 'images/light.png' %}" loading="lazy" width="300px" alt="{% trans 'Mentoring' %}">
+            <a href="{% url 'mentee_page' %}" class="button" id="mentoring">{% trans 'Mentee' %}</a>
+        </div>
+
+    </div>
+{% endblock %}

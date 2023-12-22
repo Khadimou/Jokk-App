@@ -1,0 +1,18 @@
+{% extends 'base_site.html' %}
+{% load static %}
+{% load i18n %}
+
+
+{% block navbar %}
+    {% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>{% trans 'We are in the process of correcting your test' %}</h1>
+    <p>{% trans 'Your Assessment Results will be available shortly' %}</p>
+</div>
+    <div class="button-group" style="display: flex; justify-content: center;">
+        <a href="{% url 'home' %}" type="submit" class="btn btn-primary">{% trans 'Go to home page' %}</a>
+    </div>
+{% endblock %}

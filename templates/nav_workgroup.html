@@ -1,0 +1,27 @@
+{% load static %}
+{% load i18n %}
+
+<style>
+    nav {
+        background-color: #333;
+        padding: 10px 20px;
+        text-align: center;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    .custom-link {
+        color: #f8f9fa;
+    }
+</style>
+
+<nav style="background-color: #3A3A3A; padding: 10px 20px; text-align: center; display: flex; justify-content: space-between; align-items: center;">
+    <div style="margin-left: 20px;">
+        <a href="{% url 'home' %}">
+            <img src="{% static 'images/logo.svg' %}" alt="Logo" style="height: 100px;">
+        </a>
+    </div>
+    <a class="nav-link custom-link" href="{% url 'revision_group' %}">{% trans 'Create Workgroup' %}</a>
+
+</nav>
