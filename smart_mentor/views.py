@@ -1,9 +1,13 @@
 import datetime
+import json
 import mimetypes
 import time
 
 from django.contrib.auth.decorators import login_required
+from django.db import models
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from .models import Profile, OpenAIAssistant
 from .utils import scrape_website, text_to_pdf, upload_to_openai, create_chat_thread, process_message_with_citations, \
@@ -319,3 +323,268 @@ def search_view(request):
     }
     return render(request, 'search_results.html', context)
 
+def searching(request):
+    query = request.GET.get('search', '').strip()
+    if query:
+        results = Profile.objects.filter(user__username__icontains=query)
+        results_data = [{'id': profile.user.id, 'username': profile.user.username} for profile in results]
+    else:
+        results_data = []
+
+    return JsonResponse({'results': results_data})
+
+from rest_framework import viewsets
+from .models import Message
+from .serializers import MessageSerializer
+from rest_framework.permissions import IsAuthenticated
+
+from django.db.models import Q
+
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Obtenir l'utilisateur actuel
+        user = self.request.user
+
+        # Filtrer les messages où l'utilisateur est soit l'expéditeur soit le destinataire
+        return self.queryset.filter(Q(sender=user) | Q(recipient=user))
+@login_required
+def messaging_view(request):
+    users = User.objects.exclude(id=request.user.id)
+    messages = Message.objects.filter(recipient=request.user)
+
+    conversations = {}
+    for message in messages:
+        username = message.sender.username
+        user_id = message.sender.id
+        if username not in conversations:
+            conversations[username] = {
+                'user_id': user_id,
+                'profile_picture_url': message.sender.profile.avatar.url if message.sender.profile.avatar else '',
+                'last_message': message.text,
+                'timestamp': message.sent_at  # Gardez-le comme objet datetime
+            }
+        else:
+            # Comparez les objets datetime avant de formater pour l'affichage
+            if message.sent_at > conversations[username]['timestamp']:
+                conversations[username]['last_message'] = message.text
+                conversations[username]['timestamp'] = message.sent_at  # Toujours un objet datetime
+
+    for username, details in conversations.items():
+        # Ajoutez une ligne pour vérifier s'il y a des messages non lus dans cette conversation
+        details['has_unread_messages'] = Message.objects.filter(
+            sender__username=username,
+            recipient=request.user,
+            read=False
+        ).exists()
+        details['timestamp'] = details['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+
+    # Tri par timestamp du dernier message (maintenant une chaîne)
+    sorted_conversations = sorted(conversations.items(), key=lambda kv: kv[1]['timestamp'], reverse=True)
+
+    context = {
+        'users': users,
+        'conversations': sorted_conversations  # Pass the sorted conversations
+    }
+    return render(request, 'messaging.html', context)
+
+@login_required
+def get_messages(request, username):
+    current_user = request.user
+    other_user = get_object_or_404(User, username=username)
+
+    messages = Message.objects.filter(
+        models.Q(sender=current_user, recipient=other_user) |
+        models.Q(sender=other_user, recipient=current_user)
+    ).order_by('sent_at')
+
+    def get_avatar_url(user):
+        profile = Profile.objects.get(user=user)
+        return profile.avatar.url if profile.avatar else ''
+
+    messages_data = [{
+        'id': message.id,
+        'text': message.text,
+        'timestamp': message.sent_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'sender_username': message.sender.username,
+        'recipient_username': message.recipient.username,
+        'sender_profile_picture_url': get_avatar_url(message.sender),
+        'recipient_profile_picture_url': get_avatar_url(message.recipient),
+        'is_current_user_sender': message.sender == current_user,
+        'is_read': message.read,
+    } for message in messages]
+
+    return JsonResponse({'messages': messages_data})
+
+
+@login_required
+def get_conversations(request):
+    users = User.objects.exclude(id=request.user.id)
+    messages = Message.objects.filter(recipient=request.user)
+
+    conversations = {}
+    for message in messages:
+        username = message.sender.username
+        if username not in conversations:
+            conversations[username] = {
+                'profile_picture_url': message.sender.profile.avatar.url if message.sender.profile.avatar else '',
+                'last_message': message.text,
+                'timestamp': message.sent_at
+            }
+        else:
+            if message.sent_at > conversations[username]['timestamp']:
+                conversations[username]['last_message'] = message.text
+                conversations[username]['timestamp'] = message.sent_at
+
+    # Conversion du dictionnaire en tableau d'objets
+    conversations_list = [
+        {
+            'username': username,
+            'profile_picture_url': details['profile_picture_url'],
+            'last_message': details['last_message'],
+            'timestamp': details['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+        }
+        for username, details in conversations.items()
+    ]
+
+    # Tri par timestamp du dernier message
+    sorted_conversations = sorted(conversations_list, key=lambda k: k['timestamp'], reverse=True)
+
+    # Retourne les données en JSON
+    return JsonResponse({'conversations': sorted_conversations})
+
+
+@login_required
+def message_details(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    # Obtenez l'URL de l'image du profil (adaptez selon la structure de votre modèle)
+    profile_picture_url = message.sender.profile.avatar.url if message.sender.profile.avatar else ''
+    data = {
+        'sender': message.sender.username,
+        'senderId': message.sender.id,  # Ajouter l'ID de l'expéditeur
+        'content': message.text,
+        'timestamp': message.sent_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'profile_picture_url': request.build_absolute_uri(profile_picture_url)
+        # Autres champs si nécessaire
+    }
+    return JsonResponse(data)
+
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from .serializers import UserSerializer
+
+class SearchUsersAPIView(APIView):
+    """
+    View to search for users by username.
+    """
+
+    def get(self, request, format=None):
+        query = request.query_params.get('q', None)
+        if query is not None:
+            users = User.objects.filter(username__icontains=query)
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data)
+        return Response({"message": "Search query not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework.decorators import api_view
+
+@login_required
+def sendMessage(request):
+    if request.method == 'POST':
+        recipient_id = request.POST.get('recipient_id')
+        message_text = request.POST.get('message_text')
+        sender = request.user
+
+        try:
+            recipient = User.objects.get(pk=recipient_id)
+            sender_profile = get_object_or_404(Profile, user=sender)
+            avatar_url = sender_profile.avatar.url if sender_profile.avatar else None
+
+            message = Message(sender=sender, recipient=recipient, text=message_text)
+            message.save()
+            messages.success(request, 'Message sent successfully.')
+            # You might want to include the avatar URL in the success message or pass it to the template
+            return redirect('messaging')
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid recipient ID.')
+        except Exception as e:
+            messages.error(request, f'Error sending message: {e}')
+
+    return redirect('home')
+
+
+@api_view(['POST'])
+def send_message(request):
+    # Récupérer les données de la requête
+    sender = request.user
+    recipient_id = request.data.get('recipient')
+    text = request.data.get('text')
+
+    # Vérifier si le destinataire existe
+    try:
+        recipient = User.objects.get(pk=recipient_id)
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid recipient ID'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Créer et sauvegarder le nouveau message
+    message = Message(sender=sender, recipient=recipient, text=text)
+    message.save()
+
+    # Sérialiser et retourner le nouveau message
+    serializer = MessageSerializer(message)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@require_POST
+def send_reply(request):
+    data = json.loads(request.body)
+    message_text = data.get('text')
+    recipient_id = data.get('recipientId')  # ID du destinataire
+
+    try:
+        sender = request.user  # L'expéditeur est l'utilisateur actuellement connecté
+        recipient = User.objects.get(pk=recipient_id)
+
+        new_message = Message.objects.create(
+            sender=sender,
+            recipient=recipient,
+            text=message_text,
+            sent_at=now(),
+            read=False
+        )
+
+        return JsonResponse({'status': 'success', 'message_id': new_message.id})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Recipient not found'}, status=400)
+
+@login_required
+def get_unread_messages_count(request):
+    unread_count = Message.objects.filter(recipient=request.user, read=False).count()
+    return JsonResponse({'unread_count': unread_count})
+
+@require_POST
+def mark_message_as_read(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id, recipient=request.user)
+        message.read = True
+        message.save()
+        return JsonResponse({'status': 'success'})
+    except Message.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Message not found'}, status=404)
+
+@require_POST
+@login_required
+def mark_conversation_as_read(request, username):
+    recipient = request.user
+    sender = User.objects.get(username=username)
+
+    # Marquez tous les messages non lus de cette conversation comme lus
+    Message.objects.filter(sender=sender, recipient=recipient, read=False).update(read=True)
+
+    return JsonResponse({'status': 'success'})

@@ -6,12 +6,16 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db import models
 
+from smart_mentor.models import OpenAIAssistant
+
+
 class WorkGroup(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=200, blank=True)
     avatar = models.ImageField(upload_to='avatars_workgroup/', blank=True)
     members = models.ManyToManyField(User, through='WorkGroupMember', related_name='invited_to_workgroups')
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_workgroups', null=True)
+    assistants = models.ManyToManyField(OpenAIAssistant, blank=True, related_name='workgroups')
 
 class WorkGroupMember(models.Model):
     status = models.CharField(max_length=20, choices=[('invited', 'Invited'), ('accepted', 'Accepted'), ('refused', 'Refused')])
@@ -30,5 +34,26 @@ class Message(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class MessageAudio(models.Model):
+    workgroup = models.ForeignKey(WorkGroup, related_name='audio_messages', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    audio_file = models.FileField(upload_to='audio_messages/')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Audio message from {self.user.username} in {self.workgroup.name}"
+
+class UserOnlineStatus(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='online_status')
+    is_online = models.BooleanField(default=False)
+
+    def set_online(self):
+        self.is_online = True
+        self.save()
+
+    def set_offline(self):
+        self.is_online = False
+        self.save()
 
 

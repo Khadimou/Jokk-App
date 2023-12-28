@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from mentoring_app.models import Notification
 from smart_mentor.models import Profile, OpenAIAssistant
 from workgroup.forms import RevisionForm
-from workgroup.models import WorkGroup, WorkGroupMember, ChatRoom
+from workgroup.models import WorkGroup, WorkGroupMember, ChatRoom, UserOnlineStatus
 
 
 # Create your views here.
@@ -143,18 +143,27 @@ def workgroup_detail(request, pk):
     })
 @login_required
 def create_workgroup(request):
+    with_assistant = False
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)
         if form.is_valid():
             workgroup = form.save(commit=False)
-            workgroup.creator = request.user  # Définir le créateur du groupe
+            workgroup.creator = request.user
             workgroup.save()
-            form.save_m2m()  # Nécessaire si votre formulaire utilise ManyToManyFields
+            form.save_m2m()
+
+            # Associer OpenAIAssistant si demandé
+            if 'create_with_assistant' in request.POST:
+                assistant = OpenAIAssistant.objects.first() # Ou une logique pour sélectionner un assistant spécifique
+                workgroup.assistants.add(assistant) # Supposant un champ ManyToManyField pour assistants
+                with_assistant = True
+
             return redirect('workgroup_detail', pk=workgroup.pk)
     else:
         form = RevisionForm()
 
-    return render(request, 'workgroup/classroom.html', {'form': form})
+    return render(request, 'workgroup/create_workgroup.html', {'form': form, 'with_assistant': with_assistant})
+
 
 def edit_workgroup(request, pk):
     workgroup = get_object_or_404(WorkGroup, pk=pk)
@@ -218,6 +227,11 @@ def create_chat_room(request, workgroup_id):
 @login_required
 def chat_room(request, chat_room_id):
     chat_room = get_object_or_404(ChatRoom, pk=chat_room_id)
-    # Assurez-vous que l'utilisateur a le droit de voir ce salon de discussion
+    # Vérifiez si l'utilisateur a le droit de voir ce salon de discussion
+    # Mettez à jour l'état en ligne de l'utilisateur
+    online_status, created = UserOnlineStatus.objects.get_or_create(user=request.user)
+    online_status.set_online()
+
     # Récupérer les messages, etc.
     return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room})
+

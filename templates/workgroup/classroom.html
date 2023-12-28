@@ -15,11 +15,12 @@
         }
         .workgroup-title {
             text-align: center;
-            color: #333;
+            color: #0000FF;
         }
         .workgroup-description {
             text-align: justify;
             margin-bottom: 20px;
+            color: darkolivegreen;
         }
         .workgroup-avatar {
             display: block;
@@ -29,6 +30,7 @@
         }
         .members-title {
             margin-top: 20px;
+            color: #0000FF;
         }
         .member-list {
             list-style-type: none;
@@ -183,6 +185,9 @@
             margin-top: 10px; /* Espace au-dessus des boutons */
         }
 
+        h3,h2{
+            color: #0000FF;
+        }
     </style>
 {% endblock %}
 
@@ -197,13 +202,17 @@
         {% endif %}
 
         <h1 class="workgroup-title">{{ workgroup.name }}</h1>
-        <h3 class="members-title">{% trans 'Description:' %}</h3>
-        <p class="workgroup-description">{{ workgroup.description }}</p>
-
         <h3 class="members-title">{% trans 'Members:' %}</h3>
         <ul>
             {% for member in members_info %}
-                <li>{{ member.user.username }} - {{ member.status }}</li>
+                <span style="color: #4CAF50;"><li style="display: flex; align-items: center; margin-bottom: 10px;"><img src="{{ member.user.profile.avatar.url }}" alt="{{ member.user.username }}" class="avatar" style="width: 50px; height: 50px; margin-right: 10px;">{{ member.user.username }} - {{ member.status }}</li></span>
+            {% endfor %}
+
+            {% for assistant in workgroup.assistants.all %}
+                <li style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <img src="{% static 'images/assistant_avatar.png' %}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
+                    <span style="color: #4CAF50;">{{ assistant.name }}</span>
+                </li>
             {% endfor %}
         </ul>
 

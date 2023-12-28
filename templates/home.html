@@ -7,6 +7,70 @@
 
 {% block extra_styles %}
     <style>
+        .messages-box {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            z-index: 1000;
+            max-height: 600px;
+            overflow: auto;
+            display: none; /* Caché par défaut */
+        }
+
+        .messages-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .messages-header h4 {
+            margin: 0;
+        }
+
+        .messages-header button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .message-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .message-item.read {
+            background-color: #e9ecef;
+        }
+
+        .message-item p {
+            margin: 0;
+        }
+
+        .reply-form {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .reply-form textarea {
+            margin-bottom: 10px;
+        }
+
+        .btn-reply {
+            margin-top: 10px;
+        }
         nav {
             background-color: #333;
             padding: 10px 20px;
@@ -16,31 +80,22 @@
             top: 0;
             left: 0;
         }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-        }
 
         body {
-            padding-top: 60px; /* Espace pour la navbar */
-            padding-bottom: 60px; /* Espace pour le footer */
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            flex-direction: column; /* Organise les éléments du body en colonne */
+            justify-content: center; /* Centre les éléments verticalement */
+            align-items: center; /* Centre les éléments horizontalement */
+            min-height: 100vh; /* Hauteur minimale pour prendre toute la hauteur de la fenêtre */
+            margin-top: 50px; /* Espace pour le navbar, ajustez en fonction de la hauteur de votre navbar */
+            margin-bottom: 50px; /* Espace pour le footer, ajustez en fonction de la hauteur de votre footer */
+            padding: 0; /* Réinitialise le padding */
+            box-sizing: border-box;
         }
         .container {
             background-color: #fff;
-            padding: 20px;
+            padding: 90px;
+            background-color: #777777;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex; /* Align horizontally */
@@ -71,6 +126,7 @@
         .search-container {
             text-align: center; /* Centre la barre de recherche */
             margin: 20px 0; /* Ajoute de l'espace autour de la barre de recherche */
+            padding-top: 150px;
         }
 
         .search-container form {
@@ -120,6 +176,82 @@
             padding: 2px 5px;
         }
 
+        #openMessagesBox {
+            position: fixed; /* Position fixe par rapport à la fenêtre du navigateur */
+            bottom: 80px;   /* 20px du bas, augmentez si nécessaire pour éviter le chevauchement avec le footer */
+            right: 10px;    /* 20px de la droite */
+            z-index: 1000;  /* S'assurer qu'il se situe au-dessus des autres éléments */
+            width: 170px;
+        }
+
+        .messages-box {
+            display: none; /* Cachez la boîte de messages par défaut */
+            position: absolute; /* Position absolue par rapport à son conteneur relatif */
+            bottom: 120px; /* La hauteur du bouton plus un peu d'espace */
+            right: 0; /* Alignez à droite */
+            width: 220px; /* Ou la largeur que vous voulez pour la boîte de messages */
+            z-index: 1000; /* S'assure qu'elle s'affiche au-dessus des autres éléments */
+            background: white; /* Ou toute autre couleur de fond */
+            border: 1px solid #ccc; /* Optionnel, pour la bordure */
+            border-radius: 5px; /* Optionnel, pour les coins arrondis */
+            height: 300px;
+        }
+
+        .d-flex.justify-content-end {
+            position: relative; /* Position relative pour le conteneur du bouton */
+        }
+
+        @media only screen and (max-width: 600px) {
+            nav {
+                padding: 5px;
+            }
+            .container, .button-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .button {
+                width: 100%; /* Boutons sur toute la largeur */
+                margin: 5px 0; /* Réduire l'espace entre les boutons */
+            }
+            .search-container input[type="text"], .search-container button {
+                width: 100%; /* Champ de recherche sur toute la largeur */
+            }
+            .messages-box {
+                bottom: 0; /* Positionnement en bas de l'écran */
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+            /* Adaptation de la taille des textes */
+            .messages-header h4, .message-item p {
+                font-size: smaller;
+            }
+        }
+
+        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+            /* Styles spécifiques pour les tablettes */
+            .container {
+                flex-direction: row; /* Alignement horizontal pour une meilleure utilisation de l'espace */
+            }
+            .button {
+                margin: 10px; /* Espace autour des boutons */
+            }
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            padding-top: 25px;
+            height: 0;
+        }
+
+        .video-container iframe, .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
     </style>
 {% endblock %}
 
@@ -134,6 +266,9 @@
 
         <!-- Onglets Notifications et Utilisateur regroupés -->
         <div style="display: flex; align-items: center; gap: 20px;">
+            <a href="{% url 'messaging' %}" title="{% trans 'Messages' %}" style="color: white;">
+                <i class="fas fa-comments fa-lg"></i>
+            </a>
             <!-- Onglet Notifications -->
             <div style="position: relative;">
 
@@ -177,6 +312,7 @@
 
 
 {% block content %}
+    <main>
     <!-- Barre de recherche -->
     <div class="search-container" style="margin-bottom: 150px;">
         <form action="{% url 'search_view' %}" method="get"> <!-- Remplacez 'your_search_view' par le nom de votre vue de recherche -->
@@ -202,16 +338,92 @@
         </div>
     </div>
 
+        <!-- Vidéo locale -->
+        <div class="video-container">
+            <video width="560" height="315" autoplay loop muted>
+                <source src="{% static 'videos/Design.mp4' %}" type="video/mp4">
+                {% trans 'Your browser does not support HTML5 videos.' %}
+            </video>
+        </div>
 
+
+    <!-- Boîte de messages -->
+    <div id="messagesBox" class="messages-box">
+        <!-- Entête -->
+        <div class="messages-header">
+            <h4>{% trans 'Messages' %}</h4>
+            <button id="closeMessagesBox" class="btn btn-light">X</button>
+        </div>
+
+        <!-- Liste de messages -->
+        <div class="messages-list">
+            {% for message in messages %}
+                <div class="message-container">
+                    <div class="sender-info">
+                        <!-- Use the URL from the sender's dictionary -->
+                        <img class="sender-image" src="{{ message.sender.profile_picture_url }}" alt="{{ message.sender.username }} Picture">
+                        <p class="sender-name">{{ message.sender.username }}</p>
+                    </div>
+                    <div class="message-content">
+                        <p class="message-text">{{ message.text }}</p>
+                        <span class="message-time">{{ message.timestamp }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p>{% trans 'No messages' %}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Formulaire d'envoi -->
+        <form method="post" action="{% url 'sendMessage' %}">
+            {% csrf_token %}
+            <input type="text" id="search_user" placeholder="Search for a user...">
+            <div id="search_results"></div>
+            <input type="hidden" name="recipient_id" id="selected_recipient_id" value="">
+            <textarea name="message_text" required></textarea>
+            <button type="submit">{% trans 'Send Message' %}</button>
+        </form>
+
+    </div>
+
+    <!-- Bouton pour ouvrir la boîte de messages -->
+    {% comment %}<div class="d-flex justify-content-end">
+        <button id="openMessagesBox" class="btn btn-primary">{% trans 'Messagerie' %}</button>
+    </div>{% endcomment %}
+    </main>
 {% endblock %}
 
+
 {% block extra_scripts %}
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('search_user').addEventListener('keyup', function() {
+                const query = this.value;
+                if (query.length > 2) { // Rechercher après au moins 3 caractères
+                    fetch(`{% url 'searching' %}?search=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let users = data.results;
+                            let resultsDiv = document.getElementById('search_results');
+                            resultsDiv.innerHTML = '';
+                            users.forEach(user => {
+                                let userDiv = document.createElement('div');
+                                userDiv.innerHTML = user.username;
+                                userDiv.onclick = function() {
+                                    document.getElementById('selected_recipient_id').value = user.id;
+                                    console.log("Recipient ID set to: ", user.id); // Debugging line
+                                };
+                                resultsDiv.appendChild(userDiv);
+                            });
+                        });
+                }
+            });
+
+        // Définissez getCookie en dehors des événements DOMContentLoaded pour qu'elle soit accessible globalement
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -239,8 +451,6 @@
 
             function updateNotificationsDropdown(notifications, unreadCount) {
                 const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
-                const notificationsIcon = document.getElementById('notificationIcon');
-                const notificationCounter = document.getElementById('notificationCounter');
 
                 notifications.forEach(notification => {
                     const notificationElement = document.createElement('a');
@@ -339,14 +549,96 @@
             }
 
 
+// Appeler la fonction pour charger le nombre de messages non lus
+            fetchUnreadMessagesCount();
+
+            function fetchUnreadMessagesCount() {
+                fetch('{% url 'get-unread-messages-count' %}') // Remplacez par l'URL de votre vue Django
+                    .then(response => response.json())
+                    .then(data => {
+                        updateMessagesIcon(data.unread_count);
+                    });
+            }
+
+            function updateMessagesIcon(unreadCount) {
+                const messagesIcon = document.querySelector('.fa-comments');
+                const badge = document.createElement('span');
+                badge.classList.add('badge', 'badge-danger');
+                badge.textContent = unreadCount;
+
+                if (unreadCount > 0) {
+                    messagesIcon.appendChild(badge);
+                } else {
+                    // Si aucun badge n'existe, ne faites rien
+                    if (messagesIcon.contains(badge)) {
+                        messagesIcon.removeChild(badge);
+                    }
+                }
+            }
+
+            // Script pour ouvrir/fermer la boîte de messages
+            var openMessagesBtn = document.getElementById('openMessagesBox');
+            var messagesBox = document.getElementById('messagesBox');
+            var closeMessagesBox = document.getElementById('closeMessagesBox');
+
+            if (openMessagesBtn && messagesBox) {
+                openMessagesBtn.addEventListener('click', function() {
+                    messagesBox.style.display = 'block';
+                });
+            }
+
+            if (closeMessagesBox && messagesBox) {
+                closeMessagesBox.addEventListener('click', function() {
+                    messagesBox.style.display = 'none';
+                });
+            }
         });
+
+
     </script>
 
 
 {% endblock %}
 
 {% block footer %}
-    <footer style="background-color: #333; color: white; text-align: center; padding: 20px 0; position: absolute; bottom: 0; width: 100%;">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Hauteur minimale pour prendre toute la hauteur de la fenêtre */
+            margin: 0; /* Réinitialiser les marges */
+        }
+
+        main {
+            flex: 1; /* Permet au contenu principal de se développer et de remplir l'espace */
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            width: 100%;
+            font-size: 1rem; /* Taille de police initiale */
+        }
+
+        @media only screen and (max-width: 600px) {
+            footer {
+                padding: 10px 0;
+                font-size: 0.8rem; /* Taille de police plus petite pour les petits écrans */
+            }
+        }
+
+        @media only screen and (min-width: 601px) and (max-width: 1024px) {
+            footer {
+                font-size: 0.9rem; /* Taille de police intermédiaire pour les tablettes */
+            }
+        }
+    </style>
+
+    <footer>
         <p>&copy; Copyright {% now 'Y' %} &middot; Jokk {% trans 'Personalised Learning Platform' %} &middot; {% trans 'All rights reserved!' %}</p>
     </footer>
 {% endblock %}
+
+

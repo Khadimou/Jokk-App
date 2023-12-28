@@ -1,0 +1,546 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="centered-container">
+        <div class="messaging-container">
+            <aside class="sidebar">
+                <!-- Sidebar: Liste des conversations -->
+                <h2>{% trans 'Messagerie' %}</h2>
+                <div class="search-bar">
+                    <input type="text" placeholder="{% trans 'Search conversations...' %}">
+                </div>
+                <div class="conversation-list">
+                    <!-- Les conversations seront chargées ici -->
+                    <!-- Iterate over messages -->
+                    <div class="messages-list">
+                        {% for username, details in conversations %}
+                            <div class="conversation {% if details.has_unread_messages %}conversation-unread{% endif %}" data-username="{{ username }}" data-user-id="{{ details.user_id }}">
+                                <img class="sender-image" src="{{ details.profile_picture_url }}" alt="{{ username }} Picture">
+                                <div class="conversation-details">
+                                    <p class="sender-name">{{ username }}</p>
+                                    <p class="last-message">{{ details.last_message }}</p>
+                                    <span class="message-time">{{ details.timestamp }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>{% trans 'No conversations' %}</p>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </aside>
+            <!-- Chat area for displaying messages and replying -->
+            <section class="chat-area">
+                <!-- Chat Header: Updated Dynamically -->
+                <div class="chat-header">
+                    <div class="user-info">
+                        <img id="chat-user-image" src="" style="width: 50px; height: 50px;">
+                        <p id="chat-user-name"></p>
+                    </div>
+                </div>
+
+                <!-- Chat Messages: Updated Dynamically -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be displayed here -->
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input">
+                    <input type="text" id="reply-input" placeholder="{% trans 'Type a message...' %}">
+                    <button id="send-reply" data-reply-url="{% url 'send_reply' %}">{% trans 'Send' %}</button>
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+{% block extra_scripts %}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var currentLanguage = "{{ request.LANGUAGE_CODE }}";
+            var currentUser = {
+                username: "{{ request.user.username }}",
+                avatarUrl: "{{ request.user.profile.avatar.url }}"
+            };
+
+            let currentRecipientId = null;
+
+            function loadMessages() {
+                // Charger les messages depuis le serveur pour obtenir les dernières mises à jour
+                const messageDetailsUrl = "{% url 'conversations' %}";
+                fetch(messageDetailsUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data.conversations) {
+                            throw new Error('Missing conversations data');
+                        }
+
+                        // Traiter chaque conversation
+                        data.conversations.forEach(conversation => {
+                            if (!conversation.username || !conversation.last_message || !conversation.timestamp || !conversation.profile_picture_url) {
+                                console.error('Incomplete conversation data:', conversation);
+                                return;
+                            }
+                            // Ici, vous pouvez ajouter une logique si nécessaire pour traiter les conversations
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    });
+            }
+
+            function loadConversation(username) {
+                const chatMessages = document.getElementById('chat-messages');
+                const chatUserImage = document.getElementById('chat-user-image');
+                const chatUserName = document.getElementById('chat-user-name');
+                chatMessages.innerHTML = '';
+
+                const url = `/${currentLanguage}/messages/${username}/`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.messages.length > 0) {
+                            const firstMessage = data.messages[0];
+                            let chatHeaderUsername, chatHeaderImage;
+
+                            if (firstMessage.is_current_user_sender) {
+                                chatHeaderUsername = firstMessage.recipient_username;
+                                chatHeaderImage = firstMessage.recipient_profile_picture_url;
+                            } else {
+                                chatHeaderUsername = firstMessage.sender_username;
+                                chatHeaderImage = firstMessage.sender_profile_picture_url;
+                            }
+
+                            chatUserImage.src = chatHeaderImage || 'default-image-url-here'; // Remplacez par l'URL de l'image par défaut si nécessaire
+                            chatUserImage.alt = chatHeaderUsername + " Picture";
+                            chatUserName.textContent = chatHeaderUsername;
+                        }
+
+                        // Traitement des messages pour l'affichage
+                        data.messages.forEach(message => {
+                            const isIncoming = message.sender_username !== currentUser.username;
+                            addChatMessage(message.text, message.timestamp, message.sender_profile_picture_url, message.sender_username, isIncoming, message.is_read, message.id);
+                        });
+                        // Scroller vers le bas pour afficher le dernier message
+                        scrollToBottom();
+                    })
+                    .catch(error => console.error('Error loading messages:', error));
+            }
+
+
+            function addChatMessage(content, timestamp, avatarUrl, username, incoming, isRead, messageId) {
+                const chatMessages = document.getElementById('chat-messages');
+                let messageContainer = document.createElement('div');
+                messageContainer.classList.add('message-container');
+                messageContainer.dataset.messageId = messageId;
+
+                // Appliquer une classe différente en fonction de l'expéditeur
+                messageContainer.classList.add(incoming ? 'message-incoming' : 'message-outgoing');
+
+
+                const formattedDate = new Date(timestamp).toLocaleDateString('fr-FR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+                const formattedTime = new Date(timestamp).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                messageContainer.innerHTML = `
+        <div class="sender-info">
+            <img class="sender-image" src="${avatarUrl}" alt="${username} Picture" style="width: 50px; height: 50px; border-radius: 50%;">
+            <p class="sender-name">${username}</p>
+        </div>
+        <div class="message-content ${isRead ? '' : 'message-unread'}">
+            <p class="message-text">${content}</p>
+            <span class="message-time">${formattedDate} ${formattedTime}</span>
+        </div>
+    `;
+
+                messageContainer.addEventListener('click', function() {
+                    markMessageAsRead(messageId);
+                });
+
+                chatMessages.appendChild(messageContainer);
+            }
+
+            function markMessageAsRead(messageId) {
+                const markReadUrl = `/${currentLanguage}/mark_message_as_read/${messageId}/`;
+                fetch(markReadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            document.querySelector(`[data-message-id="${messageId}"] .message-content`).classList.remove('message-unread');
+                        } else {
+                            console.error('Error marking message as read');
+                        }
+                    })
+                    .catch(error => console.error('Error sending request:', error));
+            }
+
+            function scrollToBottom() {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            document.querySelectorAll('.conversation').forEach(function(conversationElement) {
+                conversationElement.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    const userId = this.getAttribute('data-user-id');
+                    currentRecipientId = userId;
+                    loadConversation(username);
+
+                    // Marquer la conversation comme lue
+                    markConversationAsRead(username, this);
+                    setTimeout(scrollToBottom, 100); // Ajouter un délai pour s'assurer que les messages sont chargés
+                });
+            });
+
+            function markConversationAsRead(username, conversationElement) {
+                const markReadUrl = `/${currentLanguage}/mark_conversation_as_read/${username}/`;
+                fetch(markReadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Modifier le style du conteneur de conversation pour indiquer qu'elle est lue
+                            conversationElement.classList.remove('conversation-unread');
+                        } else {
+                            console.error('Error marking conversation as read');
+                        }
+                    })
+                    .catch(error => console.error('Error sending request:', error));
+            }
+
+            // Charger automatiquement la dernière conversation
+            const lastConversationElement = document.querySelector('.conversation:last-child');
+            if (lastConversationElement) {
+                const username = lastConversationElement.getAttribute('data-username');
+                const userId = lastConversationElement.getAttribute('data-user-id');
+                currentRecipientId = userId; // Mise à jour de currentRecipientId avec l'ID du destinataire
+                loadConversation(username);
+                markConversationAsRead(username); // Marquer la conversation comme lue
+            }
+
+
+            // Gestion de l'envoi des réponses
+            const sendButton = document.getElementById('send-reply');
+            sendButton.addEventListener('click', function() {
+                const replyInput = document.getElementById('reply-input');
+                const replyText = replyInput.value;
+                const replyUrl = sendButton.dataset.replyUrl;
+
+            if (currentRecipientId && replyText) {
+                    fetch(replyUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ text: replyText, recipientId: currentRecipientId })
+                    }).then(response => response.json())
+                        .then(data => {
+                            if(data.status === 'success') {
+                                const now = new Date();
+                                addChatMessage(replyText, now, currentUser.avatarUrl, currentUser.username, false);
+                                replyInput.value = '';
+                                scrollToBottom();
+                            } else {
+                                console.error('Error sending reply:', data.message);
+                            }
+                        }).catch(error => {
+                        console.error('Error sending reply:', error);
+                    });
+                } else {
+                    console.error('Recipient ID or reply text is undefined');
+                }
+            });
+            document.getElementById('reply-input').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter' || event.keyCode === 13) {
+                    event.preventDefault(); // Empêcher le comportement par défaut du formulaire (s'il y en a un)
+                    document.getElementById('send-reply').click(); // Simuler un clic sur le bouton 'Send'
+                }
+            });
+
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+
+    </script>
+{% endblock %}
+
+{% block extra_styles %}
+    <style>
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #chat-user-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* Ceci rendra l'image circulaire */
+            object-fit: cover; /* Assure que l'image couvre l'espace sans être déformée */
+            margin-right: 10px; /* Ajoute de l'espace entre l'image et le nom */
+        }
+
+        #chat-user-name {
+            font-weight: bold;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .sender-info {
+            margin-right: 10px;
+        }
+
+        .conversation {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .sender-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .conversation-details {
+            overflow: hidden;
+        }
+
+        .sender-name {
+            font-weight: bold;
+        }
+
+        .last-message {
+            font-size: 0.9em;
+            color: grey;
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            color: lightgrey;
+        }
+
+
+        .sender-name {
+            font-weight: bold;
+        }
+
+        .message-content {
+            flex-grow: 1;
+        }
+
+        .message-text {
+            margin: 0;
+        }
+
+        .message-time {
+            display: block;
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+
+        .messaging-container {
+            display: flex;
+            height: 80vh; /* Hauteur fixe pour l'exemple */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .conversation-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .conversation-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .conversation-list li:hover {
+            background-color: #f5f5f5;
+        }
+
+        .chat-header {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .chat-input {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            display: flex;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+
+        .chat-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Ajustez selon la hauteur disponible */
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            max-width: 70%;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .message-incoming {
+            {#align-self: flex-start;#}
+            background-color: #dcf8c6; /* Couleur pour les messages entrants */
+        }
+
+        .message-outgoing {
+            {#align-self: flex-end;#}
+            background-color: #eceff1; /* Couleur pour vos propres messages */
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            white-space: nowrap;
+        }
+
+        /* ... autres styles ... */
+
+        body, html {
+            margin: 0; /* Réinitialiser les marges par défaut */
+            height: 100%; /* Assurez-vous que le corps et le html prennent toute la hauteur */
+        }
+
+        .centered-container {
+            display: flex; /* Utiliser flexbox pour centrer le contenu */
+            justify-content: center; /* Centrer horizontalement */
+            align-items: flex-start; /* Aligner en haut plutôt qu'au centre */
+            height: calc(100% - 60px); /* Soustrayez la hauteur de votre navbar si elle est fixe */
+            padding-top: 20px; /* Espace au-dessus du messaging-container */
+        }
+
+        .messaging-container {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            width: 100%; /* Assurez-vous que cela ne dépasse pas la largeur maximale */
+            margin-left: auto;
+            margin-right: auto;
+            /* ... autres propriétés ... */
+        }
+
+        .conversation-unread {
+            font-weight: bold;
+            background-color: #0000FF; /* Une couleur de fond légèrement différente pour se démarquer */
+        }
+
+    </style>
+{% endblock %}

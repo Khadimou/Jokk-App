@@ -58,6 +58,7 @@
 
         .modal-content {
             background-color: #fefefe;
+            color: #0000FF;
             margin: 10% auto; /* Réduit la marge supérieure pour élever le conteneur */
             padding: 20px;
             border: 1px solid #888;
@@ -186,9 +187,9 @@
             <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form|crispy }}
-
                 <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
             </form>
+
         </div>
     </div>
 
@@ -199,7 +200,7 @@
             <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form|crispy }}
-
+                <input type="hidden" name="create_with_assistant" value="true">
                 <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
             </form>
         </div>
