@@ -4,7 +4,7 @@ from django.urls import path
 from workgroup import consumers
 
 websocket_urlpatterns = [
-    path('ws/chat/<room_name>/', consumers.ChatConsumer.as_asgi()),
+    path('ws/chat/workgroup/<int:workgroup_id>/', consumers.ChatConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({

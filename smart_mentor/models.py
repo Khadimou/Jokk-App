@@ -11,7 +11,7 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='avatars/', blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, default='static/images/pp.svg')
     birthdate = models.DateField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     country = CountryField(blank_label='(select country)', blank=True)

@@ -39,56 +39,143 @@
     <p>{% trans 'You searched for:' %} <strong>{{ query }}</strong></p>
 
     {% if results %}
-        {% for profile in results %}
-        <div class="container my-4">
-            <div class="profile-card p-4 shadow">
-                <div class="row">
-                    <!-- Section Photo -->
-                    <div class="col-md-4 text-center">
-                        {% if profile.avatar %}
-                            <img src="{{ profile.avatar.url }}" alt="Profile Picture" class="img-fluid rounded-circle profile-picture">
-                        {% endif %}
-                    </div>
+        {% for result in results %}
+            {% if result.type == 'profile' %}
 
-                    <!-- Section Informations -->
-                    <div class="col-md-8">
-                        <h2>{{ profile.user.username }}</h2>
+                <div class="container my-4">
+                    <div class="profile-card p-4 shadow">
+                        <div class="row">
+                            <!-- Section Photo -->
+                            <div class="col-md-4 text-center">
+                                {% if result.avatar %}
+                                    <img src="{{ result.avatar.url }}" alt="Profile Picture" class="img-fluid rounded-circle profile-picture">
+                                {% endif %}
+                            </div>
 
-                        <ul class="list-unstyled">
-                            {% if profile.birthdate %}
-                                <li><strong>{% trans 'Birthdate:' %}</strong> {{ profile.birthdate }}</li>
-                            {% endif %}
+                            <!-- Section Informations -->
+                            <div class="col-md-8">
+                                <h2>{{ result.user.username }}</h2>
 
-                            {% if profile.gender %}
-                                <li><strong>{% trans 'Gender:' %}</strong> {{ profile.get_gender_display }}</li>
-                            {% endif %}
+                                <ul class="list-unstyled">
+                                    {% if result.birthdate %}
+                                        <li><strong>{% trans 'Birthdate:' %}</strong> {{ result.birthdate }}</li>
+                                    {% endif %}
 
-                            {% if profile.education_level %}
-                                <li><strong>{% trans 'Education Level:' %}</strong> {{ profile.education_level }}</li>
-                            {% endif %}
+                                    {% if result.gender %}
+                                        <li><strong>{% trans 'Gender:' %}</strong> {{ result.gender }}</li>
+                                    {% endif %}
 
-                            {% if profile.skills %}
-                                <li><strong>{% trans 'Skills:' %}</strong> {{ profile.skills }}</li>
-                            {% endif %}
+                                    {% if result.education_level %}
+                                        <li><strong>{% trans 'Education Level:' %}</strong> {{ result.education_level }}</li>
+                                    {% endif %}
 
-                            {% if profile.phone %}
-                                <li><strong>{% trans 'Phone:' %}</strong> {{ profile.phone }}</li>
-                            {% endif %}
+                                    {% if result.skills %}
+                                        <li><strong>{% trans 'Skills:' %}</strong> {{ result.skills }}</li>
+                                    {% endif %}
 
-                            {% if profile.bio %}
-                                <li><strong>{% trans 'Bio:' %}</strong> {{ profile.bio }}</li>
-                            {% endif %}
+                                    {% if result.phone %}
+                                        <li><strong>{% trans 'Phone:' %}</strong> {{ result.phone }}</li>
+                                    {% endif %}
 
-                            {% if results.social_media_links %}
-                                <li><strong>{% trans 'Social Media Links:' %}</strong> <a href="{{ results.social_media_links }}">{{ results.social_media_links }}</a></li>
-                            {% endif %}
-                        </ul>
+                                    {% if result.bio %}
+                                        <li><strong>{% trans 'Bio:' %}</strong> {{ result.bio }}</li>
+                                    {% endif %}
+
+                                    {% if result.social_media_links %}
+                                        <li><strong>{% trans 'Social Media Links:' %}</strong> <a href="{{ result.social_media_links }}">{{ result.social_media_links }}</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            {% elif result.type == 'assistant' %}
+                <h2>{{ result.name }}</h2>
+                <p>{{ result.description }}</p>
+
+            {% elif result.type == 'workgroup' %}
+                <!-- Affichez les informations du groupe de travail ici -->
+                <div class="container my-4">
+                    <div class="workgroup-card p-4 shadow">
+                        <!-- Section Photo -->
+                        <div class="col-md-4 text-center">
+                            {% if result.avatar %}
+                                <img src="{{ result.avatar.url }}" alt="Profile Picture" class="img-fluid rounded-circle profile-picture">
+                            {% endif %}
+                        </div>
+                        <h2>{{ result.name }}</h2>
+                        <h3>{% trans 'Creator: ' %}{{ result.creator }}</h3>
+                        <p>{{ result.description }}</p>
+                        <p>{{ result.members }}</p>
+                        {% if request.user.username != result.creator %}
+                            <div id="join-container-{{ result.id }}">
+                                <button class="btn btn-primary join-workgroup-btn" data-workgroup-id="{{ result.id }}">
+                                    {% trans 'Join Workgroup' %}
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
         {% endfor %}
     {% else %}
         <p>{% trans 'No results found.' %}</p>
     {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var currentLanguage = "{{ request.LANGUAGE_CODE }}";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const joinButtons = document.querySelectorAll('.join-workgroup-btn');
+
+        joinButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const workgroupId = this.getAttribute('data-workgroup-id');
+                {#console.log("Workgroup ID:", workgroupId);#}
+                const url = `/${currentLanguage}/join_workgroup/${workgroupId}/`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ workgroup_id: workgroupId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const joinContainer = document.getElementById(`join-container-${workgroupId}`);
+                        if (data.status === 'success') {
+                            joinContainer.innerHTML = '<div class="alert alert-info">{% trans 'Pending' %}</div>';
+                        } else if (data.status === 'error') {
+                            joinContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+
+        // Définissez getCookie en dehors des événements DOMContentLoaded pour qu'elle soit accessible globalement
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+
+</script>
 {% endblock %}

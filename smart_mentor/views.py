@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from workgroup.models import WorkGroup
 from .models import Profile, OpenAIAssistant
 from .utils import scrape_website, text_to_pdf, upload_to_openai, create_chat_thread, process_message_with_citations, \
     transcribe_file, create_assistant
@@ -308,30 +309,39 @@ def edit_profile(request):
         form = ProfileForm(instance=profile)
     return render(request, 'edit_profile.html', {'form': form})
 
-
-def search_view(request):
-    query = request.GET.get('search', '').strip()
-    if query:
-        # Filter profiles based on the username of the related User
-        results = Profile.objects.filter(user__username__icontains=query)
-    else:
-        results = Profile.objects.none()
-
-    context = {
-        'results': results,
-        'query': query
-    }
-    return render(request, 'search_results.html', context)
-
 def searching(request):
     query = request.GET.get('search', '').strip()
-    if query:
-        results = Profile.objects.filter(user__username__icontains=query)
-        results_data = [{'id': profile.user.id, 'username': profile.user.username} for profile in results]
-    else:
-        results_data = []
+    results = []
 
-    return JsonResponse({'results': results_data})
+    if query:
+        user_results = Profile.objects.filter(user__username__icontains=query)
+        workgroup_results = WorkGroup.objects.filter(name__icontains=query)
+
+        assistants = OpenAIAssistant.objects.filter(name__icontains=query)
+
+        # Créez une liste combinée de profils et d'assistants
+        results = [
+                      {'type': 'profile', 'username': profile.user.username, 'gender': profile.gender,
+                       'birthdate': profile.birthdate, 'country': profile.country, 'education_level':profile.education_level,
+                       'phone': profile.phone, 'bio': profile.bio, 'skills': profile.skills, 'social_media_links': profile.social_media_links,
+                       'avatar': profile.avatar if profile.avatar else None}
+                      for profile in user_results
+                  ] +  [
+            {'type': 'assistant', 'name': assistant.name, 'description': assistant.description}
+            for assistant in assistants
+        ] + [
+                      {'type': 'workgroup', 'id': workgroup.id, 'name': workgroup.name, 'description': workgroup.description, 'avatar': workgroup.avatar if workgroup.avatar else None, 'creator': workgroup.creator.username}
+                      for workgroup in workgroup_results
+                  ]
+
+    context = {
+        'query': query,
+        'results': results
+    }
+
+    return render(request, 'search_results.html', context)
+
+
 
 from rest_framework import viewsets
 from .models import Message

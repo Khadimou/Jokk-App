@@ -192,7 +192,7 @@
 {% endblock %}
 
 {% block navbar %}
-    {% include 'nav_home.html' %}
+    {% include 'nav_workgroup.html' %}
 {% endblock %}
 
 {% block content %}
@@ -205,15 +205,20 @@
         <h3 class="members-title">{% trans 'Members:' %}</h3>
         <ul>
             {% for member in members_info %}
-                <span style="color: #4CAF50;"><li style="display: flex; align-items: center; margin-bottom: 10px;"><img src="{{ member.user.profile.avatar.url }}" alt="{{ member.user.username }}" class="avatar" style="width: 50px; height: 50px; margin-right: 10px;">{{ member.user.username }} - {{ member.status }}</li></span>
-            {% endfor %}
-
-            {% for assistant in workgroup.assistants.all %}
                 <li style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <img src="{% static 'images/assistant_avatar.png' %}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
-                    <span style="color: #4CAF50;">{{ assistant.name }}</span>
+                    <img src="{{ member.user.profile.avatar.url }}" alt="{{ member.user.username }}" class="avatar" style="width: 50px; height: 50px; margin-right: 10px;">
+                    <span style="color: #4CAF50;">{{ member.user.username }} - {{ member.status }}</span>
                 </li>
             {% endfor %}
+
+            {% if workgroup.assistants.all %}
+                {% for assistant in workgroup.assistants.all %}
+                    <li style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <img src="{{ assistant.profile.avatar.url }}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
+                        <span style="color: #4CAF50;">{{ assistant.name }}</span>
+                    </li>
+                {% endfor %}
+            {% endif %}
         </ul>
 
     <div class="workgroup-actions">
@@ -281,150 +286,137 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    // JavaScript pour la gestion de la modale et de la barre de recherche
-    document.addEventListener("DOMContentLoaded", function() {
-        // Obtenez la modale pour 'Add members'
-        var addMembersModal = document.getElementById("addMembersModal");
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var addMembersBtn = document.querySelector("button[data-workgroup-id]");
 
-        // Obtenez le bouton qui ouvre le modal
-        var addMembersBtn = document.querySelector("button[data-workgroup-id]");
+            if (addMembersBtn) {
+                // Si l'utilisateur est le créateur, exécutez le code de la modale
+                var addMembersModal = document.getElementById("addMembersModal");
+                var spanCloseAddMembers = addMembersModal.getElementsByClassName("close")[0];
 
-        // Obtenez l'élément <span> qui ferme la modale 'Add members'
-        var spanCloseAddMembers = addMembersModal.getElementsByClassName("close")[0];
+                addMembersBtn.onclick = function() {
+                    addMembersModal.style.display = "block";
+                };
 
-        // Quand l'utilisateur clique sur le bouton, ouvrez le modal
-        addMembersBtn.onclick = function() {
-            addMembersModal.style.display = "block";
-        }
+                spanCloseAddMembers.onclick = function() {
+                    addMembersModal.style.display = "none";
+                };
 
-        // Quand l'utilisateur clique sur <span> (x), fermez la modale 'Add members'
-        spanCloseAddMembers.onclick = function() {
-            addMembersModal.style.display = "none";
-        };
+                window.onclick = function(event) {
+                    if (event.target == addMembersModal) {
+                        addMembersModal.style.display = "none";
+                    }
+                };
 
-        // Quand l'utilisateur clique n'importe où en dehors du modal, fermez-le
-        window.onclick = function(event) {
-            if (event.target == addMembersModal) {
-                addMembersModal.style.display = "none";
-            }
-        }
+                // Gestion de la recherche d'utilisateurs
+                var searchInput = document.getElementById("userSearch");
+                var resultsContainer = document.getElementById("userSearchResults");
+                var workgroupId = addMembersBtn.getAttribute('data-workgroup-id');
 
-        // Gestion de la recherche d'utilisateurs
-        var searchInput = document.getElementById("userSearch");
-        var resultsContainer = document.getElementById("userSearchResults");
-        var workgroupId = addMembersBtn.getAttribute('data-workgroup-id');  // Récupère l'ID du groupe de travail
+                searchInput.addEventListener("input", function() {
+                    var query = this.value;
+                    if (query.length > 1) {
+                        fetch(`/search?search=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                resultsContainer.innerHTML = '';
+                                data.results.forEach(result => {
+                                    var resultDiv = document.createElement("div");
+                                    resultDiv.className = "search-result-item";
+                                    resultDiv.style.display = "flex";
+                                    resultDiv.style.justifyContent = "space-between";
+                                    resultDiv.style.alignItems = "center";
+                                    resultDiv.style.marginBottom = "10px";
 
-        searchInput.addEventListener("input", function() {
-            var query = this.value;
-            if (query.length > 1) {
-                fetch(`/search?search=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        resultsContainer.innerHTML = ''; // Efface les résultats précédents
-                        data.results.forEach(result => {
-                            // Construire et ajouter chaque élément de résultat
-                            // ...
-                            var resultDiv = document.createElement("div");
-                            resultDiv.className = "search-result-item";
-                            resultDiv.style.display = "flex";
-                            resultDiv.style.justifyContent = "space-between";
-                            resultDiv.style.alignItems = "center";
-                            resultDiv.style.marginBottom = "10px";
+                                    var userInfoDiv = document.createElement("div");
+                                    userInfoDiv.style.display = "flex";
+                                    userInfoDiv.style.alignItems = "center";
 
-                            var userInfoDiv = document.createElement("div");
-                            userInfoDiv.style.display = "flex";
-                            userInfoDiv.style.alignItems = "center";
+                                    if (result.type === 'profile' && result.avatar) {
+                                        var img = document.createElement("img");
+                                        img.src = result.avatar;
+                                        img.alt = "Avatar";
+                                        img.width = 50;
+                                        img.height = 50;
+                                        img.style.marginRight = "10px";
+                                        userInfoDiv.appendChild(img);
 
-                            if (result.type === 'profile' && result.avatar) {
-                                var img = document.createElement("img");
-                                img.src = result.avatar;
-                                img.alt = "Avatar";
-                                img.width = 50;
-                                img.height = 50;
-                                img.style.marginRight = "10px";
-                                userInfoDiv.appendChild(img);
+                                        var usernameSpan = document.createElement("span");
+                                        usernameSpan.textContent = result.username;
+                                        userInfoDiv.appendChild(usernameSpan);
+                                        resultDiv.appendChild(userInfoDiv);
 
-                                var usernameSpan = document.createElement("span");
-                                usernameSpan.textContent = result.username;
-                                userInfoDiv.appendChild(usernameSpan);
-                                resultDiv.appendChild(userInfoDiv);
+                                        var inviteButton = document.createElement("button");
+                                        inviteButton.textContent = "+ Invite";
+                                        inviteButton.onclick = function() {
+                                            inviteUser(result.username, workgroupId);
+                                        };
+                                        inviteButton.className = "invite-button";
+                                        resultDiv.appendChild(inviteButton);
 
-
-                                var inviteButton = document.createElement("button");
-                                inviteButton.textContent = "+ Invite";
-                                inviteButton.onclick = function () {
-                                    inviteUser(result.username, workgroupId);  // Utilisation de workgroupId
-                                };
-                                inviteButton.className = "invite-button";
-                                resultDiv.appendChild(inviteButton);
-
-                                resultsContainer.appendChild(resultDiv);
-                            }
-                        });
-                    })
-                    .catch(error => console.error('Error:', error));
+                                        resultsContainer.appendChild(resultDiv);
+                                    }
+                                });
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
             }
         });
-    });
 
-    function inviteUser(username, workgroupId) {
-        console.log('Inviting:', username);
-        fetch("{% url 'send_invitation' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ 'username': username, 'workgroup_id': workgroupId })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Invitation sent successfully to ' + username);
-                    showAlert('Invitation sent successfully to ' + username);
-                } else {
-                    console.error(data.message);
-                    alert('Failed to send invitation: ' + data.message);
-                    showAlert('Failed to send invitation', true);
-                }
+        function inviteUser(username, workgroupId) {
+            console.log('Inviting:', username);
+            fetch("{% url 'send_invitation' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ 'username': username, 'workgroup_id': workgroupId })
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error sending invitation');
-            });
-    }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Invitation sent successfully to ' + username);
+                        showAlert('Invitation sent successfully to ' + username);
+                    } else {
+                        console.error(data.message);
+                        alert('Failed to send invitation: ' + data.message);
+                        showAlert('Failed to send invitation', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending invitation');
+                });
+        }
 
+        function showAlert(message, error = false) {
+            const alertBox = document.createElement('div');
+            alertBox.textContent = message;
+            alertBox.className = error ? 'alert alert-danger' : 'alert alert-success';
+            alertBox.style.marginTop = '20px';
+            alertBox.style.textAlign = 'center';
+            const container = document.getElementById('alert-container');
+            container.appendChild(alertBox);
+            setTimeout(() => alertBox.remove(), 3000);
+        }
 
-    function showAlert(message, error = false) {
-        const alertBox = document.createElement('div');
-        alertBox.textContent = message;
-        alertBox.className = error ? 'alert alert-danger' : 'alert alert-success';
-
-        // Positionnement de l'alerte
-        alertBox.style.marginTop = '20px';
-        alertBox.style.textAlign = 'center';
-
-        // Ajout de l'alerte au conteneur spécifique
-        const container = document.getElementById('alert-container');
-        container.appendChild(alertBox);
-
-        // Disparaître après quelques secondes
-        setTimeout(() => alertBox.remove(), 3000);
-    }
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
+            return cookieValue;
         }
-        return cookieValue;
-    }
-</script>
+    </script>
+
 {% endblock %}

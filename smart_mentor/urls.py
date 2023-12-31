@@ -31,7 +31,6 @@ urlpatterns = [
     path('profile/',views.create_profile,name='create_profile'),
     path('profile/<int:user_id>/',views.profile_view,name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
-    path('search/', views.search_view, name='search_view'),
     path('searching/', views.searching, name='searching'),
     path('get-message-details/<int:message_id>/', views.message_details, name='message_details_base'),
     path('scrape/', views.scrape_view, name='scrape'),

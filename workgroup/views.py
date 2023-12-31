@@ -55,7 +55,8 @@ def get_notifications(request):
         'id': notification.id,
         'title': notification.title,
         'body': notification.body,
-        'read': notification.read  # Ajoutez l'état de lecture
+        'read': notification.read,  # Ajoutez l'état de lecture
+        'type': notification.type
     } for notification in notifications]
 
     unread_count = notifications.filter(read=False).count()  # Compter uniquement les notifications non lues
@@ -76,7 +77,7 @@ def send_invitation(request):
         WorkGroupMember.objects.create(
             user=user,
             workgroup=workgroup,
-            status='invited'
+            status='pending'
         )
 
         Notification.objects.create(
@@ -84,6 +85,7 @@ def send_invitation(request):
             workgroup=workgroup,  # Ajout de l'instance WorkGroup à la notification
             title=f'Invitation to join {workgroup.name}',
             body=f'You have been invited to join the workgroup "{workgroup.name}" by {request.user.username}',
+            type='invitation',
             read=False
         )
 
@@ -120,7 +122,7 @@ def workgroup_detail(request, pk):
 
     try:
         member = WorkGroupMember.objects.get(workgroup=workgroup, user=request.user)
-        is_allowed = member.status in ['invited', 'accepted']
+        is_allowed = member.status in ['pending', 'accepted']
         is_accepted = member.status == 'accepted'
     except WorkGroupMember.DoesNotExist:
         is_allowed = False
@@ -141,28 +143,63 @@ def workgroup_detail(request, pk):
         'is_accepted': is_accepted,
         'chat_rooms': chat_rooms,
     })
+
+@login_required
+@require_POST
+def clear_all_notifications(request):
+    Notification.objects.filter(recipient=request.user).delete()
+    return JsonResponse({'status': 'success', 'message': 'All notifications cleared.'})
 @login_required
 def create_workgroup(request):
-    with_assistant = False
+    # Créer un utilisateur pour l'assistant
+    assistant_user, created = User.objects.get_or_create(
+        username='assistant',  # Un identifiant unique
+        defaults={
+            'first_name': 'OpenAI',
+            'last_name': 'Assistant',
+            # Autres champs nécessaires
+        }
+    )
+
+    if created or not hasattr(assistant_user, 'profile'):
+        # Si l'utilisateur assistant est nouvellement créé ou n'a pas de profil
+        profile, profile_created = Profile.objects.get_or_create(
+            user=assistant_user,
+            defaults={'avatar': 'avatars_workgroup/assistant_avatar.png'}
+        )
+        if not profile_created:
+            # Si le profil existait déjà, mais doit être mis à jour
+            profile.avatar = 'avatars_workgroup/assistant_avatar.png'
+            profile.save()
+
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)
         if form.is_valid():
             workgroup = form.save(commit=False)
             workgroup.creator = request.user
+            workgroup.with_assistant = 'create_with_assistant' in request.POST
             workgroup.save()
             form.save_m2m()
 
-            # Associer OpenAIAssistant si demandé
-            if 'create_with_assistant' in request.POST:
-                assistant = OpenAIAssistant.objects.first() # Ou une logique pour sélectionner un assistant spécifique
-                workgroup.assistants.add(assistant) # Supposant un champ ManyToManyField pour assistants
-                with_assistant = True
+            # Vérifier si l'assistant doit être ajouté
+            if  workgroup.with_assistant :
+                # Récupérer l'utilisateur assistant
+                assistant_user = User.objects.get(username='assistant')
+
+                # Ajouter l'assistant en tant que membre du groupe
+                WorkGroupMember.objects.create(
+                    user=assistant_user,
+                    workgroup=workgroup,
+                    status='accepted'  # ou 'pending', selon la logique de votre application
+                )
 
             return redirect('workgroup_detail', pk=workgroup.pk)
+
     else:
         form = RevisionForm()
 
-    return render(request, 'workgroup/create_workgroup.html', {'form': form, 'with_assistant': with_assistant})
+    return render(request, 'workgroup/create_workgroup.html', {'form': form,'assistant': assistant_user})
+
 
 
 def edit_workgroup(request, pk):
@@ -193,11 +230,79 @@ def notification_detail(request, notification_id):
     workgroup_id = notification.workgroup_id
     return render(request, 'notification_detail.html', {'notification': notification, 'workgroup_id': workgroup_id})
 
+@login_required
+def accept_join(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    if not notification.workgroup:
+        return JsonResponse({'status': 'error', 'message': 'Invalid notification.'})
+
+    # Ici, utilisez le sender de la notification comme l'utilisateur à ajouter au groupe
+    workgroup_member, created = WorkGroupMember.objects.get_or_create(
+        user=notification.sender,
+        workgroup=notification.workgroup
+    )
+
+    if request.user != workgroup_member.workgroup.creator:
+        return HttpResponseForbidden("You are not authorized to accept this join request.")
+
+    workgroup_member.status = 'accepted'
+    workgroup_member.save()
+
+    notification.read = True
+    notification.save()
+
+    Notification.objects.create(
+        recipient=workgroup_member.user,
+        sender=request.user,
+        workgroup=workgroup_member.workgroup,
+        title=f'Your request to join {workgroup_member.workgroup.name} has been accepted',
+        body=f'{request.user.username} has accepted your request to join the workgroup "{workgroup_member.workgroup.name}".',
+        read=False,
+        type='invitation'
+    )
+
+
+    return JsonResponse({'status': 'success', 'message': 'Join request accepted successfully.'})
+
+
+@login_required
+def deny_join(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    if not notification.workgroup:
+        return JsonResponse({'status': 'error', 'message': 'Invalid notification.'})
+
+    workgroup_member = WorkGroupMember.objects.filter(
+        user=notification.sender,
+        workgroup=notification.workgroup
+    ).first()
+
+    if not workgroup_member or request.user != workgroup_member.workgroup.creator:
+        return HttpResponseForbidden("You are not authorized to deny this join request.")
+
+    workgroup_member.status = 'denied'
+    workgroup_member.save()
+
+    Notification.objects.create(
+        recipient=workgroup_member.user,
+        sender=request.user,
+        workgroup=workgroup_member.workgroup,
+        title=f'Your request to join {workgroup_member.workgroup.name} has been denied',
+        body=f'{request.user.username} has denied your request to join the workgroup "{workgroup_member.workgroup.name}".',
+        read=False,
+        type='invitation'
+    )
+
+
+    return JsonResponse({'status': 'success', 'message': 'Join request denied successfully.'})
+
+
 
 @login_required
 def accept_invitation(request, pk):
     try:
-        member = WorkGroupMember.objects.get(workgroup_id=pk, user=request.user, status='invited')
+        member = WorkGroupMember.objects.get(workgroup_id=pk, user=request.user, status='pending')
         member.status = 'accepted'
         member.save()
         # Rediriger vers la page du groupe de travail ou une autre page appropriée
@@ -209,7 +314,7 @@ def accept_invitation(request, pk):
 @login_required
 def refuse_invitation(request, pk):
     try:
-        member = WorkGroupMember.objects.get(workgroup_id=pk, user=request.user, status='invited')
+        member = WorkGroupMember.objects.get(workgroup_id=pk, user=request.user, status='pending')
         member.status = 'refused'
         member.save()
         # Rediriger vers une page appropriée
@@ -227,11 +332,51 @@ def create_chat_room(request, workgroup_id):
 @login_required
 def chat_room(request, chat_room_id):
     chat_room = get_object_or_404(ChatRoom, pk=chat_room_id)
-    # Vérifiez si l'utilisateur a le droit de voir ce salon de discussion
-    # Mettez à jour l'état en ligne de l'utilisateur
+    workgroup = chat_room.workgroup  # Accès au WorkGroup associé
+
+    workgroup_id = workgroup.id  # Récupération de l'ID du WorkGroup
+
+    # Vérifier si l'utilisateur est membre du groupe de travail
+    if not workgroup.members.filter(id=request.user.id).exists() and request.user != workgroup.creator:
+        return HttpResponseForbidden("You do not have permission to access this chat room.")
+
     online_status, created = UserOnlineStatus.objects.get_or_create(user=request.user)
     online_status.set_online()
 
-    # Récupérer les messages, etc.
-    return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room})
+    members = workgroup.members.all()
+    return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room, 'members': members, 'workgroup_id': workgroup_id})
+
+@login_required
+def join_workgroup(request, workgroup_id):
+    if request.method == 'POST':
+        workgroup = get_object_or_404(WorkGroup, pk=workgroup_id)
+
+        existing_member = WorkGroupMember.objects.filter(user=request.user, workgroup=workgroup)
+
+        if existing_member.exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': 'You have already requested to join or are a member of this workgroup.'
+            })
+
+        WorkGroupMember.objects.create(
+            user=request.user,
+            workgroup=workgroup,
+            status='pending'
+        )
+
+        Notification.objects.create(
+            recipient=workgroup.creator,
+            sender=request.user,  # Ajoutez le sender ici
+            workgroup=workgroup,
+            title=f'Join Request from {request.user.username}',
+            body=f'{request.user.username} has requested to join your workgroup "{workgroup.name}".',
+            type='join_request',
+            read=False
+        )
+
+        return JsonResponse({'status': 'success', 'message': 'Join request sent successfully.'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 

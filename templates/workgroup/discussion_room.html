@@ -167,6 +167,11 @@
         .offline {
             background-color: #dc3545; /* Rouge pour hors ligne */
         }
+
+        .status-online {
+            background-color: #28a745 !important; /* Vert pour indiquer qu'il est en ligne */
+        }
+
         .btn-microphone {
             border: none;
             background: transparent;
@@ -234,7 +239,7 @@
         return color;
     }
 
-    const chatRoomId = "{{ chat_room.id }}";
+    const chatRoomId = "{{ workgroup_id }}";
     const userId = "{{ request.user.id }}";
 
 
@@ -248,26 +253,35 @@
     }
 
     document.querySelector('#chat-message-submit').onclick = function(e) {
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({
-        'message': message,
-        'user_id': userId  // Assurez-vous d'envoyer l'ID de l'utilisateur avec le message
-        }));
-        messageInputDom.value = '';
+        if (chatSocket.readyState === WebSocket.OPEN) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'user_id': userId  // Assurez-vous d'envoyer l'ID de l'utilisateur avec le message
+            }));
+            messageInputDom.value = '';
+        } else {
+            console.error("WebSocket is not open. Cannot send message.");
+            // Vous pouvez choisir de gérer cette situation différemment, par exemple en informant l'utilisateur.
+        }
     };
-    document.querySelector('#chat-message-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault(); // Empêche le comportement par défaut de la touche "Entrée"
 
-        const messageInputDom = this;
-        const message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({
-        'message': message,
-        'user_id': userId
-        }));
-        messageInputDom.value = '';
-    }
+    document.querySelector('#chat-message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Empêche le comportement par défaut de la touche "Entrée"
+            if (chatSocket.readyState === WebSocket.OPEN) {
+                const messageInputDom = this;
+                const message = messageInputDom.value;
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'user_id': userId
+                }));
+                messageInputDom.value = '';
+            } else {
+                console.error("WebSocket is not open. Cannot send message.");
+            }
+        }
     });
 
     document.querySelector('#chat-leave').onclick = function(e) {
@@ -317,14 +331,42 @@
     function connectWebSocket() {
         chatSocket = new WebSocket(
             (window.location.protocol === "https:" ? "wss://" : "ws://") +
-            window.location.host + '/ws/chat/' + chatRoomId + '/'
+            window.location.host + '/ws/chat/workgroup/' + chatRoomId + '/'
         );
 
         chatSocket.onopen = function(e) {
             console.log("WebSocket connection established");
-            // Autres initialisations ici
             requestUserList();
+
+            {% if assistant %}
+                addAssistantToList("{{ assistant.name }}", "{{ assistant.profile.avatar.url }}");
+            {% endif %}
         };
+
+        function addAssistantToList(name, avatarUrl) {
+            const membersListDiv = document.querySelector('#members-list');
+            const memberDiv = document.createElement('div');
+            memberDiv.classList.add('member');
+
+            // Indicateur de statut
+            const statusIndicator = document.createElement('span');
+            statusIndicator.classList.add('status-indicator', 'status-online'); // Ajoutez la classe 'status-online'
+
+            const avatarImg = document.createElement('img');
+            avatarImg.src = avatarUrl;
+            avatarImg.alt = name;
+            avatarImg.classList.add('avatar');
+
+            const usernameSpan = document.createElement('span');
+            usernameSpan.textContent = name;
+
+            memberDiv.appendChild(statusIndicator);
+            memberDiv.appendChild(avatarImg);
+            memberDiv.appendChild(usernameSpan);
+
+            membersListDiv.prepend(memberDiv); // Ajoutez l'assistant en haut de la liste
+        }
+
 
         chatSocket.onclose = function(e) {
             console.log("WebSocket connection closed");
@@ -346,7 +388,6 @@
 
                 // Si un avatar est fourni
                 if (data.avatar_url) {
-                    console.log("URL de l'avatar:", data.avatar_url); // Débogage : afficher l'URL de l'avatar
                     const avatarImage = document.createElement('img');
                     avatarImage.src = data.avatar_url;
                     avatarImage.alt = 'Avatar';

@@ -280,6 +280,7 @@
 
                 <div class="dropdown-menu" aria-labelledby="notificationDropdownToggle">
                     <!-- Ici, insérez dynamiquement les notifications -->
+
                 </div>
             </div>
 
@@ -315,7 +316,7 @@
     <main>
     <!-- Barre de recherche -->
     <div class="search-container" style="margin-bottom: 150px;">
-        <form action="{% url 'search_view' %}" method="get"> <!-- Remplacez 'your_search_view' par le nom de votre vue de recherche -->
+        <form action="{% url 'searching' %}" method="get">
             <input type="text" placeholder="{% trans 'Search...' %}" name="search">
             <button type="submit">{% trans 'Search' %}</button>
         </form>
@@ -379,6 +380,7 @@
             {% csrf_token %}
             <input type="text" id="search_user" placeholder="Search for a user...">
             <div id="search_results"></div>
+
             <input type="hidden" name="recipient_id" id="selected_recipient_id" value="">
             <textarea name="message_text" required></textarea>
             <button type="submit">{% trans 'Send Message' %}</button>
@@ -386,7 +388,27 @@
 
     </div>
 
-    <!-- Bouton pour ouvrir la boîte de messages -->
+        <!-- Modale pour afficher les détails de la notification -->
+        <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="notificationModalLabel">Notification Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modalContent">
+                        <!-- Les détails de la notification seront injectés ici -->
+                    </div>
+                    <div class="modal-footer">
+                        <button id="acceptButton" type="button" class="btn btn-success">{% trans 'Accept' %}</button>
+                        <button id="denyButton" type="button" class="btn btn-danger">{% trans 'Deny' %}</button>
+                        <button id="closeButton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton pour ouvrir la boîte de messages -->
     {% comment %}<div class="d-flex justify-content-end">
         <button id="openMessagesBox" class="btn btn-primary">{% trans 'Messagerie' %}</button>
     </div>{% endcomment %}
@@ -400,30 +422,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 
     <script>
+        var currentLanguage = "{{ request.LANGUAGE_CODE }}";
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('search_user').addEventListener('keyup', function() {
                 const query = this.value;
-                if (query.length > 2) { // Rechercher après au moins 3 caractères
+                if (query.length > 2) {
                     fetch(`{% url 'searching' %}?search=${encodeURIComponent(query)}`)
                         .then(response => response.json())
                         .then(data => {
-                            let users = data.results;
+                            let users = data.users;
+                            let workgroups = data.workgroups;
                             let resultsDiv = document.getElementById('search_results');
                             resultsDiv.innerHTML = '';
+
+                            // Ajouter les utilisateurs au résultat
                             users.forEach(user => {
                                 let userDiv = document.createElement('div');
-                                userDiv.innerHTML = user.username;
-                                userDiv.onclick = function() {
-                                    document.getElementById('selected_recipient_id').value = user.id;
-                                    console.log("Recipient ID set to: ", user.id); // Debugging line
-                                };
+                                userDiv.className = 'search-item user';
+                                userDiv.innerHTML = `User: ${user.username}`;
                                 resultsDiv.appendChild(userDiv);
+                            });
+
+                            // Ajouter les groupes de travail au résultat
+                            workgroups.forEach(workgroup => {
+                                let workgroupDiv = document.createElement('div');
+                                workgroupDiv.className = 'search-item workgroup';
+                                workgroupDiv.innerHTML = `Workgroup: ${workgroup.name}`;
+
+                                resultsDiv.appendChild(workgroupDiv);
                             });
                         });
                 }
             });
 
-        // Définissez getCookie en dehors des événements DOMContentLoaded pour qu'elle soit accessible globalement
+
+            // Définissez getCookie en dehors des événements DOMContentLoaded pour qu'elle soit accessible globalement
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -454,20 +487,33 @@
 
                 notifications.forEach(notification => {
                     const notificationElement = document.createElement('a');
-
                     notificationElement.setAttribute('data-id', notification.id);
-                    notificationElement.href = `/notifications/${notification.id}/`;
                     notificationElement.classList.add('dropdown-item');
                     if (!notification.read) {
                         notificationElement.classList.add('notification-unread');
                     }
                     notificationElement.textContent = notification.title;
-                    notificationElement.addEventListener('click', async function() {
-                        await markAsRead(notification.id); // Marquer la notification comme lue
-                        showNotificationDetails(notification); // Afficher les détails
-                    });
+
+                    if (notification.type === 'invitation') {
+                        // Gérer les notifications d'invitation
+                        notificationElement.href = `/notifications/${notification.id}/`;
+                        notificationElement.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            await markAsRead(notification.id);
+                            window.location.href = this.href;  // Rediriger vers le détail de la notification
+                        });
+                    } else if (notification.type === 'join_request') {
+                        // Gérer les demandes d'adhésion
+                        notificationElement.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            await markAsRead(notification.id);
+                            showNotificationDetails(notification); // Afficher le modal
+                        });
+                    }
+
                     notificationsDropdown.appendChild(notificationElement);
                 });
+
 
                 const notificationBadge = document.getElementById('notificationBadge');
                 if (unreadCount > 0) {
@@ -477,30 +523,52 @@
                     notificationBadge.style.display = 'none'; // Cachez le badge s'il n'y a pas de notifications non lues
                 }
 
+                // Ajoutez le lien 'See All Notifications'
                 const allNotificationsElement = document.createElement('a');
                 allNotificationsElement.href = '{% url 'all_notifications' %}';
                 allNotificationsElement.classList.add('dropdown-item');
                 allNotificationsElement.textContent = '{% trans "See all notifications" %}';
                 notificationsDropdown.appendChild(allNotificationsElement);
+
+                // Ajoutez un séparateur
+                const divider = document.createElement('div');
+                divider.classList.add('dropdown-divider');
+                notificationsDropdown.appendChild(divider);
+
+                // Ajoutez le bouton 'Clear All'
+                const clearAllElement = document.createElement('a');
+                clearAllElement.href = '#';
+                clearAllElement.id = 'clearAllNotifications';
+                clearAllElement.classList.add('dropdown-item');
+                clearAllElement.textContent = '{% trans "Clear all" %}';
+                notificationsDropdown.appendChild(clearAllElement);
+
+                document.getElementById('clearAllNotifications').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fetch('{% url 'clear_all_notifications' %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                // Supprimez toutes les notifications du menu déroulant
+                                const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
+                                notificationsDropdown.innerHTML = '';
+                                // Mettre à jour le compteur de notifications
+                                updateNotificationCounter();
+                            }
+                        });
+                });
+
             }
-            function showNotificationDetails(notification) {
-                // Ici, affichez les détails de la notification
-                // Par exemple, ouvrez une modale avec le message et les boutons Accepter/Refuser
-                const modalContent = document.getElementById('modalContent');
-                modalContent.textContent = notification.body;
-                const acceptButton = document.getElementById('acceptButton');
-                const denyButton = document.getElementById('denyButton');
-
-                acceptButton.onclick = function() { handleInvitation(notification.id, true); };
-                denyButton.onclick = function() { handleInvitation(notification.id, false); };
-
-                // Ouvrir la modale
-                $('#notificationModal').modal('show');
-            }
-
             function handleInvitation(notificationId, accepted) {
-                // Envoyer une requête au backend pour traiter l'invitation
-                const url = accepted ? 'accept-invitation-url' : 'deny-invitation-url';
+                const url = accepted
+                    ? `/notifications/accept-join/${notificationId}/`
+                    : `/notifications/deny-join/${notificationId}/`;
+
                 fetch(url, {
                     method: 'POST',
                     headers: {
@@ -509,13 +577,45 @@
                     },
                     body: JSON.stringify({ notificationId: notificationId })
                 })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        // Traiter la réponse
-                        $('#notificationModal').modal('hide');
-                        // Mettre à jour l'interface utilisateur
+                        if (data.status === 'success') {
+                            alert(data.message); // Afficher un message de succès
+                        } else {
+                            alert('Error: ' + data.message); // Afficher un message d'erreur
+                        }
+                        $('#notificationModal').modal('hide'); // Fermer le modal
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.'); // Message d'erreur générique
                     });
             }
+
+            function showNotificationDetails(notification) {
+                const modalContent = document.getElementById('modalContent');
+                const acceptButton = document.getElementById('acceptButton');
+                const denyButton = document.getElementById('denyButton');
+                const closeButton = document.getElementById('closeButton');
+
+                if (modalContent && acceptButton && denyButton && closeButton) {
+                    modalContent.textContent = notification.body;
+
+                    acceptButton.onclick = () => handleInvitation(notification.id, true);
+                    denyButton.onclick = () => handleInvitation(notification.id, false);
+                    closeButton.onclick = () => $('#notificationModal').modal('hide');
+
+                    $('#notificationModal').modal('show');
+                } else {
+                    console.error('One or more modal elements are missing');
+                }
+            }
+
 
             async function markAsRead(notificationId) {
                 const response = await fetch(`/mark_notification_as_read/${notificationId}/`, {

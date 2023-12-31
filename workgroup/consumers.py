@@ -6,6 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.templatetags.static import static
 
@@ -23,8 +24,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def set_user_offline(self, user):
         user.online_status.set_offline()
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_name = self.scope['url_route']['kwargs']['workgroup_id']
         self.room_group_name = f'chat_{self.room_name}'
+        # logger.debug(f"Attempting to connect to room: {self.room_name}")
 
         # Rejoindre la room
         await self.channel_layer.group_add(
@@ -55,7 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
         if bytes_data:
             # Traiter les données audio
-            workgroup_id = self.room_name.split("_")[-1]
+            workgroup_id = self.room_name
             workgroup = await self.get_workgroup(workgroup_id)
             audio_message = await self.save_audio_message(user, workgroup, bytes_data)
             await self.send_audio_message_to_group(audio_message)
@@ -104,15 +106,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def add_user_to_list(self, user):
-        # Ajouter l'utilisateur à la liste des utilisateurs connectés de la salle de discussion
-        workgroup_id = self.room_name.split("_")[-1]  # Assurez-vous que cela correspond à la structure de vos URL
-        workgroup = WorkGroup.objects.get(id=workgroup_id)
+        try:
+            workgroup_id = int(self.room_name)
+            workgroup = WorkGroup.objects.get(id=workgroup_id)
+        except (ValueError, WorkGroup.DoesNotExist):
+            # Gérer l'erreur si l'ID n'est pas un nombre ou si le WorkGroup n'existe pas
+            logger.error(f"WorkGroup with id {workgroup_id} does not exist.")
+            return []
+
         workgroup.members.add(user)
         return workgroup.members.all()
 
     @database_sync_to_async
     def remove_user_from_list(self, user):
-        workgroup_id = self.room_name.split("_")[-1]  # Assurez-vous que cela correspond à la structure de vos URL
+        workgroup_id = self.room_name # Assurez-vous que cela correspond à la structure de vos URL
         workgroup = WorkGroup.objects.get(id=workgroup_id)
         workgroup.members.remove(user)
         return workgroup.members.all()
@@ -132,7 +139,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_users(self):
         # Récupérer la liste des utilisateurs dans le groupe/room
-        workgroup_id = self.room_name.split("_")[-1]
+        workgroup_id = self.room_name
         workgroup = WorkGroup.objects.get(id=workgroup_id)
         user_list = []
         for user in workgroup.members.all():

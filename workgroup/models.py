@@ -11,6 +11,7 @@ from smart_mentor.models import OpenAIAssistant
 
 class WorkGroup(models.Model):
     name = models.CharField(max_length=50)
+    with_assistant = models.BooleanField(default=False)
     description = models.TextField(max_length=200, blank=True)
     avatar = models.ImageField(upload_to='avatars_workgroup/', blank=True)
     members = models.ManyToManyField(User, through='WorkGroupMember', related_name='invited_to_workgroups')
@@ -18,7 +19,7 @@ class WorkGroup(models.Model):
     assistants = models.ManyToManyField(OpenAIAssistant, blank=True, related_name='workgroups')
 
 class WorkGroupMember(models.Model):
-    status = models.CharField(max_length=20, choices=[('invited', 'Invited'), ('accepted', 'Accepted'), ('refused', 'Refused')])
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('denied', 'Denied')])
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     workgroup = models.ForeignKey(WorkGroup, on_delete=models.CASCADE)
     # Vous pouvez ajouter d'autres champs si nécessaire
