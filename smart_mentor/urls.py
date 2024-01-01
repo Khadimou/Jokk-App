@@ -11,6 +11,7 @@ router.register(r'messages', views.MessageViewSet)
 
 urlpatterns = [
     path('login/', views.login_view, name='login'),
+    path('clear-chat/', views.clear_chat, name='clear_chat'),
     path('api/', include(router.urls)),
     path('api/search-users/', SearchUsersAPIView.as_view(), name='search-users'),
     path('api/send_message/', views.send_message, name='send_message'),

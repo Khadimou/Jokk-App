@@ -200,11 +200,19 @@
             <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form|crispy }}
+
+                <!-- Ajoutez ce champ pour le nom de l'assistant -->
+                <div class="form-group">
+                    <label for="assistant_name">{% trans 'Enter Assistant Name:' %}</label>
+                    <input type="text" class="form-control" name="assistant_name" id="assistant_name" placeholder="{% trans 'Enter Assistant Name' %}" required>
+                </div>
+
                 <input type="hidden" name="create_with_assistant" value="true">
                 <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
             </form>
         </div>
     </div>
+
 
 {% endblock %}
 
@@ -263,19 +271,6 @@
             }
             return cookieValue;
         }
-
-       {% comment %} var socket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
-
-        socket.onmessage = function(e) {
-            var data = JSON.parse(e.data);
-            if (data.notifications) {
-                data.notifications.forEach(function(notification) {
-                    // Affichez la notification à l'utilisateur
-                    console.log(notification.title, notification.body);
-                });
-            }
-        };{% endcomment %}
-
 
     </script>
 

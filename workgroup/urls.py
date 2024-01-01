@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path('revision_group/',views.revision_group,name='revision_group'),
+    path('assistant-endpoint/<int:workgroup_id>/', views.assistant_endpoint, name='assistant_endpoint'),
     path('search',views.search_view,name='search'),
     path('send_invitation/', views.send_invitation, name='send_invitation'),
     path('get-notifications/', views.get_notifications, name='get-notifications'),

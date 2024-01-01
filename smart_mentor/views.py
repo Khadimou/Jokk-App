@@ -14,8 +14,8 @@ from .models import Profile, OpenAIAssistant
 from .utils import scrape_website, text_to_pdf, upload_to_openai, create_chat_thread, process_message_with_citations, \
     transcribe_file, create_assistant
 import os
-import openai
-from django.http import JsonResponse
+import docx
+import PyPDF2
 from django.contrib.auth import login, logout
 from .forms import SignUpForm, ProfileForm
 from openai import OpenAI
@@ -34,6 +34,21 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 import os
 
+def handle_text_file(file_path):
+    with open(file_path, 'r') as file:
+        return file.read()
+
+def handle_docx_file(file_path):
+    doc = docx.Document(file_path)
+    return "\n".join([paragraph.text for paragraph in doc.paragraphs])
+
+def handle_pdf_file(file_path):
+    with open(file_path, 'rb') as file:
+        reader = PyPDF2.PdfFileReader(file)
+        text = ""
+        for page_num in range(reader.numPages):
+            text += reader.getPage(page_num).extractText()
+        return text
 def scrape_view(request):
     context = {'file_id': None}
     if request.method == "POST":
@@ -55,14 +70,19 @@ def scrape_view(request):
             # Determine the file type
             file_type, _ = mimetypes.guess_type(uploaded_file_path)
 
+            text_content = ""
             if file_type.startswith('audio') or file_type.startswith('video'):
-                # It's an audio or video file, transcribe it
                 text_content = transcribe_file(uploaded_file_path)
                 pdf_path = text_to_pdf(text_content, "transcribed_content.pdf")
-            else:
-                # It's not an audio or video file, process it as a text file
-                # (Or handle other file types as necessary)
-                pdf_path = text_to_pdf(uploaded_file_path, "uploaded_content.pdf")
+            elif file_type in ['application/pdf']:
+                text_content = handle_pdf_file(uploaded_file_path)
+                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
+            elif file_type in ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+                text_content = handle_docx_file(uploaded_file_path)
+                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
+            elif file_type in ['text/plain']:
+                text_content = handle_text_file(uploaded_file_path)
+                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
 
             # Upload the PDF to OpenAI
             file_id = upload_to_openai(pdf_path)
@@ -73,10 +93,16 @@ def scrape_view(request):
             os.remove(pdf_path)
 
     return render(request, 'smart_mentor/scrape.html', context)
-
 @csrf_exempt
 def chat_view(request):
     file_id = request.GET.get('file_id')
+    assistant_name = request.GET.get('assistant_name')
+    context = {'file_id': file_id, 'error': None, 'messages': request.session.get('messages', [])}
+    # Check if an assistant with this name already exists
+    if OpenAIAssistant.objects.filter(name=assistant_name).exists():
+        context['error'] = 'An assistant with this name already exists. Please choose a different name.'
+        return render(request, 'smart_mentor/scrape.html', context)
+
     messages = request.session.get('messages', [])
     context = {'error': None, 'response': None, 'messages': messages, 'file_id': file_id}
 
@@ -99,7 +125,7 @@ def chat_view(request):
                 assistant_id = assistant.assistant_id
             except OpenAIAssistant.DoesNotExist:
                 # If no assistant exists for this file_id, create a new one
-                assistant_id = create_assistant(file_id)
+                assistant_id = create_assistant(file_id,assistant_name)
                 # Note: create_assistant function should save the new assistant in the database
 
             run = client.beta.threads.runs.create(
@@ -184,7 +210,18 @@ def chat_view(request):
             context['error'] = f"An error occurred: {str(e)}"
 
     return render(request, 'smart_mentor/chat.html', context)
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
+def clear_chat(request):
+    if request.method == 'POST':
+        # Logique pour effacer les messages
+        request.session['messages'] = []
+        return JsonResponse({'status': 'success'})
+    else:
+        # Assurez-vous de renvoyer une réponse même si la méthode n'est pas POST
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def home(request):
     context = {}

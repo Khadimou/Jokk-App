@@ -155,11 +155,20 @@
                 {% endif %}
 
             </div>
-            <input type="text" class="form-control" name="message" id="message" placeholder="{% trans 'Type a message' %}">
-            <button type="submit" class="btn btn-secondary btn-send-message" name="chat">
-                <i class="fas fa-paper-plane"></i> <!-- Icône FontAwesome pour un avion en papier -->
-                {% trans 'Send' %}
-            </button>
+            <!-- Champ de saisie avec marge -->
+            <input type="text" class="form-control" name="message" id="message" placeholder="{% trans 'Type a message' %}" style="margin-bottom: 10px;">
+            <!-- Conteneur pour les boutons avec style Flex -->
+            <div class="button-container" style="display: flex; justify-content: space-between;">
+                <!-- Bouton pour effacer les messages -->
+                <button type="button" class="btn btn-danger" id="clear-chat">
+                    {% trans 'Clear Chat' %}
+                </button>
+                <!-- Bouton d'envoi de message -->
+                <button type="submit" class="btn btn-secondary btn-send-message" name="chat">
+                    <i class="fas fa-paper-plane"></i>
+                    {% trans 'Send' %}
+                </button>
+            </div>
         </form>
         {% if response %}
             <div class="alert alert-success" role="alert">
@@ -192,5 +201,43 @@
         // Scroll to the bottom of the chat box
         var chatBox = document.getElementById("chat-box");
         chatBox.scrollTop = chatBox.scrollHeight;
+        var currentLanguage = "{{ request.LANGUAGE_CODE }}";
+
+
+        document.getElementById('clear-chat').addEventListener('click', function() {
+            const url = `/${currentLanguage}/clear-chat/`;
+            // Requête AJAX pour effacer les messages côté serveur
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'), // Assurez-vous d'inclure le jeton CSRF
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        // Effacer les messages du chat-box côté client
+                        document.getElementById('chat-box').innerHTML = '';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        // Fonction pour obtenir le cookie CSRF (si ce n'est pas déjà fait)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
 {% endblock %}

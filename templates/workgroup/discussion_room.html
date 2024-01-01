@@ -8,19 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <style>
-        input, button {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            height: 100%;
-        }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
 
         .online-user {
             background-color: #333333; /* Vert pour indiquer qu'ils sont en ligne */
@@ -47,17 +35,7 @@
             margin-right: 10px;
         }
 
-        .chat-message {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: white;
-            color: #e0e0e0;
-            border-radius: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            max-width: 75%;
-        }
+
 
         .message-outgoing {
             align-self: flex-end;
@@ -91,12 +69,14 @@
             grid-template-rows: auto 50px; /* Hauteur flexible pour le chat-log et hauteur fixe pour la zone de saisie */
             height: 100vh;
             width: 100%;
-            background-color: aliceblue;
+            background-color: white;
+            flex-direction: column;
         }
 
         .workgroup-members {
             grid-row: 1 / span 2; /* S'étend sur les deux lignes de la grille */
-            background-color: #f8f9fa;
+            background-color: #2c2f33;
+            color: white;
             border-right: 1px solid #ddd;
             overflow-y: auto;
             display: flex;
@@ -112,12 +92,29 @@
             padding: 10px;
         }
 
+        .chat-message {
+            margin-bottom: 15px; /* Espacement entre les messages */
+        }
+
+        /* Si vous souhaitez spécifiquement cibler les messages de l'assistant pour une marge différente */
+        .chat-message.assistant-message {
+            margin-bottom: 20px; /* Espacement plus grand pour les messages de l'assistant */
+        }
+
+        /* Si vous souhaitez spécifiquement cibler les messages des utilisateurs pour une marge différente */
+        .chat-message.user-message {
+            margin-bottom: 10px; /* Espacement spécifique pour les messages des utilisateurs */
+        }
+
         .chat-message-input-container {
+            position: relative;
             grid-column: 2; /* Positionne la zone de saisie dans la deuxième colonne */
             display: flex;
             align-items: center; /* Centre les éléments verticalement */
             padding: 0 15px;
-            background-color: aliceblue;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            margin-top: auto;
         }
 
         #chat-message-input {
@@ -147,6 +144,8 @@
 
         #chat-leave {
             background-color: #dc3545;
+            position: absolute;
+            right: 10px;
         }
 
         #chat-leave:hover {
@@ -182,46 +181,183 @@
         .btn-microphone i {
             font-size: 1.5em; /* Taille de l'icône */
         }
+        /* Adaptations pour les petits écrans */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column-reverse; /* Place la zone de saisie en bas sur les mobiles */
+            }
+        }
 
+        /* Vos styles existants ... */
 
+        .suggestions-container {
+            position: absolute;
+            bottom: 60px;
+            left: 50%; /* Centrer le conteneur */
+            transform: translateX(-50%); /* Décaler le conteneur pour le centrer exactement */
+            {#width: calc(100% - 10px); /* Ajuster la largeur en soustrayant 250px */#}
+            background: #f7f7f7;
+            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            z-index: 10;
+            {#max-width: 700px; /* Vous pouvez définir une largeur maximale si nécessaire */#}
+        }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .toggle-suggestions, .close-suggestions {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .toggle-suggestions:hover, .close-suggestions:hover {
+            background: #e0e0e0;
+        }
+
+        .suggestions-list {
+            list-style: none; /* Enlever les puces de la liste */
+            margin: 0; /* Enlever les marges par défaut */
+            padding: 0; /* Enlever le padding par défaut */
+            max-height: 200px; /* Exemple de hauteur max */
+            overflow-y: auto;
+            {#display: none; /* Cacher par défaut */#}
+        }
+
+        .suggestions-list li {
+            padding: 5px 10px; /* Espacement pour chaque élément de la liste */
+            border-radius: 4px; /* Arrondir les coins */
+            margin-bottom: 5px; /* Espacement entre les éléments de la liste */
+            cursor: pointer; /* Indiquer que les éléments sont cliquables */
+            transition: background-color 0.3s ease; /* Transition pour l'effet de survol */
+            color: #28a745;
+        }
+
+        .suggestions-list li:hover {
+            background-color: #e6f9e6; /* Changer la couleur de fond au survol */
+        }
+
+        /* Style pour le message d'attente */
+        .message-waiting {
+            font-style: italic;
+            color: #888888; /* Couleur de texte grise pour le message d'attente */
+            margin: 10px 0; /* Ajoutez un peu d'espace autour du message d'attente */
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="chat-container">
-        <!-- Zone de chat principal -->
-        <!-- Conteneur pour les membres du groupe de travail -->
-        <div id="workgroup-members" class="workgroup-members">
-            <h3>{% trans 'Workgroup Members' %}</h3>
-            <div id="members-list" class="members-list">
-                <!-- Les membres seront ajoutés ici par le WebSocket -->
+
+        <div class="chat-container">
+
+            <!-- Conteneur pour les membres du groupe de travail -->
+            <div id="workgroup-members" class="workgroup-members">
+                <h3>{% trans 'Workgroup Members' %}</h3>
+                <div id="members-list" class="members-list">
+                    <!-- Exemple de membre du groupe de travail -->
+
+                </div>
             </div>
-        </div>
-        <!-- Log des messages de chat -->
-        <div id="chat-log" class="chat-log">
-            <!-- Les messages et les utilisateurs seront ajoutés ici par le WebSocket -->
-        </div>
-        <!-- Zone de saisie des messages -->
-        <div class="chat-message-input-container">
-            <input id="chat-message-input" type="text" placeholder="{% trans 'Type your message here...' %}" autocomplete="off">
-            <button id="microphone-button" class="btn btn-microphone" aria-label="Record Audio">
-                <i class="fas fa-microphone"></i>
-            </button>
-            <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
+
+            <!-- Log des messages de chat -->
+            <div id="chat-log" class="chat-log">
+                <!-- Les messages et les utilisateurs seront ajoutés ici par le WebSocket -->
+            </div>
+
+            <!-- Zone de saisie des messages -->
+            <div class="chat-message-input-container">
+                <input id="chat-message-input" type="text" placeholder="{% trans 'Type your message here...' %}" autocomplete="off">
+
+                <!-- Icône du microphone et bouton d'envoi -->
+                <button id="microphone-button" class="btn btn-microphone" aria-label="Record Audio">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
+            </div>
+
+            <!-- Suggestions list -->
+            {% if assistant %}
+                <div id="suggestions" class="suggestions-container">
+                    <div class="suggestions-header">
+                        <span>{% trans 'Questions for requesting the assistant: (You should always start with the key word assistant)' %}</span>
+                        <button id="toggle-suggestions" class="toggle-suggestions">-</button>
+                        <button id="close-suggestions" class="close-suggestions">x</button>
+                    </div>
+                    <ul class="suggestions-list">
+
+                        <li onclick="insertText('{{ 'Assistant, Can you suggest some questions based on the data, to be answered to assess my understanding?'|addslashes }}')">
+                            {% trans 'Assistant, Can you suggest some questions based on the data, to be answered to assess my understanding?' %}
+                        </li>
+                        <li onclick="insertText('{{ 'Assistant Can you give me a brief summary of what the data is about ?'|addslashes }}')">
+                            {% trans 'Assistant Can you give me a brief summary of what the data is about ?' %}
+                        </li>
+                        <li onclick="insertText('{{ 'Assistant Can you give me some clues to help me solve these questions?'|addslashes }}')">
+                            {% trans 'Assistant Can you give me some clues to help me solve these questions?' %}
+                        </li>
+                        <!-- Add more suggestions here -->
+
+                    </ul>
+                </div>
+            {% endif %}
+
             <!-- Bouton Leave -->
             <button id="chat-leave" class="btn btn-danger" data-redirect-url="{% url 'workgroup_list' %}">
                 {% trans 'Leave' %}
             </button>
 
+
         </div>
 
-    </div>
 {% endblock %}
 
 
 {% block extra_scripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <script>
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const suggestionsContainer = document.getElementById('suggestions');
+            const toggleButton = document.getElementById('toggle-suggestions');
+            const closeButton = document.getElementById('close-suggestions');
+            const suggestionsList = suggestionsContainer.querySelector('.suggestions-list');
+
+            // Réduire ou agrandir le conteneur de suggestions
+            toggleButton.addEventListener('click', () => {
+                const isCollapsed = suggestionsList.style.display === 'none';
+                suggestionsList.style.display = isCollapsed ? 'block' : 'none';
+                toggleButton.textContent = isCollapsed ? '-' : '+';
+            });
+
+            // Fermer le conteneur de suggestions
+            closeButton.addEventListener('click', () => {
+                suggestionsContainer.style.display = 'none';
+            });
+        });
+
+        // Function to insert text into the message input field
+    function insertText(text) {
+        var input = document.getElementById('chat-message-input'); // Correction ici
+        if (input) {
+            input.value = text;
+            var form = document.getElementById('chat-form');
+            if (form) {
+                form.submit(); // Envoyer le formulaire si vous le souhaitez
+            }
+        } else {
+            console.error("Input element not found");
+        }
+    }
+
+    const workgroup_id = "{{ workgroup_id }}";
+    {#console.log('ID du groupe de travail:', workgroup_id);#}
+
     // Fonction pour générer une couleur en fonction du nom d'utilisateur
     function getUsernameColor(username) {
         // Hash le nom d'utilisateur
@@ -241,6 +377,7 @@
 
     const chatRoomId = "{{ workgroup_id }}";
     const userId = "{{ request.user.id }}";
+    var currentLanguage = "{{ request.LANGUAGE_CODE }}";
 
 
     // Ajoutez ceci pour charger la liste des utilisateurs connectés
@@ -251,36 +388,116 @@
         div.id = 'user-list';
         return div;
     }
+    // Fonction pour obtenir le cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function queryAssistant(message, assistantName) {
+        const url = `/${currentLanguage}/assistant-endpoint/${workgroup_id}/`;
+        {#const url = `/${currentLanguage}/assistant-endpoint/`;#}
+        fetch(url, { // Assurez-vous que l'URL est correcte
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                message: message,
+                assistant_name: assistantName  // Envoyer le nom de l'assistant
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayAssistantMessage("{{ assistant.name }}", "{{ assistant_user.profile.avatar.url }}", data.response);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Utilisez cette fonction pour afficher le message de l'assistant dans le chat
+    function displayAssistantMessage(assistantName, assistantAvatarUrl, message) {
+        const chatLog = document.querySelector('#chat-log');
+        const waitingMessage = chatLog.querySelector('.message-waiting');
+        if (waitingMessage) {
+            chatLog.removeChild(waitingMessage);
+        }
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('chat-message', 'message-incoming');
+
+
+        // Créer et ajouter l'avatar de l'assistant
+        const avatarImage = document.createElement('img');
+        avatarImage.src = assistantAvatarUrl;
+        avatarImage.alt = assistantName;
+        avatarImage.classList.add('avatar');
+        messageContainer.appendChild(avatarImage);
+
+
+        // Créer et ajouter le nom de l'assistant
+        const usernameElement = document.createElement('span');
+        usernameElement.textContent = assistantName + ': ';
+        usernameElement.classList.add('message-username');
+        messageContainer.appendChild(usernameElement);
+
+        // Ajouter le message
+        messageContainer.appendChild(document.createTextNode(message));
+
+        chatLog.appendChild(messageContainer);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+        // Fonction pour envoyer un message via WebSocket et vérifier s'il commence par "assistant"
+        function sendMessageAndCheckForAssistant(messageInputDom) {
+            const message = messageInputDom.value;
+            if (chatSocket.readyState === WebSocket.OPEN) {
+                // Envoi du message au WebSocket
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'user_id': userId
+                }));
+
+                messageInputDom.value = '';
+
+                // Si le message est pour l'assistant, affichez le message d'attente
+                if (message.toLowerCase().startsWith('assistant')) {
+                    displayWaitingMessage();
+                    queryAssistant(message);
+                }
+            } else {
+                console.error("WebSocket is not open. Cannot send message.");
+            }
+        }
+
+        // Fonction pour afficher le message d'attente
+        function displayWaitingMessage() {
+            const chatLog = document.querySelector('#chat-log');
+            const waitingMessageContainer = document.createElement('div');
+            waitingMessageContainer.classList.add('chat-message', 'message-waiting');
+            waitingMessageContainer.textContent = 'Waiting for the Assistant to process...';
+            chatLog.appendChild(waitingMessageContainer);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
 
     document.querySelector('#chat-message-submit').onclick = function(e) {
-        if (chatSocket.readyState === WebSocket.OPEN) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message,
-                'user_id': userId  // Assurez-vous d'envoyer l'ID de l'utilisateur avec le message
-            }));
-            messageInputDom.value = '';
-        } else {
-            console.error("WebSocket is not open. Cannot send message.");
-            // Vous pouvez choisir de gérer cette situation différemment, par exemple en informant l'utilisateur.
-        }
+        const messageInputDom = document.querySelector('#chat-message-input');
+        sendMessageAndCheckForAssistant(messageInputDom);
     };
 
     document.querySelector('#chat-message-input').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault(); // Empêche le comportement par défaut de la touche "Entrée"
-            if (chatSocket.readyState === WebSocket.OPEN) {
-                const messageInputDom = this;
-                const message = messageInputDom.value;
-                chatSocket.send(JSON.stringify({
-                    'message': message,
-                    'user_id': userId
-                }));
-                messageInputDom.value = '';
-            } else {
-                console.error("WebSocket is not open. Cannot send message.");
-            }
+            sendMessageAndCheckForAssistant(this);
         }
     });
 

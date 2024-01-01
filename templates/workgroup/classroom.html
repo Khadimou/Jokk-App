@@ -211,13 +211,11 @@
                 </li>
             {% endfor %}
 
-            {% if workgroup.assistants.all %}
-                {% for assistant in workgroup.assistants.all %}
-                    <li style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <img src="{{ assistant.profile.avatar.url }}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
-                        <span style="color: #4CAF50;">{{ assistant.name }}</span>
-                    </li>
-                {% endfor %}
+            {% if assistant_name %}
+                <li style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <img src="{{ assistant.profile.avatar.url }}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
+                    <span style="color: #4CAF50;">{{ assistant.name }}</span>
+                </li>
             {% endif %}
         </ul>
 

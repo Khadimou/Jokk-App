@@ -9,10 +9,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 
 from mentoring_app.models import Notification
 from smart_mentor.models import Profile, OpenAIAssistant
+from smart_mentor.utils import create_chat_thread, create_assistant
 from workgroup.forms import RevisionForm
 from workgroup.models import WorkGroup, WorkGroupMember, ChatRoom, UserOnlineStatus
 
@@ -117,8 +118,27 @@ def mark_notification_as_read(request, notification_id):
     except Notification.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Notification not found'})
 
+def get_assistant_for_workgroup(workgroup_id):
+    try:
+        workgroup = WorkGroup.objects.get(id=workgroup_id)
+        # Si le groupe de travail est configuré pour avoir un assistant
+        if workgroup.with_assistant:
+            # Récupérer le premier assistant associé au groupe de travail
+            assistant = workgroup.assistants.first()
+            return assistant
+    except WorkGroup.DoesNotExist:
+        # Gérer le cas où le groupe de travail n'existe pas
+        return None
+
+    return None
+
 def workgroup_detail(request, pk):
     workgroup = get_object_or_404(WorkGroup, pk=pk)
+    assistant_name = None
+    # Supposons que vous ayez une façon de récupérer l'assistant associé au groupe de travail
+    assistant = get_assistant_for_workgroup(pk)
+    if assistant:
+        assistant_name = assistant.name
 
     try:
         member = WorkGroupMember.objects.get(workgroup=workgroup, user=request.user)
@@ -142,6 +162,7 @@ def workgroup_detail(request, pk):
         'is_creator': workgroup.creator == request.user,
         'is_accepted': is_accepted,
         'chat_rooms': chat_rooms,
+        'assistant_name': assistant_name,
     })
 
 @login_required
@@ -151,56 +172,47 @@ def clear_all_notifications(request):
     return JsonResponse({'status': 'success', 'message': 'All notifications cleared.'})
 @login_required
 def create_workgroup(request):
-    # Créer un utilisateur pour l'assistant
-    assistant_user, created = User.objects.get_or_create(
-        username='assistant',  # Un identifiant unique
-        defaults={
-            'first_name': 'OpenAI',
-            'last_name': 'Assistant',
-            # Autres champs nécessaires
-        }
-    )
-
-    if created or not hasattr(assistant_user, 'profile'):
-        # Si l'utilisateur assistant est nouvellement créé ou n'a pas de profil
-        profile, profile_created = Profile.objects.get_or_create(
-            user=assistant_user,
-            defaults={'avatar': 'avatars_workgroup/assistant_avatar.png'}
-        )
-        if not profile_created:
-            # Si le profil existait déjà, mais doit être mis à jour
-            profile.avatar = 'avatars_workgroup/assistant_avatar.png'
-            profile.save()
-
+    assistant_user = None
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)
         if form.is_valid():
             workgroup = form.save(commit=False)
             workgroup.creator = request.user
-            workgroup.with_assistant = 'create_with_assistant' in request.POST
             workgroup.save()
             form.save_m2m()
 
             # Vérifier si l'assistant doit être ajouté
-            if  workgroup.with_assistant :
-                # Récupérer l'utilisateur assistant
-                assistant_user = User.objects.get(username='assistant')
+            if 'create_with_assistant' in request.POST:
+                assistant_name = request.POST.get('assistant_name', '').strip()
+                # Récupérer ou créer l'assistant utilisateur
+                assistant_user, _ = User.objects.get_or_create(username=assistant_name)
+                # Vérifiez si l'assistant est déjà membre du groupe
+                if not WorkGroupMember.objects.filter(user=assistant_user, workgroup=workgroup).exists():
+                    WorkGroupMember.objects.create(
+                        user=assistant_user,
+                        workgroup=workgroup,
+                        status='accepted'
+                    )
 
-                # Ajouter l'assistant en tant que membre du groupe
-                WorkGroupMember.objects.create(
-                    user=assistant_user,
-                    workgroup=workgroup,
-                    status='accepted'  # ou 'pending', selon la logique de votre application
-                )
+                # Récupérer l'assistant par son nom
+                try:
+                    assistant = OpenAIAssistant.objects.get(name=assistant_name)
+                    # Associer l'assistant au groupe de travail
+                    workgroup.assistants.add(assistant)
+                except OpenAIAssistant.DoesNotExist:
+                    # Gérer le cas où l'assistant n'existe pas
+                    messages.error(request, f"The assistant '{assistant_name}' does not exist.")
+                    return redirect('revision_group')
 
+            messages.success(request, 'Working group successfully set up.')
             return redirect('workgroup_detail', pk=workgroup.pk)
+        else:
+            messages.error(request, 'Error when creating the workgroup.')
 
     else:
         form = RevisionForm()
 
-    return render(request, 'workgroup/create_workgroup.html', {'form': form,'assistant': assistant_user})
-
-
+    return render(request, 'workgroup/create_workgroup.html', {'form': form, 'assistant': assistant_user})
 
 def edit_workgroup(request, pk):
     workgroup = get_object_or_404(WorkGroup, pk=pk)
@@ -335,6 +347,9 @@ def chat_room(request, chat_room_id):
     workgroup = chat_room.workgroup  # Accès au WorkGroup associé
 
     workgroup_id = workgroup.id  # Récupération de l'ID du WorkGroup
+    # Récupérer le premier assistant associé au WorkGroup, si disponible
+    assistant = workgroup.assistants.first() if workgroup.assistants.exists() else None
+    assistant_user, _ = User.objects.get_or_create(username=assistant.name)
 
     # Vérifier si l'utilisateur est membre du groupe de travail
     if not workgroup.members.filter(id=request.user.id).exists() and request.user != workgroup.creator:
@@ -344,7 +359,7 @@ def chat_room(request, chat_room_id):
     online_status.set_online()
 
     members = workgroup.members.all()
-    return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room, 'members': members, 'workgroup_id': workgroup_id})
+    return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room, 'members': members, 'workgroup_id': workgroup_id,'assistant': assistant, 'assistant_user':assistant_user})
 
 @login_required
 def join_workgroup(request, workgroup_id):
@@ -379,4 +394,116 @@ def join_workgroup(request, workgroup_id):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
+from openai import OpenAI
+import os
+import datetime
+import time
 
+
+client = OpenAI(api_key = os.environ.get('OPENAI_API_KEY'))
+@require_http_methods(["POST"])
+def assistant_endpoint(request, workgroup_id):
+
+    if request.method == "POST":
+        data = json.loads(request.body.decode('utf-8'))
+        user_message = data.get('message')
+
+        # Récupérez l'assistant depuis la base de données en utilisant le nom
+        try:
+            assistant_name = None
+            if workgroup_id:
+                workgroup = WorkGroup.objects.get(id=workgroup_id)
+                # Supposons que vous vouliez récupérer le premier assistant
+                assistant = workgroup.assistants.first()
+                if assistant:
+                    assistant_name = assistant.name
+            #print(assistant_name,user_message)
+            assistant = OpenAIAssistant.objects.get(name=assistant_name)
+        except OpenAIAssistant.DoesNotExist:
+            return JsonResponse({'error': 'Assistant not found'}, status=404)
+
+        file_id = assistant.file_id
+        thread_id = None
+
+        if not thread_id:
+            thread_id = create_chat_thread(file_id)
+            request.session['thread_id'] = thread_id
+
+        try:
+            # Send user message to the thread
+            client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_message)
+
+            # Trigger the assistant's response
+            # Check if an assistant for this file_id already exists
+            try:
+                assistant_id = assistant.assistant_id
+            except OpenAIAssistant.DoesNotExist:
+                # If no assistant exists for this file_id, create a new one
+                assistant_id = create_assistant(file_id)
+                # Note: create_assistant function should save the new assistant in the database
+
+            run = client.beta.threads.runs.create(
+                assistant_id=assistant_id,
+                thread_id=thread_id
+            )
+
+
+            # Code to wait for run completion
+            # print(run.model_dump_json(indent=4))
+
+            while True:
+                # Wait for 5 seconds
+                time.sleep(5)
+
+                # Retrieve the run status
+                run_status = client.beta.threads.runs.retrieve(
+                    thread_id=thread_id,
+                    run_id=run.id
+                )
+                #print(run_status.model_dump_json(indent=4))
+
+                # If run is completed, get messages
+                if run_status.status == 'completed':
+
+                    # Loop through messages and print content based on role
+                    # Convertir les messages en une structure sérialisable
+                    messages = client.beta.threads.messages.list(thread_id=thread_id).data
+                    serializable_messages = [
+                        {
+                            'role': msg.role,
+                            'content': msg.content[0].text.value,
+                            "timestamp": datetime.datetime.fromtimestamp(msg.created_at).strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        for msg in messages
+                    ]
+
+                    # Inverser l'ordre des messages
+                    serializable_messages.reverse()
+
+                    request.session['messages'] = serializable_messages
+
+                    #print(serializable_messages)
+
+                    break
+                else:
+                    print("Waiting for the Assistant to process...")
+                    time.sleep(5)
+
+            # Trouver le dernier message de l'assistant
+            last_assistant_message_content = None
+            for message in reversed(serializable_messages):
+                if message['role'] == 'assistant':
+                    last_assistant_message_content = message['content']
+                    break
+
+            # Vérifier si un message de l'assistant a été trouvé
+            if last_assistant_message_content:
+                return JsonResponse({'response': last_assistant_message_content})
+            else:
+                # Gérer le cas où aucun message de l'assistant n'est trouvé
+                return JsonResponse({'error': 'No assistant message found'}, status=404)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

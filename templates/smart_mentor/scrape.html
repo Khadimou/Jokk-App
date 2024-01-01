@@ -23,7 +23,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding-top: 0; /* Enlève le padding supplémentaire si nécessaire */
         }
 
         /* Styles pour les conteneurs individuels */
@@ -38,6 +37,7 @@
             font-weight: bold;
         }
         h1{
+            margin-top: 35px;
             color: darkolivegreen;
         }
         /* Styles pour les titres et le texte en général */
@@ -49,48 +49,63 @@
 
 {% block content %}
     <div class="centered-container">
-    <h1>{% trans 'Give knowledge to your assistant here then test it with chatting' %}</h1>
-    <div class="container mt-5" style="margin-top: 120px;">
-        <h5 class="card-title">{% trans 'Scrape Website' %}</h5>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="website_url">{% trans 'Enter a website URL:' %}</label>
-                <input type="text" class="form-control" name="website_url" id="website_url" placeholder="{% trans 'Enter URL' %}">
-            </div>
-            <button type="submit" class="btn btn-primary" name="scrape">{% trans 'Feed' %}</button>
-        </form>
+        <h1>{% trans 'Give knowledge to your assistant here then test it with chatting' %}</h1>
+        <div class="container mt-5" style="margin-top: 120px;">
+            <h5 class="card-title">{% trans 'Scrape Website' %}</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="website_url">{% trans 'Enter a website URL:' %}</label>
+                    <input type="text" class="form-control" name="website_url" id="website_url" placeholder="{% trans 'Enter URL' %}">
+                </div>
+                <button type="submit" class="btn btn-primary" name="scrape">{% trans 'Feed' %}</button>
+            </form>
+        </div>
+
+        <!-- Nouveau container pour le bouton de sélection de fichier -->
+        <div class="file-upload-container mt-3">
+            <h5 class="card-title">{% trans 'Upload a file' %}</h5>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="fileInput">{% trans 'Select a file' %}</label>
+                    <input type="file" class="form-control-file" id="fileInput" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary" name="upload">{% trans 'Feed' %}</button>
+            </form>
+        </div>
+
+        <!-- Ajoutez ce formulaire pour sélectionner l'assistant -->
+        <div class="select-assistant-container mt-3">
+            <h5 class="card-title">{% trans 'Select an Assistant' %}</h5>
+            <form action="{% url 'chat' %}" method="get">
+                {% csrf_token %}
+                {% if file_id %}
+                    <div class="form-group">
+                        <label for="assistant_name">{% trans 'Enter Assistant Name:' %}</label>
+                        <input type="text" class="form-control" name="assistant_name" id="assistant_name" placeholder="{% trans 'Enter Assistant Name' %}">
+                    </div>
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <input type="hidden" name="file_id" value="{{ file_id }}">
+                    <button type="submit" class="btn btn-primary">{% trans 'Save and chat with assistant' %}</button>
+                {% else %}
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item">
+                            <a class="page-link" href="#" title="{% trans 'Feed assistant first' %}" onclick="alert('{% trans 'Feed assistant first' %}'); return false;">
+                                {% trans 'Save and chat with assistant' %}
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+
+            </form>
+        </div>
 
     </div>
-
-    <!-- Nouveau container pour le bouton de sélection de fichier -->
-    <div class="file-upload-container mt-3">
-        <h5 class="card-title">{% trans 'Upload a file' %}</h5>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="fileInput">{% trans 'Select a file' %}</label>
-                <input type="file" class="form-control-file" id="fileInput" name="file">
-            </div>
-            <button type="submit" class="btn btn-primary" name="upload">{% trans 'Feed' %}</button>
-        </form>
-    </div>
-    </div>
-    </div>
-
-    {% if file_id %}
-        <form action="{% url 'chat' %}" method="get">
-            <input type="hidden" name="file_id" value="{{ file_id }}">
-            <button type="submit" class="btn btn-link">{% trans 'Chat with smart mentor' %}</button>
-        </form>
-    {% else %}
-        <ul class="pagination justify-content-center">
-            <li class="page-item">
-                <a class="page-link" href="#" title="{% trans 'Feed assistant first' %}" onclick="alert('{% trans 'Feed assistant first' %}'); return false;">
-                    {% trans 'Chat with smart mentor' %}
-                </a>
-            </li>
-        </ul>
-    {% endif %}
-
 {% endblock %}
+

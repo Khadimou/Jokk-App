@@ -51,7 +51,7 @@ def upload_to_openai(filepath):
         response = client.files.create(file=file, purpose="assistants")
     return response.id
 
-def create_assistant(file_id, name="Assistant", description="Assistant capable of answering questions based on provided data.", model="gpt-4-1106-preview"):
+def create_assistant(file_id, name, description="Assistant capable of answering questions based on provided data.", model="gpt-4-1106-preview"):
     assistant = client.beta.assistants.create(
         name=name,
         description=description,
