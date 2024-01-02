@@ -16,12 +16,13 @@ from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SocialNetwork.settings')
 django.setup()
-import workgroup.routing
+
+from workgroup.routing import websocket_urlpatterns
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            workgroup.routing.websocket_urlpatterns
+            websocket_urlpatterns
         )
     ),
 })

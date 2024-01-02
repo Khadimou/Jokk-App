@@ -280,6 +280,15 @@
                     <i class="fas fa-microphone"></i>
                 </button>
                 <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
+                <button id="start-call-button" class="btn btn-success">{% trans 'Start Video Call' %}</button>
+                <button id="join-call" onclick="joinCall()" disabled>{% trans 'Join Call' %}</button>
+
+                <div id="video-call-section" style="display:none;">
+                    <video id="local-video" muted autoplay></video>
+                    <video id="remote-video" autoplay></video>
+                    <button id="end-call-button">End Call</button>
+                </div>
+
             </div>
 
             <!-- Suggestions list -->
@@ -340,6 +349,140 @@
                 suggestionsContainer.style.display = 'none';
             });
         });
+
+        document.getElementById('start-call-button').addEventListener('click', function() {
+            startCall();
+        });
+
+        // Initialisez la connexion WebSocket ici
+        webSocket = new WebSocket(
+            (window.location.protocol === "https:" ? "wss://" : "ws://") +
+            window.location.host + '/ws/chat/workgroup/' + "{{ workgroup_id }}" + '/'
+        );
+
+        function sendData(data) {
+            if (webSocket.readyState === WebSocket.OPEN) {
+                webSocket.send(JSON.stringify(data));
+            } else {
+                console.error("WebSocket is not open.");
+            }
+        }
+
+        let callStarted = false;
+        let localStream;
+        let peerConn;
+
+        webSocket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "call_started") {
+                callStarted = true;
+                document.getElementById("join-call").disabled = false;
+            }
+
+            handleSignallingData(data);
+        };
+
+        // Fonction pour rejoindre un appel
+        function joinCall() {
+            if (callStarted) {
+                sendData({type: "join_call"});
+            }else {
+                console.log("Call has not been started yet.");
+            }
+        }
+
+        // Fonction pour démarrer un appel
+        function startCall() {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    localStream = stream;
+                    document.getElementById("local-video").srcObject = localStream;
+
+                    peerConn = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: "stun:stun.l.google.com:19302" },
+                            // Ajoutez d'autres serveurs STUN/TURN si nécessaire
+                        ]
+                    });
+
+                    peerConn.addStream(localStream);
+
+                    peerConn.ontrack = event => {
+                        document.getElementById("remote-video").srcObject = event.streams[0];
+                    };
+
+                    peerConn.onicecandidate = event => {
+                        if (event.candidate) {
+                            sendData({
+                                type: "store_candidate",
+                                candidate: event.candidate
+                            });
+                        }
+                    };
+
+                    peerConn.createOffer()
+                        .then(offer => {
+                            peerConn.setLocalDescription(offer);
+                            sendData({
+                                type: "store_offer",
+                                offer: offer
+                            });
+                        })
+                        .catch(error => console.log(error));
+                })
+                .catch(error => console.log(error));
+            callStarted = true;
+            document.getElementById("join-call").disabled = false;
+            // Envoyer un message pour informer les autres utilisateurs que l'appel a commencé
+            sendData({ type: "call_started" });
+        }
+
+        function muteVideo() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                }
+            }
+        }
+
+        function muteAudio() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                }
+            }
+        }
+
+        function handleSignallingData(data) {
+            switch (data.type) {
+                case "offer":
+                    handleOffer(data.offer);
+                    break;
+                case "answer":
+                    peerConn.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    break;
+                case "candidate":
+                    peerConn.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    break;
+                // Ajoutez d'autres cas si nécessaire
+            }
+        }
+
+        function handleOffer(offer) {
+            peerConn.setRemoteDescription(new RTCSessionDescription(offer));
+            peerConn.createAnswer()
+                .then(answer => {
+                    peerConn.setLocalDescription(answer);
+                    sendData({
+                        type: "send_answer",
+                        answer: answer
+                    });
+                })
+                .catch(error => console.log(error));
+        }
 
         // Function to insert text into the message input field
     function insertText(text) {

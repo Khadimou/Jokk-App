@@ -494,7 +494,7 @@
                     }
                     notificationElement.textContent = notification.title;
 
-                    if (notification.type === 'invitation') {
+                   {% comment %} if (notification.type === 'invitation') {
                         // Gérer les notifications d'invitation
                         notificationElement.href = `/notifications/${notification.id}/`;
                         notificationElement.addEventListener('click', async function(e) {
@@ -502,12 +502,21 @@
                             await markAsRead(notification.id);
                             window.location.href = this.href;  // Rediriger vers le détail de la notification
                         });
-                    } else if (notification.type === 'join_request') {
+                    } else{% endcomment %}
+                        if (notification.type === 'join_request') {
                         // Gérer les demandes d'adhésion
                         notificationElement.addEventListener('click', async function(e) {
                             e.preventDefault();
                             await markAsRead(notification.id);
                             showNotificationDetails(notification); // Afficher le modal
+                        });
+                    } else {
+                        // Gérer les notifications pour les rooms lancés
+                        notificationElement.href = `/workgroups/${notification.workgroup_id}/`;
+                        notificationElement.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            await markAsRead(notification.id);
+                            window.location.href = this.href;  // Rediriger vers la page de détail du workgroup
                         });
                     }
 

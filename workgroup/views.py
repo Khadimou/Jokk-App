@@ -57,7 +57,8 @@ def get_notifications(request):
         'title': notification.title,
         'body': notification.body,
         'read': notification.read,  # Ajoutez l'état de lecture
-        'type': notification.type
+        'type': notification.type,
+        'workgroup_id': notification.workgroup_id if notification.workgroup else None
     } for notification in notifications]
 
     unread_count = notifications.filter(read=False).count()  # Compter uniquement les notifications non lues
@@ -74,7 +75,7 @@ def send_invitation(request):
         workgroup_id = data['workgroup_id']  # Assurez-vous de passer l'ID du groupe de travail
         workgroup = WorkGroup.objects.get(id=workgroup_id)
 
-        # Créer une instance WorkGroupMember avec le statut 'invited'
+        # Créer une instance WorkGroupMember avec le statut 'pending'
         WorkGroupMember.objects.create(
             user=user,
             workgroup=workgroup,
@@ -337,9 +338,29 @@ def refuse_invitation(request, pk):
 
 @login_required
 def create_chat_room(request, workgroup_id):
+    # Récupérer le workgroup
     workgroup = get_object_or_404(WorkGroup, pk=workgroup_id, creator=request.user)
+
+    # Créer la chat room
     ChatRoom.objects.create(workgroup=workgroup)
+
+    # Parcourir tous les membres du workgroup ayant le statut 'accepted'
+    members = WorkGroupMember.objects.filter(workgroup=workgroup, status='accepted')
+    for member in members:
+        # Ne pas notifier le créateur de la chat room
+        if member.user != request.user:
+            Notification.objects.create(
+                recipient=member.user,
+                workgroup=workgroup,
+                title=f'New Chat Room in {workgroup.name}',
+                body=f'A new chat room has been created in the workgroup "{workgroup.name}".',
+                read=False,
+                type='room_launched'
+            )
+
+    # Rediriger vers la page de détail du workgroup
     return redirect('workgroup_detail', pk=workgroup_id)
+
 
 @login_required
 def chat_room(request, chat_room_id):
@@ -349,7 +370,9 @@ def chat_room(request, chat_room_id):
     workgroup_id = workgroup.id  # Récupération de l'ID du WorkGroup
     # Récupérer le premier assistant associé au WorkGroup, si disponible
     assistant = workgroup.assistants.first() if workgroup.assistants.exists() else None
-    assistant_user, _ = User.objects.get_or_create(username=assistant.name)
+    assistant_user = None
+    if workgroup.with_assistant:
+        assistant_user, _ = User.objects.get_or_create(username=assistant.name)
 
     # Vérifier si l'utilisateur est membre du groupe de travail
     if not workgroup.members.filter(id=request.user.id).exists() and request.user != workgroup.creator:
@@ -360,6 +383,7 @@ def chat_room(request, chat_room_id):
 
     members = workgroup.members.all()
     return render(request, 'workgroup/discussion_room.html', {'chat_room': chat_room, 'members': members, 'workgroup_id': workgroup_id,'assistant': assistant, 'assistant_user':assistant_user})
+
 
 @login_required
 def join_workgroup(request, workgroup_id):
