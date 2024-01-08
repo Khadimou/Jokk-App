@@ -1,0 +1,70 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        .assistant-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .assistant-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 300px;
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .assistant-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .assistant-info {
+            flex-grow: 1;
+        }
+
+        .assistant-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .assistant-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+
+    <div class="assistant-container">
+        {% for assistant in assistants %}
+            <div class="assistant-card">
+                <img src="{{ assistant.avatar_url|default:'/static/images/assistant_avatar.png' }}" alt="Avatar" class="assistant-avatar">
+                <div class="assistant-info">
+                    <h3>{{ assistant.name }}</h3>
+                    <p>{{ assistant.description }}</p>
+                    <!-- Vous pouvez ajouter d'autres détails ici -->
+                </div>
+            </div>
+        {% empty %}
+            <p>{% trans 'No Assistant has been created yet!' %}</p>
+        {% endfor %}
+    </div>
+
+{% endblock %}

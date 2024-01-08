@@ -1,0 +1,14 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% trans 'Cancel subscription' %}</h1>
+    <p>{% trans 'Are you sure you want to cancel your subscription?' %}</p>
+
+    <form method="post" action="{% url 'cancel_subscription' %}">
+        {% csrf_token %}
+        <input type="submit" value="Confirm cancellation">
+    </form>
+
+    <a href="{% url 'account_settings' %}">{% trans 'Back to account settings' %}</a>
+{% endblock %}

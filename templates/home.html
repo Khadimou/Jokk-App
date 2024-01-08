@@ -266,6 +266,18 @@
 
         <!-- Onglets Notifications et Utilisateur regroupés -->
         <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- Bouton Produits -->
+            {% if not request.user.appuser.is_premium %}
+                <a href="{% url 'product_page' %}" title="{% trans 'Premium' %}" style="color: white; text-decoration: none;">
+                    <i class="fa fa-shopping-cart fa-lg"></i> <!-- Icône du chariot -->
+                    {% trans 'Premium' %}
+                </a>
+            {% else %}
+                <a href="{% url 'my_assistants' %}" title="{% trans 'Assistants' %}" style="color: white; text-decoration: none;">
+                    {% trans 'My Assistants' %}
+                </a>
+            {% endif %}
+
             <a href="{% url 'messaging' %}" title="{% trans 'Messages' %}" style="color: white;">
                 <i class="fas fa-comments fa-lg"></i>
             </a>
@@ -316,6 +328,7 @@
     <main>
     <!-- Barre de recherche -->
     <div class="search-container" style="margin-bottom: 150px;">
+        <p>{% trans 'Find users or workgroups' %}</p>
         <form action="{% url 'searching' %}" method="get">
             <input type="text" placeholder="{% trans 'Search...' %}" name="search">
             <button type="submit">{% trans 'Search' %}</button>
@@ -335,7 +348,9 @@
 
         <div class="button-container">
             <img src="{% static 'images/switch.png' %}" loading="lazy" width="300px" alt="{% trans 'Smart Assistant' %}">
-            <a href="{% url 'scrape' %}" class="button" id="smart-assistant">{% trans 'Smart Assistant' %}</a>
+            <a href="{% url 'scrape' %}" class="button" id="smart-assistant" {% if not request.user.appuser.is_premium %}data-premium="false"{% endif %}>
+                {% trans 'Smart Assistant' %}
+            </a>
         </div>
     </div>
 

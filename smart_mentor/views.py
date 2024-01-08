@@ -4,6 +4,7 @@ import mimetypes
 import time
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
@@ -32,7 +33,14 @@ from .forms import LoginForm
 
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from PyPDF2 import PdfReader
 import os
+
+
+def my_assistants(request):
+    assistants = OpenAIAssistant.objects.filter(user=request.user)
+    return render(request, 'smart_mentor/my_assistants.html', {'assistants': assistants})
+
 
 def handle_text_file(file_path):
     with open(file_path, 'r') as file:
@@ -44,13 +52,18 @@ def handle_docx_file(file_path):
 
 def handle_pdf_file(file_path):
     with open(file_path, 'rb') as file:
-        reader = PyPDF2.PdfFileReader(file)
+        reader = PdfReader(file)
         text = ""
-        for page_num in range(reader.numPages):
-            text += reader.getPage(page_num).extractText()
+        for page in reader.pages:
+            text += page.extract_text()
         return text
+
 def scrape_view(request):
     context = {'file_id': None}
+    if not request.user.appuser.is_premium:
+        return redirect('product_page')
+        # Option 2: Afficher un message d'erreur
+        #return HttpResponse("This feature is reserved for premium users.", status=403)
     if request.method == "POST":
         # Handle URL scraping
         if 'scrape' in request.POST:
@@ -69,9 +82,10 @@ def scrape_view(request):
 
             # Determine the file type
             file_type, _ = mimetypes.guess_type(uploaded_file_path)
+            #print(file_type)
 
             text_content = ""
-            if file_type.startswith('audio') or file_type.startswith('video'):
+            if file_type and (file_type.startswith('audio') or file_type.startswith('video')):
                 text_content = transcribe_file(uploaded_file_path)
                 pdf_path = text_to_pdf(text_content, "transcribed_content.pdf")
             elif file_type in ['application/pdf']:
@@ -124,8 +138,10 @@ def chat_view(request):
                 assistant = OpenAIAssistant.objects.get(file_id=file_id)
                 assistant_id = assistant.assistant_id
             except OpenAIAssistant.DoesNotExist:
+                user = request.user
                 # If no assistant exists for this file_id, create a new one
-                assistant_id = create_assistant(file_id,assistant_name)
+                if user.is_authenticated:
+                    assistant_id = create_assistant(user,file_id,assistant_name)
                 # Note: create_assistant function should save the new assistant in the database
 
             run = client.beta.threads.runs.create(
@@ -210,7 +226,7 @@ def chat_view(request):
             context['error'] = f"An error occurred: {str(e)}"
 
     return render(request, 'smart_mentor/chat.html', context)
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
@@ -351,25 +367,44 @@ def searching(request):
     results = []
 
     if query:
-        user_results = Profile.objects.filter(user__username__icontains=query)
+        # Recherche des groupes de travail
         workgroup_results = WorkGroup.objects.filter(name__icontains=query)
 
-        assistants = OpenAIAssistant.objects.filter(name__icontains=query)
+        # Recherche des profils utilisateurs
+        profile_results = Profile.objects.filter(
+            Q(user__username__icontains=query) |
+            Q(bio__icontains=query) |
+            Q(skills__icontains=query)
+        ).select_related('user')
 
-        # Créez une liste combinée de profils et d'assistants
-        results = [
-                      {'type': 'profile', 'username': profile.user.username, 'gender': profile.gender,
-                       'birthdate': profile.birthdate, 'country': profile.country, 'education_level':profile.education_level,
-                       'phone': profile.phone, 'bio': profile.bio, 'skills': profile.skills, 'social_media_links': profile.social_media_links,
-                       'avatar': profile.avatar if profile.avatar else None}
-                      for profile in user_results
-                  ] +  [
+        for profile in profile_results:
+            results.append({
+                'type': 'profile',
+                'username': profile.user.username,
+                'avatar': profile.avatar.url if profile.avatar else None,
+                # ... autres champs du profil
+            })
+
+        # Recherche des assistants
+        assistants = OpenAIAssistant.objects.filter(name__icontains=query)
+        results += [
             {'type': 'assistant', 'name': assistant.name, 'description': assistant.description}
             for assistant in assistants
-        ] + [
-                      {'type': 'workgroup', 'id': workgroup.id, 'name': workgroup.name, 'description': workgroup.description, 'avatar': workgroup.avatar if workgroup.avatar else None, 'creator': workgroup.creator.username}
-                      for workgroup in workgroup_results
-                  ]
+        ]
+
+        # Inclusion des workgroups dans les résultats
+        results += [
+            {
+                'type': 'workgroup',
+                'id': workgroup.id,
+                'name': workgroup.name,
+                'description': workgroup.description,
+                'avatar': workgroup.avatar if workgroup.avatar else None,
+                'creator': workgroup.creator.username
+                # ... autres champs du workgroup
+            }
+            for workgroup in workgroup_results
+        ]
 
     context = {
         'query': query,
@@ -377,6 +412,7 @@ def searching(request):
     }
 
     return render(request, 'search_results.html', context)
+
 
 
 
@@ -635,3 +671,28 @@ def mark_conversation_as_read(request, username):
     Message.objects.filter(sender=sender, recipient=recipient, read=False).update(read=True)
 
     return JsonResponse({'status': 'success'})
+def get_user_info(request):
+    username = request.GET.get('username', None)
+    if username:
+        try:
+            user = User.objects.get(username=username)
+            profile_picture_url = user.profile.avatar.url if user.profile.avatar else None
+
+            return JsonResponse({
+                'status': 'success',
+                'username': user.username,
+                'profile_picture_url': profile_picture_url
+            })
+        except ObjectDoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+def get_user_id(request):
+    username = request.GET.get('username')
+    if username:
+        try:
+            user = User.objects.get(username=username)
+            return JsonResponse({'status': 'success', 'user_id': user.id})
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+    return JsonResponse({'status': 'error', 'message': 'Username not provided'})

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -11,6 +12,7 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_mentor = models.BooleanField(default=False)
     avatar = models.ImageField(upload_to='avatars/', blank=True, default='static/images/pp.svg')
     birthdate = models.DateField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
@@ -25,6 +27,7 @@ class Profile(models.Model):
         return self.user.username
 
 class OpenAIAssistant(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     assistant_id = models.CharField(max_length=100, unique=True)
     file_id = models.CharField(max_length=100)
     name = models.CharField(max_length=100)

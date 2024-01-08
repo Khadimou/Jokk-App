@@ -1,0 +1,20 @@
+{% extends 'base_site.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <body>
+
+    <div class="container home_msg">
+        <h1>{% trans '' %}Your payment didn't go through :(</h1>
+    </div>
+
+    </body>
+
+{% endblock %} 

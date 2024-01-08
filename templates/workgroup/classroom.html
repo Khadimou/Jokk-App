@@ -204,6 +204,14 @@
         <h1 class="workgroup-title">{{ workgroup.name }}</h1>
         <h3 class="members-title">{% trans 'Members:' %}</h3>
         <ul>
+            <!-- Affichage de l'assistant -->
+            {% if assistant_name %}
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                     <img src="{% static 'images/assistant_avatar.png' %}" alt="Assistant Avatar" style="width: 50px; height: 50px;">
+                    <span style="color: #5b80b2;">{{ assistant_name }}</span>
+                </div>
+            {% endif %}
+
             {% for member in members_info %}
                 <li style="display: flex; align-items: center; margin-bottom: 10px;">
                     <img src="{{ member.user.profile.avatar.url }}" alt="{{ member.user.username }}" class="avatar" style="width: 50px; height: 50px; margin-right: 10px;">
@@ -211,12 +219,6 @@
                 </li>
             {% endfor %}
 
-            {% if assistant_name %}
-                <li style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <img src="{{ assistant.profile.avatar.url }}" alt="Assistant Avatar" class="avatar" style="width: 50px; height: 50px;">
-                    <span style="color: #4CAF50;">{{ assistant.name }}</span>
-                </li>
-            {% endif %}
         </ul>
 
     <div class="workgroup-actions">

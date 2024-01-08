@@ -14,6 +14,7 @@ urlpatterns += i18n_patterns(
     path('', include("smart_mentor.urls")),
     path('', include("workgroup.urls")),
     path('', include("mentoring_app.urls")),
+    path('',include("user_payment.urls")),
     path('', RedirectView.as_view(pattern_name='login', permanent=True)),  # Redirige le chemin racine vers 'login'
     #prefix_default_language=False,  # Ajoutez cette option si vous ne voulez pas de préfixe pour la langue par défaut
 )

@@ -1,0 +1,21 @@
+{% extends 'base_site.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+{% block content %}
+
+    <body>
+
+    <div class="container home_msg">
+        <h1>{% trans 'Thanks for your order ' %}{{ customer.name }}!</h1>
+        <h2>{% trans 'You are officialy a premium Jokk member !!' %}</h2>
+    </div>
+
+    </body>
+
+{% endblock %} 

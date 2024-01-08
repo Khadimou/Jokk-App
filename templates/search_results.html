@@ -30,6 +30,29 @@
         .list-unstyled li {
             margin-bottom: 10px; /* Ajustez cette valeur selon vos besoins */
         }
+        .workgroup-list-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+            white-space: nowrap; /* Empêche le retour à la ligne des éléments */
+        }
+
+        .workgroup-item {
+            display: inline-block; /* Pour aligner les éléments horizontalement */
+            margin-right: 15px; /* Espacement entre les éléments */
+        }
+
+        .workgroup-item img {
+            width: 100px; /* Taille de l'image */
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover; /* Pour garder le ratio de l'image */
+        }
+
+        /* Styles pour les informations du workgroup */
+        .workgroup-info {
+            text-align: center; /* Centre le texte sous l'image */
+        }
 
     </style>
 {% endblock %}
@@ -54,7 +77,7 @@
 
                             <!-- Section Informations -->
                             <div class="col-md-8">
-                                <h2>{{ result.user.username }}</h2>
+                                <h2>{{ result.username }}</h2>
 
                                 <ul class="list-unstyled">
                                     {% if result.birthdate %}
@@ -88,7 +111,46 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Afficher les workgroups créés -->
+                    <h4>{% trans 'Workgroups' %}</h4>
+                    <div>
+                        <div class="workgroup-list-container">
+                            {% for workgroup in result.created_workgroups %}
+                                <div class="workgroup-item">
+                                    <a href="{% url 'workgroup_detail' pk=workgroup.id %}">
+                                        {% if workgroup.avatar %}
+                                            <img src="{{ workgroup.avatar.url }}" alt="{{ workgroup.name }}">
+                                        {% endif %}
+                                        <div class="workgroup-info">
+                                            <strong>{{ workgroup.name }}</strong>
+                                            <p>{{ workgroup.description }}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Afficher les workgroups dont l'utilisateur est membre -->
+                    <div>
+                        <div class="workgroup-list-container">
+                            {% for workgroup in result.member_workgroups %}
+                                <div class="workgroup-item">
+                                    <a href="{% url 'workgroup_detail' pk=workgroup.id %}">
+                                        {% if workgroup.avatar %}
+                                            <img src="{{ workgroup.avatar.url }}" alt="{{ workgroup.name }}">
+                                        {% endif %}
+                                        <div class="workgroup-info">
+                                            <strong>{{ workgroup.name }}</strong>
+                                            <p>{{ workgroup.description }}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
+
             {% elif result.type == 'assistant' %}
                 <h2>{{ result.name }}</h2>
                 <p>{{ result.description }}</p>

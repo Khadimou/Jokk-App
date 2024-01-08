@@ -12,6 +12,7 @@ router.register(r'messages', views.MessageViewSet)
 urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('clear-chat/', views.clear_chat, name='clear_chat'),
+    path('my-assistants/',views.my_assistants,name='my_assistants'),
     path('api/', include(router.urls)),
     path('api/search-users/', SearchUsersAPIView.as_view(), name='search-users'),
     path('api/send_message/', views.send_message, name='send_message'),
@@ -33,6 +34,8 @@ urlpatterns = [
     path('profile/<int:user_id>/',views.profile_view,name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('searching/', views.searching, name='searching'),
+    path('get_user_info', views.get_user_info, name='get_user_info'),
+    path('get_user_id', views.get_user_id, name='get_user_id'),
     path('get-message-details/<int:message_id>/', views.message_details, name='message_details_base'),
     path('scrape/', views.scrape_view, name='scrape'),
     path('chat/', views.chat_view, name='chat'),

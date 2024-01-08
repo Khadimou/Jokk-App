@@ -35,19 +35,22 @@ def search_view(request):
     results = []
 
     if query:
+        # Recherche des profils d'utilisateurs dont le nom d'utilisateur contient la requête
         user_profiles = Profile.objects.filter(user__username__icontains=query)
-        assistants = OpenAIAssistant.objects.filter(name__icontains=query)
 
-        # Créez une liste combinée de profils et d'assistants
+        # Création de la liste des résultats pour les profils utilisateurs
         results = [
-                      {'type': 'profile', 'username': profile.user.username, 'avatar': profile.avatar.url if profile.avatar else None}
-                      for profile in user_profiles
-                  ] + [
-                      {'type': 'assistant', 'name': assistant.name, 'description': assistant.description}
-                      for assistant in assistants
-                  ]
+            {
+                'type': 'profile',
+                'username': profile.user.username,
+                'avatar': profile.avatar.url if profile.avatar else None,
+                'id': profile.user.id  # Ajout de l'ID de l'utilisateur si nécessaire
+            }
+            for profile in user_profiles
+        ]
 
     return JsonResponse({'results': results})
+
 
 @login_required
 def get_notifications(request):
@@ -135,11 +138,11 @@ def get_assistant_for_workgroup(workgroup_id):
 
 def workgroup_detail(request, pk):
     workgroup = get_object_or_404(WorkGroup, pk=pk)
-    assistant_name = None
-    # Supposons que vous ayez une façon de récupérer l'assistant associé au groupe de travail
     assistant = get_assistant_for_workgroup(pk)
-    if assistant:
-        assistant_name = assistant.name
+    assistant_name = assistant.name if assistant else None
+
+    # Exclure l'assistant de members_info
+    members_info = WorkGroupMember.objects.filter(workgroup=workgroup).exclude(user__username=assistant_name).select_related('user')
 
     try:
         member = WorkGroupMember.objects.get(workgroup=workgroup, user=request.user)
@@ -155,7 +158,7 @@ def workgroup_detail(request, pk):
     if not is_allowed:
         return HttpResponseForbidden("You are not authorised to view this group.")
 
-    members_info = WorkGroupMember.objects.filter(workgroup=workgroup).select_related('user')
+    #members_info = WorkGroupMember.objects.filter(workgroup=workgroup).select_related('user')
     chat_rooms = workgroup.chatrooms.all()
     return render(request, 'workgroup/classroom.html', {
         'workgroup': workgroup,
@@ -171,20 +174,41 @@ def workgroup_detail(request, pk):
 def clear_all_notifications(request):
     Notification.objects.filter(recipient=request.user).delete()
     return JsonResponse({'status': 'success', 'message': 'All notifications cleared.'})
+
+def is_valid_assistant_name(user, name):
+    """
+    Vérifie si le nom de l'assistant correspond à un assistant existant créé par l'utilisateur.
+    """
+    return OpenAIAssistant.objects.filter(user=user, name=name).exists()
 @login_required
 def create_workgroup(request):
-    assistant_user = None
+    # Vérifier si l'utilisateur est premium
+    if not request.user.appuser.is_premium:
+        return redirect('product_page')
+
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)
         if form.is_valid():
             workgroup = form.save(commit=False)
             workgroup.creator = request.user
+
+            # Vérifier si l'assistant doit être ajouté et si le nom est valide
+            if 'create_with_assistant' in request.POST:
+                assistant_name = request.POST.get('assistant_name', '').strip()
+                if not is_valid_assistant_name(request.user, assistant_name):
+                    messages.error(request, 'Invalid assistant name. Please check and try again.')
+                    return render(request, 'workgroup/create_group.html', {'form': form})
+
+                # Si un assistant est ajouté, mettez à jour with_assistant
+                workgroup.with_assistant = True
+
+            workgroup = form.save(commit=False)
+            workgroup.creator = request.user
             workgroup.save()
             form.save_m2m()
 
-            # Vérifier si l'assistant doit être ajouté
+            # Traitement supplémentaire pour ajouter l'assistant
             if 'create_with_assistant' in request.POST:
-                assistant_name = request.POST.get('assistant_name', '').strip()
                 # Récupérer ou créer l'assistant utilisateur
                 assistant_user, _ = User.objects.get_or_create(username=assistant_name)
                 # Vérifiez si l'assistant est déjà membre du groupe
@@ -195,10 +219,9 @@ def create_workgroup(request):
                         status='accepted'
                     )
 
-                # Récupérer l'assistant par son nom
+                # Associer l'assistant au groupe de travail
                 try:
                     assistant = OpenAIAssistant.objects.get(name=assistant_name)
-                    # Associer l'assistant au groupe de travail
                     workgroup.assistants.add(assistant)
                 except OpenAIAssistant.DoesNotExist:
                     # Gérer le cas où l'assistant n'existe pas
@@ -209,11 +232,10 @@ def create_workgroup(request):
             return redirect('workgroup_detail', pk=workgroup.pk)
         else:
             messages.error(request, 'Error when creating the workgroup.')
-
     else:
         form = RevisionForm()
 
-    return render(request, 'workgroup/create_workgroup.html', {'form': form, 'assistant': assistant_user})
+    return render(request, 'workgroup/create_group.html', {'form': form})
 
 def edit_workgroup(request, pk):
     workgroup = get_object_or_404(WorkGroup, pk=pk)

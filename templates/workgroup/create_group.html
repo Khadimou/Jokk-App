@@ -6,6 +6,41 @@
 
 {% block extra_styles %}
     <style>
+        /* CSS pour les messages */
+        .messages {
+            width: 100%; /* Utilise la pleine largeur de la page */
+            text-align: center; /* Centre le texte horizontalement */
+            position: absolute; /* Position absolue pour le placer spécifiquement sur la page */
+            top: 40%; /* Position sous les boutons modaux */
+            left: 0; /* Aligné à gauche de la page */
+            padding: 10px 0; /* Padding autour du message */
+            z-index: 2; /* Assure que les messages sont au-dessus des autres éléments */
+        }
+
+        .messages .error {
+            color: #ff0000; /* Couleur rouge pour les messages d'erreur */
+            font-size: 20px; /* Taille du texte plus grande */
+            font-weight: bold; /* Texte en gras */
+        }
+
+        p {
+            color: #ff0000; /* Couleur rouge pour les messages d'erreur */
+            font-size: 20px; /* Taille du texte plus grande */
+            font-weight: bold;
+            width: 100%; /* Utilise la pleine largeur de la page */
+            text-align: center; /* Centre le texte horizontalement */
+            position: absolute; /* Position absolue pour le placer spécifiquement sur la page */
+            top: 40%; /* Position sous les boutons modaux */
+            left: 0; /* Aligné à gauche de la page */
+            padding: 10px 0; /* Padding autour du message */
+            z-index: 2;
+        }
+
+        .messages .success {
+            color: #008000; /* Couleur verte pour les messages de succès */
+            font-size: 20px; /* Taille du texte plus grande */
+            font-weight: bold; /* Texte en gras */
+        }
         .create-new-btn {
             display: flex;
             flex-direction: column;
@@ -174,13 +209,15 @@
 {% block content %}
     <h3 class="text-center">{% trans 'Working groups are a kind of virtual classroom in which you can add your colleagues and share your knowledge ' %}</h3>
     <div class="button-container">
-        <button class="create-new-btn" >
+        <button class="create-new-btn" id="openCreateWorkgroupModal">
             <span class="plus-icon">+</span> {% trans 'Create a workgroup' %}
         </button>
-        <button class="create-new-btn">
+        <button class="create-new-btn" id="openCreateWorkgroupWithAssistantModal">
             <span class="plus-icon">+</span> {% trans 'Create a workgroup with your assistant' %}
         </button>
+
     </div>
+
     <!-- Modale pour 'Create a workgroup' -->
     <div id="createWorkgroupModal" class="modal">
         <div class="modal-content">
@@ -194,31 +231,64 @@
         </div>
     </div>
 
-    <!-- Modale pour 'Create a workgroup with your assistant' -->
-    <div id="createWorkgroupAssistantModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form|crispy }}
+    {% if request.user.appuser.is_premium %}
+        <!-- Modale pour 'Create a workgroup with your assistant' -->
+        <div id="createWorkgroupAssistantModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <form action="{% url 'create_workgroup' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form|crispy }}
 
-                <!-- Ajoutez ce champ pour le nom de l'assistant -->
-                <div class="form-group">
-                    <label for="assistant_name">{% trans 'Enter Assistant Name:' %}</label>
-                    <input type="text" class="form-control" name="assistant_name" id="assistant_name" placeholder="{% trans 'Enter Assistant Name' %}" required>
-                </div>
+                    <div class="form-group">
+                        <label for="assistant_name">{% trans 'Enter Assistant Name:' %}</label>
+                        <input type="text" class="form-control" name="assistant_name" id="assistant_name" placeholder="{% trans 'Enter Assistant Name' %}" required>
+                    </div>
 
-                <input type="hidden" name="create_with_assistant" value="true">
-                <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
-            </form>
+                    <input type="hidden" name="create_with_assistant" value="true">
+                    <button type="submit" class="btn btn-primary" name="save">{% trans 'Create' %}</button>
+                </form>
+
+            </div>
         </div>
-    </div>
-
+    {% else %}
+        <p>{% trans 'This feature is only available to premium users.' %}</p>
+    {% endif %}
+    <!-- Affichage des messages d'erreur -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
 {% endblock %}
 
 {% block extra_scripts %}
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var openCreateWorkgroupModalBtn = document.getElementById('openCreateWorkgroupModal');
+            var openCreateWorkgroupWithAssistantModalBtn = document.getElementById('openCreateWorkgroupWithAssistantModal');
+            var messagesDiv = document.querySelector('.messages');
+
+            // Fonction pour masquer les messages
+            function hideMessages() {
+                if (messagesDiv) {
+                    messagesDiv.style.display = 'none';
+                }
+            }
+
+            // Ajouter des écouteurs d'événements
+            if (openCreateWorkgroupModalBtn) {
+                openCreateWorkgroupModalBtn.addEventListener('click', hideMessages);
+            }
+            if (openCreateWorkgroupWithAssistantModalBtn) {
+                openCreateWorkgroupWithAssistantModalBtn.addEventListener('click', hideMessages);
+            }
+        });
         // Obtenez les modales
         var modal = document.getElementById("createWorkgroupModal");
         var modalAssistant = document.getElementById("createWorkgroupAssistantModal");

@@ -27,7 +27,11 @@ SECRET_KEY = "django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+STRIPE_SECRET_KEY_TEST = "sk_test_51OVgNXAdLeMTD97Qe3iLusl97vCjzbl4FgAt9bPHesdBFj72c2LNoEgnj9uQp411ICJvsiv0FJQ7IF5vkYxLl7OR00nkEaM5Sj"
+PRODUCT_PRICE = "price_1OVkV9AdLeMTD97QWtMtNKpT"
+MONTHLY_SUBSCRIPTION_PRICE = "price_1OVkWXAdLeMTD97QhbGypGSI"
+WEEKLY_SUBSCRIPTION_PRICE = "price_1OWGNpAdLeMTD97QttADIitQ"
+REDIRECT_DOMAIN = 'http://127.0.0.1:8000/'
 
 # Application definition
 
@@ -43,7 +47,8 @@ INSTALLED_APPS = [
     "workgroup",
     "smart_mentor",
     "mentoring_app",
-    'crispy_bootstrap4'
+    'crispy_bootstrap4',
+    'user_payment'
 ]
 
 MIDDLEWARE = [

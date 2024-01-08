@@ -11,6 +11,19 @@ from smart_mentor.utils import generate_questions, evaluate
 def mentoring_page(request):
     return render(request, 'mentoring_app/mentoring_page.html')
 
+def redirect_mentor(request):
+    if request.user.is_authenticated:
+        if request.user.profile.is_mentor:
+            return redirect('my_page')
+        else:
+            return redirect('mentor_page')
+    else:
+        # Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+        return redirect('login')
+
+def my_page(request):
+    return render(request,'mentoring_app/is_mentor.html')
+
 def mentee_page(request):
     return render(request, 'mentoring_app/mentee_page.html')
 

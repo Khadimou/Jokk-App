@@ -13,4 +13,6 @@ urlpatterns = [
     path('matching_optimized/', views.optim_find, name='matching_optim'),
     path('mentee_page/', views.mentee_page, name='mentee_page'),
     path('mentor_page/', views.mentor_page, name='mentor_page'),
+    path('redirect_mentor/', views.redirect_mentor, name='redirect_mentor'),
+    path('my_page/', views.my_page, name='my_page'),
     ]

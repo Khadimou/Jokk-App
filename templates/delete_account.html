@@ -7,6 +7,8 @@
 
 {% block content %}
     <div class="container">
+        <h1>{% trans 'Cancel Subscription' %}</h1>
+        <a href="{% url 'cancel_page' %}" class="btn btn-danger">{% trans 'Cancel Subscription' %}</a>
         <h1>{% trans 'Account Settings' %}</h1>
         <!-- Options de gestion du compte, y compris la suppression du compte -->
         <a href="{% url 'delete_account' %}" class="btn btn-danger">{% trans 'Delete Account' %}</a>

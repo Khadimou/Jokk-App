@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 
+from smart_mentor.models import Profile
+
+
 # Create your models here.
 class Matching(models.Model):
     Fields = models.CharField(max_length=100)
@@ -31,6 +34,7 @@ class Mentor(models.Model):
     Objectives = models.CharField(max_length=100)
     Job = models.CharField(max_length=100)
     PersonalityDescription = models.CharField(max_length=100, blank=True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.Fields

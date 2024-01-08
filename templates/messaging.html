@@ -7,6 +7,12 @@
 
 {% block content %}
     <div class="centered-container">
+        <!-- Barre de recherche pour trouver des utilisateurs -->
+        <div class="user-search-bar">
+            <input type="text" id="user-search-input" placeholder="{% trans 'Find users to message...' %}">
+            <div id="user-search-results"></div>
+        </div>
+
         <div class="messaging-container">
             <aside class="sidebar">
                 <!-- Sidebar: Liste des conversations -->
@@ -286,6 +292,81 @@
                 }
             });
 
+            document.getElementById('user-search-input').addEventListener('input', function() {
+                const query = this.value;
+                if (query.length > 1) {
+                    fetch(`/search?search=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const resultsContainer = document.getElementById('user-search-results');
+                            resultsContainer.innerHTML = '';
+                            data.results.forEach(result => {
+                                if (result.type === 'profile') {
+                                    // Créer un élément pour chaque utilisateur trouvé
+                                    const userDiv = document.createElement('div');
+                                    userDiv.textContent = result.username;
+                                    userDiv.className = 'search-result';
+                                    userDiv.onclick = function() {
+                                        // Logique pour démarrer une conversation avec cet utilisateur
+                                        startConversation(result.username);
+                                    };
+                                    resultsContainer.appendChild(userDiv);
+                                }
+                            });
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+            });
+
+            function startConversation(username) {
+                {#console.log('Starting conversation with:', username);#}
+
+                // Faire une requête pour obtenir l'ID de l'utilisateur
+                fetch(`/get_user_id?username=${encodeURIComponent(username)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            currentRecipientId = data.user_id; // Mise à jour de currentRecipientId
+
+                            // Faire une requête pour obtenir les informations de l'utilisateur (y compris l'image de profil)
+                            fetch(`/get_user_info?username=${encodeURIComponent(username)}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.status === 'success') {
+                                        // Mettre à jour l'en-tête de la zone de chat
+                                        updateChatHeader(username, data.profile_picture_url);
+
+                                        // Réinitialiser le champ de saisie de message et se préparer pour une nouvelle conversation
+                                        prepareForNewConversation();
+
+                                        // Charger la conversation
+                                        loadConversation(username);
+                                    } else {
+                                        console.error('Failed to get user info:', data.message);
+                                    }
+                                })
+                                .catch(error => console.error('Error fetching user info:', error));
+                        } else {
+                            console.error('Failed to get user ID:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching user ID:', error));
+            }
+
+            function updateChatHeader(username, imageUrl) {
+                const chatUserName = document.getElementById('chat-user-name');
+                const chatUserImage = document.getElementById('chat-user-image');
+                chatUserName.textContent = username;
+                chatUserImage.src = imageUrl || "{{ request.user.profile.avatar.url }}"; // Utiliser une image de profil par défaut si nécessaire
+            }
+
+            function prepareForNewConversation() {
+                // Réinitialiser la zone de chat et le champ de saisie
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';
+                const replyInput = document.getElementById('reply-input');
+                replyInput.value = '';
+            }
 
             function getCookie(name) {
                 let cookieValue = null;
@@ -308,6 +389,28 @@
 
 {% block extra_styles %}
     <style>
+
+        .user-search-bar {
+            margin-bottom: 20px;
+        }
+
+        #user-search-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .search-result {
+            padding: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .search-result:hover {
+            background-color: #f5f5f5;
+        }
 
         .user-info {
             display: flex;
@@ -539,7 +642,7 @@
 
         .conversation-unread {
             font-weight: bold;
-            background-color: #0000FF; /* Une couleur de fond légèrement différente pour se démarquer */
+            background-color: dimgray; /* Une couleur de fond légèrement différente pour se démarquer */
         }
 
     </style>

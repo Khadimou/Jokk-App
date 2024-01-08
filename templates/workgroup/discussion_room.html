@@ -250,6 +250,26 @@
             color: #888888; /* Couleur de texte grise pour le message d'attente */
             margin: 10px 0; /* Ajoutez un peu d'espace autour du message d'attente */
         }
+        {% comment %}#video-call-section video {
+            width: 100%; /* Ajustez selon vos besoins */
+            height: auto; /* Ajustez selon vos besoins */
+        }{% endcomment %}
+
+        .video-controls {
+            position: absolute;
+            bottom: 10px; /* Position depuis le bas du conteneur vidéo */
+            left: 10px; /* Position depuis le côté gauche du conteneur vidéo */
+            background: rgba(0, 0, 0, 0.5); /* Fond semi-transparent */
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .video-controls button {
+            margin: 5px;
+            {#color: white; /* Couleur du texte */#}
+        }
+
+
     </style>
 {% endblock %}
 
@@ -269,6 +289,17 @@
             <!-- Log des messages de chat -->
             <div id="chat-log" class="chat-log">
                 <!-- Les messages et les utilisateurs seront ajoutés ici par le WebSocket -->
+                <div id="video-call-section" style="display:none; position: relative;">
+                    <video id="local-video" muted autoplay></video>
+                    <video id="remote-video" autoplay></video>
+
+                    <div class="video-controls">
+                        <button id="end-call-button">{% trans 'End Call' %}</button>
+                        <button onclick="muteVideo()">Mute Video</button>
+                        <button onclick="muteAudio()">Mute Audio</button>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Zone de saisie des messages -->
@@ -281,14 +312,11 @@
                 </button>
                 <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
                 <button id="start-call-button" class="btn btn-success">{% trans 'Start Video Call' %}</button>
-                <button id="join-call" onclick="joinCall()" disabled>{% trans 'Join Call' %}</button>
-
-                <div id="video-call-section" style="display:none;">
-                    <video id="local-video" muted autoplay></video>
-                    <video id="remote-video" autoplay></video>
-                    <button id="end-call-button">End Call</button>
+                <button id="join-call" class="btn btn-success" onclick="joinCall()" disabled style="display:none;">{% trans 'Join Call' %}</button>
+                <!-- Ajouter un indicateur d'état d'appel ici -->
+                <div id="call-status-indicator" style="display:none; color: green; margin-left: 10px;">
+                    <!-- Le texte sera ajouté par JavaScript -->
                 </div>
-
             </div>
 
             <!-- Suggestions list -->
@@ -351,7 +379,21 @@
         });
 
         document.getElementById('start-call-button').addEventListener('click', function() {
+            // Démarrez l'appel vidéo
             startCall();
+
+            // Cacher le bouton "Start Video Call"
+            this.style.display = 'none';
+
+            // Afficher le bouton "Join Call"
+            const joinCallButton = document.getElementById("join-call");
+            joinCallButton.style.display = "block";
+            joinCallButton.disabled = false; // Assurez-vous que le bouton est activé
+        });
+
+
+        document.getElementById('end-call-button').addEventListener('click', function() {
+            endCall();
         });
 
         // Initialisez la connexion WebSocket ici
@@ -359,6 +401,18 @@
             (window.location.protocol === "https:" ? "wss://" : "ws://") +
             window.location.host + '/ws/chat/workgroup/' + "{{ workgroup_id }}" + '/'
         );
+
+        function endCall() {
+            // Cacher la section de l'appel vidéo
+            document.getElementById('video-call-section').style.display = 'none';
+
+            // Terminer l'appel vidéo et libérer les ressources
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            // ... (autres actions de fin d'appel)
+        }
 
         function sendData(data) {
             if (webSocket.readyState === WebSocket.OPEN) {
@@ -371,17 +425,6 @@
         let callStarted = false;
         let localStream;
         let peerConn;
-
-        webSocket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-
-            if (data.type === "call_started") {
-                callStarted = true;
-                document.getElementById("join-call").disabled = false;
-            }
-
-            handleSignallingData(data);
-        };
 
         // Fonction pour rejoindre un appel
         function joinCall() {
@@ -430,12 +473,14 @@
                             });
                         })
                         .catch(error => console.log(error));
+                    // Affichez la section de l'appel vidéo
+                    document.getElementById("video-call-section").style.display = "block";
+                    // Envoyer un message pour informer les autres utilisateurs que l'appel a commencé
+                    if (webSocket.readyState === WebSocket.OPEN) {
+                        sendData({ type: "call_started" });
+                    }
                 })
                 .catch(error => console.log(error));
-            callStarted = true;
-            document.getElementById("join-call").disabled = false;
-            // Envoyer un message pour informer les autres utilisateurs que l'appel a commencé
-            sendData({ type: "call_started" });
         }
 
         function muteVideo() {
@@ -823,6 +868,23 @@
                 audioContainer.appendChild(audioElement);
                 chatLog.appendChild(audioContainer);
                 chatLog.scrollTop = chatLog.scrollHeight;
+            }else if (data.type === "call_started") {
+                // L'appel a été démarré par un utilisateur
+                callStarted = true;
+
+                // Cacher le bouton "Start Video Call" et afficher le bouton "Join Call" pour tous les utilisateurs
+                document.getElementById("start-call-button").style.display = "none";
+                const joinCallButton = document.getElementById("join-call");
+                joinCallButton.style.display = "block";
+                joinCallButton.disabled = false;
+                // Ajouter un indicateur visuel pour l'appel en cours
+                const callStatusIndicator = document.getElementById("call-status-indicator");
+                if (callStatusIndicator) {
+                    callStatusIndicator.textContent = "{% trans 'Call in progress' %}...";
+                    callStatusIndicator.style.display = "block";
+                }
+
+                handleSignallingData(data);
             }
         };
     }
