@@ -1,11 +1,50 @@
+import json
+
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from mentoring_app.forms import MatchingForm, MentorForm
-from mentoring_app.models import Matching, Response, Notification
+from mentoring_app.models import Matching, Response, Notification, Availability
 from mentoring_app.utils import calculate_matching_score_optimized
 from smart_mentor.utils import generate_questions, evaluate
 
+from .forms import AvailabilityForm
+
+def availability_view(request):
+    if request.method == 'POST':
+        form = AvailabilityForm(request.POST)
+        #print(form)
+        if form.is_valid():
+            # Extraire les créneaux de disponibilité à partir des données JSON
+            availability_slots = request.POST.get('availability_slots')
+            if availability_slots:
+                try:
+                    slots = json.loads(availability_slots)
+                    for slot in slots:
+                        # Créer un objet Availability pour chaque créneau
+                        Availability.objects.create(
+                            user=request.user,
+                            day_of_week=slot['dayOfWeek'],
+                            start_time=slot['startTime'],
+                            end_time=slot['endTime']
+                        )
+                    return redirect('availability_dates')
+                except json.JSONDecodeError:
+                    # Gérer l'erreur si la chaîne JSON n'est pas valide
+                    # Vous pouvez ajouter un message d'erreur ou une logique de gestion d'erreur ici
+                    pass
+    else:
+        form = AvailabilityForm()
+
+    return render(request, 'mentoring_app/is_mentor.html', {'form': form})
+def delete_availability(request, slot_id):
+    slot = get_object_or_404(Availability, id=slot_id, user=request.user)
+    slot.delete()
+    return redirect('availability_dates')  # Rediriger vers la vue qui affiche les créneaux
+
+def availability_dates(request):
+    availability_slots = Availability.objects.filter(user=request.user)
+    return render(request, 'mentoring_app/availability_dates.html',{'availability_slots': availability_slots})
 
 # Create your views here.
 def mentoring_page(request):
@@ -22,39 +61,69 @@ def redirect_mentor(request):
         return redirect('login')
 
 def my_page(request):
-    return render(request,'mentoring_app/is_mentor.html')
+    # Obtenez les créneaux de disponibilité de l'utilisateur
+    availability_slots = Availability.objects.filter(user=request.user).values(
+        'day_of_week', 'start_time', 'end_time'
+    )
+
+    # Convertissez les créneaux en format adapté pour FullCalendar
+    calendar_events =  json.dumps([
+        {
+            'start': slot['day_of_week'] + 'T' + str(slot['start_time']),
+            'end': slot['day_of_week'] + 'T' + str(slot['end_time']),
+            'color': '#28a745'  # Couleur pour les créneaux enregistrés
+        }
+        for slot in availability_slots
+    ])
+    return render(request,'mentoring_app/is_mentor.html', {'calendar_events': calendar_events})
 
 def mentee_page(request):
     return render(request, 'mentoring_app/mentee_page.html')
 
+from django.contrib.auth.decorators import login_required
+from .models import Mentor
+from .forms import MentorForm
+
+from django.shortcuts import render, redirect
+from .forms import MentorForm
+from .models import Profile
+
+@login_required
 def mentor_page(request):
-    if request.method == 'POST':
-        form = MentorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('register_page')
-    else:
-        form = MentorForm()
+    user_profile = Profile.objects.get(user=request.user)
+    try:
+        mentor = Mentor.objects.get(profile=user_profile)
+        form = MentorForm(request.POST or None, instance=mentor)
+    except Mentor.DoesNotExist:
+        form = MentorForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        mentor_instance = form.save(commit=False)
+        mentor_instance.profile = user_profile
+        mentor_instance.save()
+        return redirect('register_page')
 
     return render(request, 'mentoring_app/mentor_page.html', {'form': form})
 
+from django.shortcuts import get_object_or_404
+
 def register_page(request):
+    user = request.user
+    user_profile = get_object_or_404(Profile, user=user)
+
     if request.method == 'POST':
         form = MentorForm(request.POST)
         if form.is_valid():
-            fields = form.cleaned_data['Fields']
-            degree = form.cleaned_data['Degree']
+            mentor_instance = form.save(commit=False)
+            mentor_instance.profile = user_profile
+            mentor_instance.save()
 
-            form.save()
-            questions = generate_questions(fields, degree)
-
-            # Store questions and answers in the session
+            questions = generate_questions(mentor_instance.Fields, mentor_instance.Degree)
             request.session['questions'] = questions
-
             return render(request, 'mentoring_app/questions_page.html', {'questions': questions})
     else:
         form = MentorForm()
-    return render(request, 'mentoring_app/register_page.html', {'form': form})
+    return render(request, 'mentoring_app/result_page.html', {'form': form})
 
 # def evaluate_answers(request):
 #     if request.method == 'POST':

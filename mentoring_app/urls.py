@@ -15,4 +15,7 @@ urlpatterns = [
     path('mentor_page/', views.mentor_page, name='mentor_page'),
     path('redirect_mentor/', views.redirect_mentor, name='redirect_mentor'),
     path('my_page/', views.my_page, name='my_page'),
+    path('availability/', views.availability_view, name='availability_view'),
+    path('availability_dates',views.availability_dates,name='availability_dates'),
+    path('delete_availability/<int:slot_id>/', views.delete_availability, name='delete_availability'),
     ]

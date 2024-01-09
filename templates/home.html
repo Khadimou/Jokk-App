@@ -509,16 +509,15 @@
                     }
                     notificationElement.textContent = notification.title;
 
-                   {% comment %} if (notification.type === 'invitation') {
-                        // Gérer les notifications d'invitation
-                        notificationElement.href = `/notifications/${notification.id}/`;
+                    if (notification.type === 'mentor_promotion') {
+                        // Gérer les notifications de promotion de mentor
+                        notificationElement.href = '/my_page/';
                         notificationElement.addEventListener('click', async function(e) {
                             e.preventDefault();
                             await markAsRead(notification.id);
-                            window.location.href = this.href;  // Rediriger vers le détail de la notification
+                            window.location.href = this.href;  // Rediriger vers la page my_page
                         });
-                    } else{% endcomment %}
-                        if (notification.type === 'join_request') {
+                    } else if (notification.type === 'join_request') {
                         // Gérer les demandes d'adhésion
                         notificationElement.addEventListener('click', async function(e) {
                             e.preventDefault();
@@ -539,7 +538,7 @@
                 });
 
 
-                const notificationBadge = document.getElementById('notificationBadge');
+            const notificationBadge = document.getElementById('notificationBadge');
                 if (unreadCount > 0) {
                     notificationBadge.textContent = unreadCount;
                     notificationBadge.style.display = 'inline-block'; // Assurez-vous que le badge est visible

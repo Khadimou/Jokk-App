@@ -1,10 +1,114 @@
 {% extends 'base_site.html' %}
 {% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
 
 {% block navbar %}
     {% include 'nav_mentoring.html' %}
 {% endblock %}
 
-{% block content %}
+{% comment %}{% block extrahead %}
+    <!-- Si vous utilisez un CDN, utilisez ces liens -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
 
+    <!-- Sinon, utilisez les fichiers locaux comme ceci -->
+    <!-- <link href='{% static "css/fullcalendar.min.css" %}' rel='stylesheet' />
+<script src='{% static "js/fullcalendar.min.js" %}'></script> -->
+{% endblock %}{% endcomment %}
+
+{% block extra_styles %}
+    <style>
+        #calendar {
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .fc .fc-timegrid-slot, .fc .fc-timegrid-slot-label {
+            height: 2em; /* Réduire la hauteur des créneaux horaires */
+        }
+
+        h1{
+            text-align: center;
+            color: #4ac1f7;
+        }
+
+        /* ... autres styles ... */
+    </style>
 {% endblock %}
+
+{% block content %}
+    <h1>{% trans 'Define your availability times here!' %}</h1>
+    <div class="container d-flex flex-column align-items-center">
+        <form method="post" id="availability-form" class="mb-3 w-100" action="{% url 'availability_view' %}">
+            {% csrf_token %}
+            <input type="hidden" name="availability_slots" id="availability-slots">
+            <!-- Remplacez les champs cachés par des champs textuels pour le débogage -->
+            <input type="text" name="day_of_week" id="day_of_week">
+            <input type="text" name="start_time" id="start_time">
+            <input type="text" name="end_time" id="end_time">
+
+            <div id='calendar' class="w-100 mb-3"></div>
+            <div class="w-100 d-flex justify-content-center">
+                <button class="btn btn-primary" type="submit">{% trans 'Save Availability' %}</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.10/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var existingEvents = JSON.parse('{{ calendar_events|escapejs }}');
+            var selectedSlots = [];
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                selectable: true,
+                allDaySlot: false,
+                slotDuration: '00:30:00',
+                slotLabelInterval: '01:00',
+                slotMinTime: '08:00:00',
+                slotMaxTime: '18:00:00',
+                events: existingEvents,  // Ajoutez les événements existants ici
+                select: function(info) {
+                    var dayOfWeek = info.startStr.split('T')[0];
+                    var startTime = info.startStr.split('T')[1].substring(0, 5);
+                    var endTime = info.endStr.split('T')[1].substring(0, 5);
+                    var eventId = dayOfWeek + '-' + startTime + '-' + endTime;
+
+                    if (!selectedSlots.some(slot => slot.eventId === eventId)) {
+                        selectedSlots.push({
+                            eventId: eventId,
+                            dayOfWeek: dayOfWeek,
+                            startTime: startTime,
+                            endTime: endTime
+                        });
+                        calendar.addEvent({
+                            id: eventId,
+                            start: info.startStr,
+                            end: info.endStr,
+                            color: '#28a745'
+                        });
+                    }
+
+                    document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
+                },
+                eventClick: function(info) {
+                    var event = info.event;
+                    if (event) {
+                        var index = selectedSlots.findIndex(slot => slot.eventId === event.id);
+                        if (index > -1) {
+                            selectedSlots.splice(index, 1);
+                            event.remove();
+                        }
+                    }
+                    document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
+

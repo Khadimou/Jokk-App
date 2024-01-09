@@ -1,0 +1,70 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block navbar %}
+    {% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="availability-container">
+        <h2>{% trans 'Your Availability Schedule' %}</h2>
+        <div class="availability-cards">
+            {% for slot in availability_slots %}
+                <div class="availability-card">
+                    <div class="date">
+                        <span class="day">{{ slot.day_of_week }}</span>
+                        <a href="{% url 'delete_availability' slot.id %}" class="delete-btn">X</a>
+                    </div>
+                    <div class="time">
+                        <span>{{ slot.start_time }} - {{ slot.end_time }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p>{% trans 'No availability slots have been set yet.' %}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_styles %}
+    <style>
+        .delete-btn {
+            float: right;
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .availability-container {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .availability-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .availability-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            width: 200px;
+            background-color: #f8f8f8;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .availability-card .date {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .availability-card .time {
+            font-size: 1em;
+            color: #666;
+        }
+    </style>
+{% endblock %}

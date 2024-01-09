@@ -79,13 +79,14 @@
                             <div class="col-md-8">
                                 <h2>{{ result.username }}</h2>
 
+                                <!-- Bouton Follow -->
+                                <div class="follow-button-container text-right">
+                                    <button id="followButton" class="btn btn-primary" data-user-id="{{ result.id }}">+ {% trans 'Follow' %}</button>
+                                </div>
+
                                 <ul class="list-unstyled">
                                     {% if result.birthdate %}
                                         <li><strong>{% trans 'Birthdate:' %}</strong> {{ result.birthdate }}</li>
-                                    {% endif %}
-
-                                    {% if result.gender %}
-                                        <li><strong>{% trans 'Gender:' %}</strong> {{ result.gender }}</li>
                                     {% endif %}
 
                                     {% if result.education_level %}
@@ -94,10 +95,6 @@
 
                                     {% if result.skills %}
                                         <li><strong>{% trans 'Skills:' %}</strong> {{ result.skills }}</li>
-                                    {% endif %}
-
-                                    {% if result.phone %}
-                                        <li><strong>{% trans 'Phone:' %}</strong> {{ result.phone }}</li>
                                     {% endif %}
 
                                     {% if result.bio %}
@@ -237,6 +234,39 @@
             }
             return cookieValue;
         }
+
+        document.getElementById('followButton').addEventListener('click', function() {
+            var userId = this.getAttribute('data-user-id');
+            var csrftoken = getCookie('csrftoken');  // Obtenez le token CSRF
+
+            console.log("User ID:", userId);  // Affichez l'ID de l'utilisateur pour le débogage
+
+            fetch(`/${currentLanguage}/follow_toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'user_id=' + encodeURIComponent(userId)  // Assurez-vous d'encoder la valeur
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // Mettre à jour le texte du bouton
+                        this.textContent = data.followed ? '- Unfollow' : '+ Follow';
+                    } else {
+                        console.error(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+
     });
 
 </script>

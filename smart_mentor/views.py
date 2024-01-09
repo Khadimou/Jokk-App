@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from workgroup.models import WorkGroup
-from .models import Profile, OpenAIAssistant
+from .models import Profile, OpenAIAssistant, Follow
 from .utils import scrape_website, text_to_pdf, upload_to_openai, create_chat_thread, process_message_with_citations, \
     transcribe_file, create_assistant
 import os
@@ -381,7 +381,10 @@ def searching(request):
             results.append({
                 'type': 'profile',
                 'username': profile.user.username,
-                'avatar': profile.avatar.url if profile.avatar else None,
+                'avatar': profile.avatar if profile.avatar else None,
+                'bio': profile.bio,
+                'social_media_links': profile.social_media_links,
+                'id': profile.id,
                 # ... autres champs du profil
             })
 
@@ -696,3 +699,22 @@ def get_user_id(request):
         except User.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'User not found'})
     return JsonResponse({'status': 'error', 'message': 'Username not provided'})
+
+
+@login_required
+@require_POST
+def follow_toggle(request):
+    user_id = request.POST.get('user_id')
+    try:
+        followed_user = User.objects.get(pk=user_id)
+        follow, created = Follow.objects.get_or_create(follower=request.user, followed=followed_user)
+
+        if not created:
+            follow.delete()
+            followed = False
+        else:
+            followed = True
+
+        return JsonResponse({'status': 'ok', 'followed': followed})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)

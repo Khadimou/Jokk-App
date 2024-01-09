@@ -34,6 +34,7 @@ urlpatterns = [
     path('profile/<int:user_id>/',views.profile_view,name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('searching/', views.searching, name='searching'),
+    path('follow_toggle/',views.follow_toggle,name="follow_toggle"),
     path('get_user_info', views.get_user_info, name='get_user_info'),
     path('get_user_id', views.get_user_id, name='get_user_id'),
     path('get-message-details/<int:message_id>/', views.message_details, name='message_details_base'),
