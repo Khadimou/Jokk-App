@@ -12,8 +12,9 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_login = models.BooleanField(default=True)
     is_mentor = models.BooleanField(default=False)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, default='static/images/pp.svg')
+    avatar = models.ImageField(upload_to='avatars/', blank=True, default='avatars/pp.svg')
     birthdate = models.DateField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     country = CountryField(blank_label='(select country)', blank=True)

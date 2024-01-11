@@ -311,9 +311,14 @@ def login_view(request):
                 login(request, user)
                 # Vérifiez si l'utilisateur a déjà un profil
                 try:
-                    Profile.objects.get(user=user)
-                    # Si un profil existe, redirigez vers 'home'
-                    return redirect('home')
+                    profile = Profile.objects.get(user=user)
+                    # Vérifiez si c'est la première connexion
+                    if profile.first_login:
+                        profile.first_login = False
+                        profile.save()
+                        return redirect('create_profile')
+                    else:
+                        return redirect('home')
                 except Profile.DoesNotExist:
                     # S'il n'y a pas de profil, redirigez vers 'create_profile'
                     return redirect('create_profile')
@@ -322,9 +327,7 @@ def login_view(request):
     else:
         form = LoginForm()
 
-    context = {
-        'form': form
-    }
+    context = {'form': form}
     return render(request, 'default.html', context)
 
 def logout_view(request):
@@ -346,8 +349,11 @@ def create_profile(request):
 
     return render(request, 'create_profile.html', {'form': form})
 
-def profile_view(request, user_id):
-    profile = Profile.objects.get(user_id=user_id)
+def profile_view(request, user_id=None):
+    if user_id is None:
+        profile = Profile.objects.get(user=request.user)
+    else:
+        profile = Profile.objects.get(user_id=user_id)
     return render(request, 'profile.html', {'profile': profile})
 
 @login_required
