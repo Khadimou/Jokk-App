@@ -69,21 +69,21 @@
                 <h2>{% trans 'Hi' %} {{ user }}{% trans '! To proceed, select your payment type and click the button' %}</h2>
 
                 <!-- Choix du type de paiement -->
-                <div>
+                {% comment %}<div>
                     <input type="radio" id="paymentTypeOneTime" name="payment_type" value="one_time" checked>
                     <label for="paymentTypeOneTime">{% trans 'One-time Payment' %}</label>
-                </div>
+                </div>{% endcomment %}
                 <div>
                     <input type="radio" id="paymentTypeSubscription" name="payment_type" value="subscription">
-                    <label for="paymentTypeSubscription">{% trans 'Subscription' %}</label>
+                    <label for="paymentTypeSubscription" style="color: #007bff">{% trans 'Subscription' %}</label>
                 </div>
 
                 <!-- Choix du type d'abonnement si l'abonnement est sélectionné -->
                 <div id="subscriptionTypeChoice" style="display: none;">
                     <input type="radio" id="weeklySubscription" name="subscription_type" value="weekly">
-                    <label for="weeklySubscription">{% trans 'Weekly Subscription' %}</label>
+                    <label for="weeklySubscription" style="color: #007bff">{% trans 'Weekly Subscription' %}</label>
                     <input type="radio" id="monthlySubscription" name="subscription_type" value="monthly" checked>
-                    <label for="monthlySubscription">{% trans 'Monthly Subscription' %}</label>
+                    <label for="monthlySubscription" style="color: #007bff">{% trans 'Monthly Subscription' %}</label>
                 </div>
 
                 <!-- Bouton de soumission -->
@@ -109,12 +109,12 @@
                 }
             });
 
-            var paymentTypeOneTime = document.getElementById('paymentTypeOneTime');
+           {% comment %} var paymentTypeOneTime = document.getElementById('paymentTypeOneTime');
             paymentTypeOneTime.addEventListener('change', function() {
                 if (this.checked) {
                     subscriptionTypeChoice.style.display = 'none';
                 }
-            });
+            });{% endcomment %}
         });
     </script>
 {% endblock %}

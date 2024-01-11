@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#: .\templates\user_payment\payment_cancelled.html:15
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-08 02:07+0100\n"
+"POT-Creation-Date: 2024-01-11 23:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,13 +18,53 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\SocialNetwork\settings.py:148
+#: .\SocialNetwork\settings.py:149
 msgid "English"
 msgstr ""
 
-#: .\SocialNetwork\settings.py:149
+#: .\SocialNetwork\settings.py:150
 msgid "French"
 msgstr ""
+
+#: .\smart_mentor\forms.py:47
+msgid "Avatar"
+msgstr "Avatar"
+
+#: .\smart_mentor\forms.py:48
+msgid "Birthdate"
+msgstr "Date de naissance"
+
+#: .\smart_mentor\forms.py:49
+msgid "Gender"
+msgstr "Genre"
+
+#: .\smart_mentor\forms.py:50
+msgid "Country"
+msgstr "Pays"
+
+#: .\smart_mentor\forms.py:51 .\templates\mentoring_app\mentee_page.html:45
+msgid "Skills"
+msgstr "Compétences"
+
+#: .\smart_mentor\forms.py:52
+msgid "Phone"
+msgstr "Téléphone"
+
+#: .\smart_mentor\forms.py:53
+msgid "Biography"
+msgstr "Biographie"
+
+#: .\smart_mentor\forms.py:54
+msgid "Social Media Links"
+msgstr "Liens réseaux sociaux"
+
+#: .\smart_mentor\forms.py:64
+msgid "MM/DD/YYYY"
+msgstr "JJ/MM/AAAA"
+
+#: .\smart_mentor\forms.py:64
+msgid "JJ/MM/AAAA"
+msgstr "JJ/MM/AAAA"
 
 #: .\smart_mentor\models.py:9
 msgid "Male"
@@ -46,11 +85,11 @@ msgstr "Notifications"
 #: .\templates\all_notifications.html:56
 #: .\templates\notification_detail.html:12
 msgid "Received on: "
-msgstr "Reçu le : "
+msgstr "Reçu le: "
 
 #: .\templates\all_notifications.html:60
 msgid "No notifications."
-msgstr "Aucune notification."
+msgstr "Aucune notification"
 
 #: .\templates\confirm_delete_account.html:10
 msgid "Confirm Account Deletion"
@@ -59,9 +98,7 @@ msgstr "Confirmer la suppression du compte"
 #: .\templates\confirm_delete_account.html:11
 msgid ""
 "Are you sure you want to delete your account? This action cannot be undone."
-msgstr ""
-"Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est "
-"irréversible."
+msgstr "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut être annulée."
 
 #: .\templates\confirm_delete_account.html:15
 msgid "Delete my account"
@@ -75,15 +112,15 @@ msgstr "Annuler"
 
 #: .\templates\create_profile.html:106
 msgid "Create Your Profile"
-msgstr "Créer votre profil"
+msgstr "Créez votre profil"
 
 #: .\templates\create_profile.html:117
 msgid "Save Profile"
-msgstr "Enregistrer le profil"
+msgstr "Sauvegarder le profil"
 
 #: .\templates\create_profile.html:118
 msgid "Skip"
-msgstr "Passer"
+msgstr "Sauter"
 
 #: .\templates\default.html:5
 msgid "Log In Page"
@@ -99,16 +136,15 @@ msgstr "Langues"
 
 #: .\templates\default.html:206
 msgid "Your Personalized Learning Platform"
-msgstr "Votre plateforme d'apprentissage personnalisée"
+msgstr "Votre Plateforme d'Apprentissage Personnalisée"
 
 #: .\templates\default.html:207
 msgid "Connect and Thrive – Build Your Virtual Classroom Today!"
-msgstr ""
-"Connectez-vous et prospérez – Créez votre classe virtuelle dès aujourd'hui !"
+msgstr "Connectez-vous et Prospérez – Construisez Votre Classe Virtuelle Aujourd'hui !"
 
 #: .\templates\default.html:210
 msgid "Welcome Back!"
-msgstr "Bon retour !"
+msgstr "Bon Retour !"
 
 #: .\templates\default.html:212 .\templates\home.html:318
 #: .\templates\signup.html:90
@@ -133,25 +169,29 @@ msgid ""
 "believe that every individual has potential to share with the world. Our "
 "mission is to facilitate that sharing."
 msgstr ""
-"Jokk est un mot en wolof qui signifie se connecter avec quelqu'un. Chez "
-"jokk, nous croyons que chaque individu a un potentiel à partager avec le "
-"monde. Notre mission est de faciliter ce partage."
+"Jokk est un mot en Wolof qui signifie se connecter avec quelqu'un. Chez Jokk, "
+"nous croyons que chaque individu a un potentiel à partager avec le monde. Notre "
+"mission est de faciliter ce partage."
 
-#: .\templates\delete_account.html:10
-msgid "Account Settings"
-msgstr "Paramètres du compte"
+#: .\templates\delete_account.html:10 .\templates\delete_account.html:11
+msgid "Cancel Subscription"
+msgstr "Annuler l'Abonnement"
 
 #: .\templates\delete_account.html:12
+msgid "Account Settings"
+msgstr "Paramètres du Compte"
+
+#: .\templates\delete_account.html:14
 msgid "Delete Account"
-msgstr "Supprimer le compte"
+msgstr "Supprimer le Compte"
 
 #: .\templates\edit_profile.html:110 .\templates\profile.html:90
 msgid "Edit Profile"
-msgstr "Modifier le profil"
+msgstr "Modifier le Profil"
 
 #: .\templates\edit_profile.html:118
 msgid "Save changes"
-msgstr "Enregistrer les modifications"
+msgstr "Enregistrer les changements"
 
 #: .\templates\home.html:6
 msgid "Online revision platform"
@@ -159,19 +199,15 @@ msgstr "Plateforme de révision en ligne"
 
 #: .\templates\home.html:271 .\templates\home.html:273
 msgid "Premium"
-msgstr ""
+msgstr "Premium"
 
 #: .\templates\home.html:276
-#, fuzzy
-#| msgid "Feed Assistant"
 msgid "Assistants"
-msgstr "Nourrir l'assistant"
+msgstr "Assistants"
 
 #: .\templates\home.html:277
-#, fuzzy
-#| msgid "Feed Assistant"
 msgid "My Assistants"
-msgstr "Nourrir l'assistant"
+msgstr "Mes Assistants"
 
 #: .\templates\home.html:281 .\templates\home.html:370
 #: .\venv\Lib\site-packages\django\contrib\messages\apps.py:15
@@ -195,10 +231,8 @@ msgid "Logout"
 msgstr "Déconnexion"
 
 #: .\templates\home.html:331
-#, fuzzy
-#| msgid "Your Workgroups"
 msgid "Find users or workgroups"
-msgstr "Vos groupes de travail"
+msgstr "Trouver des utilisateurs ou des groupes de travail"
 
 #: .\templates\home.html:333
 msgid "Search..."
@@ -210,11 +244,11 @@ msgstr "Rechercher"
 
 #: .\templates\home.html:340 .\templates\mentoring_app\mentoring_page.html:62
 msgid "Virtual Classroom"
-msgstr "Classe virtuelle"
+msgstr "Classe Virtuelle"
 
 #: .\templates\home.html:341
 msgid "Create Workgroups"
-msgstr "Créer des groupes de travail"
+msgstr "Créer des Groupes de Travail"
 
 #: .\templates\home.html:345 .\templates\home.html:346
 #: .\templates\mentoring_app\mentoring_page.html:67
@@ -223,7 +257,7 @@ msgstr "Mentorat"
 
 #: .\templates\home.html:350 .\templates\home.html:352
 msgid "Smart Assistant"
-msgstr "Assistant intelligent"
+msgstr "Assistant Intelligent"
 
 #: .\templates\home.html:361
 msgid "Your browser does not support HTML5 videos."
@@ -235,7 +269,7 @@ msgstr "Pas de messages"
 
 #: .\templates\home.html:401
 msgid "Send Message"
-msgstr "Envoyer un message"
+msgstr "Envoyer le Message"
 
 #: .\templates\home.html:418
 msgid "Accept"
@@ -249,21 +283,29 @@ msgstr "Refuser"
 msgid "Close"
 msgstr "Fermer"
 
-#: .\templates\home.html:556
+#: .\templates\home.html:554
 msgid "See all notifications"
 msgstr "Voir toutes les notifications"
 
-#: .\templates\home.html:569
+#: .\templates\home.html:567
 msgid "Clear all"
 msgstr "Tout effacer"
 
-#: .\templates\home.html:766
+#: .\templates\home.html:764
 msgid "Personalised Learning Platform"
-msgstr "Plateforme d'apprentissage personnalisée"
+msgstr "Plateforme d'Apprentissage Personnalisée"
 
-#: .\templates\home.html:766
+#: .\templates\home.html:764
 msgid "All rights reserved!"
 msgstr "Tous droits réservés !"
+
+#: .\templates\mentoring_app\availability_dates.html:11
+msgid "Your Availability Schedule"
+msgstr "Votre Calendrier de Disponibilité"
+
+#: .\templates\mentoring_app\availability_dates.html:24
+msgid "No availability slots have been set yet."
+msgstr "Aucun créneau de disponibilité n'a encore été défini."
 
 #: .\templates\mentoring_app\evaluation.html:38
 msgid "Do you confirm your results?"
@@ -271,15 +313,23 @@ msgstr "Confirmez-vous vos résultats ?"
 
 #: .\templates\mentoring_app\evaluation.html:53
 msgid "Confirm Answers"
-msgstr "Confirmer les réponses"
+msgstr "Confirmer les Réponses"
+
+#: .\templates\mentoring_app\is_mentor.html:41
+msgid "Define your availability times here!"
+msgstr "Définissez ici vos horaires de disponibilité !"
+
+#: .\templates\mentoring_app\is_mentor.html:53
+msgid "Save Availability"
+msgstr "Enregistrer la Disponibilité"
 
 #: .\templates\mentoring_app\matching.html:6
 msgid "My Mentor"
-msgstr "Mon mentor"
+msgstr "Mon Mentor"
 
 #: .\templates\mentoring_app\matching.html:23
 msgid "Predicted Score:"
-msgstr "Score prédit :"
+msgstr "Score Prévu :"
 
 #: .\templates\mentoring_app\matching.html:27
 msgid "Matching with"
@@ -294,7 +344,7 @@ msgid "Name:"
 msgstr "Nom :"
 
 #: .\templates\mentoring_app\matching.html:31 .\templates\profile.html:71
-#: .\templates\search_results.html:96
+#: .\templates\search_results.html:97
 msgid "Skills:"
 msgstr "Compétences :"
 
@@ -316,7 +366,7 @@ msgstr "Voir le profil complet"
 
 #: .\templates\mentoring_app\mentee_page.html:5
 msgid "Mentee Page"
-msgstr "Page du mentoré"
+msgstr "Page du Mentoré"
 
 #: .\templates\mentoring_app\mentee_page.html:30
 msgid "Find your mentor !"
@@ -342,17 +392,13 @@ msgstr "Diplôme"
 msgid "Licence"
 msgstr "Licence"
 
-#: .\templates\mentoring_app\mentee_page.html:45
-msgid "Skills"
-msgstr "Compétences"
-
 #: .\templates\mentoring_app\mentee_page.html:46
 msgid "Compute"
 msgstr "Calculer"
 
 #: .\templates\mentoring_app\mentee_page.html:49
 msgid "Career Objectives"
-msgstr "Objectifs de carrière"
+msgstr "Objectifs de Carrière"
 
 #: .\templates\mentoring_app\mentee_page.html:50
 msgid "Architect"
@@ -368,7 +414,7 @@ msgstr "Étudiant"
 
 #: .\templates\mentoring_app\mentee_page.html:57
 msgid "Personality Description"
-msgstr "Description de la personnalité"
+msgstr "Description de la Personnalité"
 
 #: .\templates\mentoring_app\mentee_page.html:58
 msgid "Humble"
@@ -393,7 +439,7 @@ msgstr "S'inscrire"
 #: .\templates\mentoring_app\mentoring_page.html:5
 #: .\templates\nav_mentoring.html:25
 msgid "Mentoring page"
-msgstr "Page de mentorat"
+msgstr "Page de Mentorat"
 
 #: .\templates\mentoring_app\mentoring_page.html:58
 msgid "Choose your hat:"
@@ -403,8 +449,7 @@ msgstr "Choisissez votre chapeau :"
 msgid ""
 "Be a mentee and boost your skills / Become a mentor and share your knowledge"
 msgstr ""
-"Soyez un mentoré et améliorez vos compétences / Devenez mentor et partagez "
-"vos connaissances"
+"Soyez un mentoré et améliorez vos compétences / Devenez un mentor et partagez vos connaissances"
 
 #: .\templates\mentoring_app\mentoring_page.html:63
 msgid "Mentor"
@@ -428,15 +473,15 @@ msgstr "Vous devez obtenir un score minimum de 7/10 pour réussir l'évaluation.
 
 #: .\templates\mentoring_app\questions_page.html:73
 msgid "Submit Answers"
-msgstr "Soumettre les réponses"
+msgstr "Soumettre les Réponses"
 
 #: .\templates\mentoring_app\result_page.html:5
 msgid "Register Page"
-msgstr "Page d'inscription"
+msgstr "Page d'Inscription"
 
 #: .\templates\mentoring_app\result_page.html:19
 msgid "Your Assessment Results"
-msgstr "Vos résultats d'évaluation"
+msgstr "Vos Résultats d'Évaluation"
 
 #: .\templates\mentoring_app\result_page.html:20
 msgid "Your score:"
@@ -463,10 +508,8 @@ msgid "Go to home page"
 msgstr "Aller à la page d'accueil"
 
 #: .\templates\messaging.html:12
-#, fuzzy
-#| msgid "Type a message..."
 msgid "Find users to message..."
-msgstr "Tapez un message..."
+msgstr "Trouver des utilisateurs à contacter..."
 
 #: .\templates\messaging.html:19
 msgid "Messagerie"
@@ -491,77 +534,81 @@ msgstr "Envoyer"
 
 #: .\templates\nav_workgroup.html:25
 msgid "Create Workgroup"
-msgstr "Créer un groupe de travail"
+msgstr "Créer un Groupe de Travail"
 
 #: .\templates\notification_detail.html:18
 msgid "View Workgroup"
-msgstr "Voir le groupe de travail"
+msgstr "Voir le Groupe de Travail"
 
-#: .\templates\profile.html:55 .\templates\search_results.html:84
+#: .\templates\profile.html:55 .\templates\search_results.html:89
 msgid "Birthdate:"
-msgstr "Date de naissance :"
+msgstr "Date de Naissance :"
 
-#: .\templates\profile.html:59 .\templates\search_results.html:88
+#: .\templates\profile.html:59
 msgid "Gender:"
-msgstr "Genre :"
+msgstr "Sexe :"
 
 #: .\templates\profile.html:63
 msgid "Country:"
 msgstr "Pays :"
 
-#: .\templates\profile.html:67 .\templates\search_results.html:92
+#: .\templates\profile.html:67 .\templates\search_results.html:93
 msgid "Education Level:"
-msgstr "Niveau d'éducation :"
+msgstr "Niveau d'Éducation :"
 
-#: .\templates\profile.html:75 .\templates\search_results.html:100
+#: .\templates\profile.html:75
 msgid "Phone:"
 msgstr "Téléphone :"
 
-#: .\templates\profile.html:79 .\templates\search_results.html:104
+#: .\templates\profile.html:79 .\templates\search_results.html:101
 msgid "Bio:"
 msgstr "Biographie :"
 
-#: .\templates\profile.html:83 .\templates\search_results.html:108
+#: .\templates\profile.html:83 .\templates\search_results.html:105
 msgid "Social Media Links:"
-msgstr "Liens de médias sociaux :"
+msgstr "Liens des Réseaux Sociaux :"
 
 #: .\templates\search_results.html:61
 msgid "Search Results"
-msgstr "Résultats de la recherche"
+msgstr "Résultats de Recherche"
 
 #: .\templates\search_results.html:62
 msgid "You searched for:"
 msgstr "Vous avez recherché :"
 
-#: .\templates\search_results.html:115
+#: .\templates\search_results.html:84
+msgid "Follow"
+msgstr "Suivre"
+
+#: .\templates\search_results.html:112
 #: .\templates\workgroup\workgroup_list.html:13
 msgid "Workgroups"
-msgstr "Groupes de travail"
+msgstr "Groupes de Travail"
 
-#: .\templates\search_results.html:169
+#: .\templates\search_results.html:166
 msgid "Creator: "
-msgstr "Créateur : "
+msgstr "Créateur :"
 
-#: .\templates\search_results.html:175
+#: .\templates\search_results.html:172
 msgid "Join Workgroup"
-msgstr "Rejoindre le groupe de travail"
+msgstr "Rejoindre le Groupe de Travail"
 
-#: .\templates\search_results.html:185
+#: .\templates\search_results.html:182
 #: .\templates\workgroup\search_users.html:18
 msgid "No results found."
 msgstr "Aucun résultat trouvé."
 
-#: .\templates\search_results.html:214
+#: .\templates\search_results.html:211
 msgid "Pending"
-msgstr "En attente"
+msgstr "En Attente"
 
 #: .\templates\signup.html:6
 msgid "Sign Up"
-msgstr "S'inscrire"
+msgstr "Inscription"
 
 #: .\templates\signup.html:85
 msgid "Create Your Account"
-msgstr "Créer votre compte"
+msgstr "Créer Votre Compte"
 
 #: .\templates\signup.html:90
 msgid "Already have an account?"
@@ -573,7 +620,7 @@ msgstr "Discuter avec l'assistant"
 
 #: .\templates\smart_mentor\chat.html:13
 msgid "Feed Assistant"
-msgstr "Nourrir l'assistant"
+msgstr "Nourrir l'Assistant"
 
 #: .\templates\smart_mentor\chat.html:126
 msgid "Chat with Assistant"
@@ -581,23 +628,22 @@ msgstr "Discuter avec l'Assistant"
 
 #: .\templates\smart_mentor\chat.html:127
 msgid "Ask questions to your assistant about your data"
-msgstr "Posez des questions à votre assistant sur vos données"
+msgstr "Posez des questions à votre assistant à propos de vos données"
 
 #: .\templates\smart_mentor\chat.html:135
 msgid ""
 "Hey, Can you suggest some questions based on the data, to be answered to "
 "assess my understanding?"
 msgstr ""
-"Hé, peux-tu suggérer des questions basées sur les données pour évaluer ma "
-"compréhension ?"
+"Hé, pouvez-vous suggérer des questions basées sur les données, pour évaluer ma compréhension ?"
 
 #: .\templates\smart_mentor\chat.html:138
 msgid "Can you give me a brief summary of what the data is about ?"
-msgstr "Peux-tu me donner un bref résumé de ce que représentent les données ?"
+msgstr "Pouvez-vous me donner un bref résumé de ce que sont les données ?"
 
 #: .\templates\smart_mentor\chat.html:141
 msgid "Can you give me some clues to help me solve these questions?"
-msgstr "Peux-tu me donner des indices pour m'aider à résoudre ces questions ?"
+msgstr "Pouvez-vous me donner quelques indices pour m'aider à résoudre ces questions ?"
 
 #: .\templates\smart_mentor\chat.html:159
 msgid "Type a message"
@@ -605,7 +651,7 @@ msgstr "Tapez un message"
 
 #: .\templates\smart_mentor\chat.html:164
 msgid "Clear Chat"
-msgstr "Effacer le chat"
+msgstr "Effacer le Chat"
 
 #: .\templates\smart_mentor\my_assistants.html:66
 msgid "No Assistant has been created yet!"
@@ -613,20 +659,19 @@ msgstr "Aucun assistant n'a encore été créé !"
 
 #: .\templates\smart_mentor\scrape.html:52
 msgid "Give knowledge to your assistant here then test it with chatting"
-msgstr ""
-"Donnez des connaissances à votre assistant ici, puis testez-le en discutant"
+msgstr "Donnez des connaissances à votre assistant ici, puis testez-le en discutant"
 
 #: .\templates\smart_mentor\scrape.html:54
 msgid "Scrape Website"
-msgstr "Scraper le site web"
+msgstr "Extraire Site Web"
 
 #: .\templates\smart_mentor\scrape.html:58
 msgid "Enter a website URL:"
-msgstr "Entrez une URL de site web :"
+msgstr "Entrez une URL de site Web :"
 
 #: .\templates\smart_mentor\scrape.html:59
 msgid "Enter URL"
-msgstr "Entrer l'URL"
+msgstr "Entrez l'URL"
 
 #: .\templates\smart_mentor\scrape.html:61
 #: .\templates\smart_mentor\scrape.html:74
@@ -648,61 +693,89 @@ msgstr "Sélectionner un Assistant"
 #: .\templates\smart_mentor\scrape.html:85
 #: .\templates\workgroup\create_group.html:244
 msgid "Enter Assistant Name:"
-msgstr "Entrez le nom de l'Assistant :"
+msgstr "Entrez le Nom de l'Assistant :"
 
 #: .\templates\smart_mentor\scrape.html:86
 #: .\templates\workgroup\create_group.html:245
 msgid "Enter Assistant Name"
-msgstr "Entrer le nom de l'Assistant"
+msgstr "Entrez le Nom de l'Assistant"
 
 #: .\templates\smart_mentor\scrape.html:95
 #: .\templates\smart_mentor\scrape.html:100
 msgid "Save and chat with assistant"
-msgstr "Enregistrer et discuter avec l'assistant"
+msgstr "Sauvegarder et discuter avec l'assistant"
 
 #: .\templates\smart_mentor\scrape.html:99
 msgid "Feed assistant first"
 msgstr "Alimenter l'assistant d'abord"
+
+#: .\templates\user_payment\cancel_subscription.html:5
+msgid "Cancel subscription"
+msgstr "Annuler l'abonnement"
+
+#: .\templates\user_payment\cancel_subscription.html:6
+msgid "Are you sure you want to cancel your subscription?"
+msgstr "Êtes-vous sûr de vouloir annuler votre abonnement ?"
+
+#: .\templates\user_payment\cancel_subscription.html:13
+msgid "Back to account settings"
+msgstr "Retour aux paramètres du compte"
+
+#: .\templates\user_payment\payment_cancelled.html:15
+msgid "Your payment did not go through :("
+msgstr "Votre paiement n'a pas abouti :("
 
 #: .\templates\user_payment\payment_successful.html:15
 msgid "Thanks for your order "
 msgstr "Merci pour votre commande "
 
 #: .\templates\user_payment\payment_successful.html:16
-msgid "You are officialy a premium Jokk member !!"
-msgstr "Vous êtes officiellement un membre premium de Jokk !"
-
-#: .\templates\user_payment\product_page.html:66
-msgid "The feature you are trying to access is reserved for premium users."
-msgstr "La fonction à laquelle vous essayez d'accéder est réservée aux utilisateurs premium."
+msgid "You are officially a premium Jokk member !!"
+msgstr "Vous êtes officiellement un membre premium de Jokk !!"
 
 #: .\templates\user_payment\product_page.html:69
 msgid "Hi"
-msgstr "Bonjour"
+msgstr "Salut"
 
 #: .\templates\user_payment\product_page.html:69
 msgid "! To proceed, select your payment type and click the button"
 msgstr "! Pour continuer, sélectionnez votre type de paiement et cliquez sur le bouton"
 
-#: .\templates\user_payment\product_page.html:74
-msgid "One-time Payment"
-msgstr "Paiement unique"
-
-#: .\templates\user_payment\product_page.html:78
+#: .\templates\user_payment\product_page.html:79
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: .\templates\user_payment\product_page.html:82
-msgid "Proceed to Payment"
-msgstr "Procéder au paiement"
-
 #: .\templates\user_payment\product_page.html:85
+msgid "Weekly Subscription"
+msgstr "Abonnement Hebdomadaire"
+
+#: .\templates\user_payment\product_page.html:87
+msgid "Monthly Subscription"
+msgstr "Abonnement Mensuel"
+
+#: .\templates\user_payment\product_page.html:91
+msgid "Proceed to Payment"
+msgstr "Procéder au Paiement"
+
+#: .\templates\user_payment\product_page.html:94
 msgid "You are not logged in..."
 msgstr "Vous n'êtes pas connecté..."
 
-#: .\templates\user_payment\product_page.html:86
+#: .\templates\user_payment\product_page.html:95
 msgid "Log in"
 msgstr "Se connecter"
+
+#: .\templates\user_payment\subscription_cancelled.html:5
+msgid "Subscription Cancelled Successfully"
+msgstr "Abonnement Annulé avec Succès"
+
+#: .\templates\user_payment\subscription_cancelled.html:6
+msgid "Your subscription has been successfully cancelled."
+msgstr "Votre abonnement a été annulé avec succès."
+
+#: .\templates\user_payment\subscription_cancelled.html:7
+msgid "Return to Home"
+msgstr "Retour à l'Accueil"
 
 #: .\templates\workgroup\classroom.html:205
 msgid "Members:"
@@ -722,17 +795,17 @@ msgstr "Rechercher des utilisateurs..."
 
 #: .\templates\workgroup\classroom.html:239
 msgid "Launch Discussion Room"
-msgstr "Lancer la salle de discussion"
+msgstr "Lancer la Salle de Discussion"
 
 #: .\templates\workgroup\classroom.html:241
 #: .\templates\workgroup\classroom.html:254
 msgid "Discussion Rooms"
-msgstr "Salles de discussion"
+msgstr "Salles de Discussion"
 
 #: .\templates\workgroup\classroom.html:245
 #: .\templates\workgroup\classroom.html:258
 msgid "Join Room"
-msgstr "Rejoindre la salle"
+msgstr "Rejoindre la Salle"
 
 #: .\templates\workgroup\classroom.html:267
 msgid "Refuse"
@@ -753,7 +826,7 @@ msgstr "Supprimer"
 
 #: .\templates\workgroup\confirm_delete.html:6
 msgid "Confirm Delete"
-msgstr "Confirmer la suppression"
+msgstr "Confirmer la Suppression"
 
 #: .\templates\workgroup\confirm_delete.html:7
 msgid "Are you sure you want to delete"
@@ -765,19 +838,17 @@ msgstr "Oui, supprimer"
 
 #: .\templates\workgroup\create_group.html:5
 msgid "Workgroup"
-msgstr "Groupe de travail"
+msgstr "Groupe de Travail"
 
 #: .\templates\workgroup\create_group.html:201
 msgid "Your Workgroups"
-msgstr "Vos groupes de travail"
+msgstr "Vos Groupes de Travail"
 
 #: .\templates\workgroup\create_group.html:210
 msgid ""
 "Working groups are a kind of virtual classroom in which you can add your "
 "colleagues and share your knowledge "
-msgstr ""
-"Les groupes de travail sont une sorte de classe virtuelle dans laquelle vous "
-"pouvez ajouter vos collègues et partager vos connaissances"
+msgstr "Les groupes de travail sont une sorte de salle de classe virtuelle où vous pouvez ajouter vos collègues et partager vos connaissances "
 
 #: .\templates\workgroup\create_group.html:213
 msgid "Create a workgroup"
@@ -794,19 +865,19 @@ msgstr "Créer"
 
 #: .\templates\workgroup\create_group.html:255
 msgid "This feature is only available to premium users."
-msgstr "Cette fonctionnalité n'est disponible que pour les utilisateurs premium."
+msgstr "Cette fonctionnalité est uniquement disponible pour les utilisateurs premium."
 
 #: .\templates\workgroup\discussion_room.html:5
 msgid "Chat Room"
-msgstr "Salle de chat"
+msgstr "Salle de Chat"
 
 #: .\templates\workgroup\discussion_room.html:283
 msgid "Workgroup Members"
-msgstr "Membres du groupe de travail"
+msgstr "Membres du Groupe de Travail"
 
 #: .\templates\workgroup\discussion_room.html:298
 msgid "End Call"
-msgstr "Terminer l'appel"
+msgstr "Terminer l'Appel"
 
 #: .\templates\workgroup\discussion_room.html:308
 msgid "Type your message here..."
@@ -814,39 +885,33 @@ msgstr "Tapez votre message ici..."
 
 #: .\templates\workgroup\discussion_room.html:315
 msgid "Start Video Call"
-msgstr "Démarrer l'appel vidéo"
+msgstr "Démarrer l'Appel Vidéo"
 
 #: .\templates\workgroup\discussion_room.html:316
 msgid "Join Call"
-msgstr "Rejoindre l'appel"
+msgstr "Rejoindre l'Appel"
 
 #: .\templates\workgroup\discussion_room.html:327
 msgid ""
 "Questions for requesting the assistant: (You should always start with the "
 "key word assistant)"
 msgstr ""
-"Questions pour solliciter l'assistant : (Vous devriez toujours commencer par "
-"le mot-clé assistant)"
+"Questions pour demander de l'aide à l'assistant : (Vous devriez toujours commencer par le mot-clé assistant)"
 
 #: .\templates\workgroup\discussion_room.html:334
 msgid ""
 "Assistant, Can you suggest some questions based on the data, to be answered "
 "to assess my understanding?"
 msgstr ""
-"Assistant, peux-tu suggérer des questions basées sur les données pour "
-"évaluer ma compréhension ?"
+"Assistant, pouvez-vous suggérer des questions basées sur les données, pour évaluer ma compréhension ?"
 
 #: .\templates\workgroup\discussion_room.html:337
 msgid "Assistant Can you give me a brief summary of what the data is about ?"
-msgstr ""
-"Assistant, peux-tu me donner un bref résumé de ce que représentent les "
-"données ?"
+msgstr "Assistant, pouvez-vous me donner un bref résumé de ce que sont les données ?"
 
 #: .\templates\workgroup\discussion_room.html:340
 msgid "Assistant Can you give me some clues to help me solve these questions?"
-msgstr ""
-"Assistant, peux-tu me donner des indices pour m'aider à résoudre ces "
-"questions ?"
+msgstr "Assistant, pouvez-vous me donner des indices pour m'aider à résoudre ces questions ?"
 
 #: .\templates\workgroup\discussion_room.html:350
 msgid "Leave"
@@ -858,16 +923,1215 @@ msgstr "Appel en cours"
 
 #: .\templates\workgroup\edit_workgroup.html:7
 msgid "Edit Workgroup"
-msgstr "Modifier le groupe de travail"
+msgstr "Modifier le Groupe de Travail"
 
 #: .\templates\workgroup\edit_workgroup.html:11
 msgid "Save Changes"
-msgstr "Enregistrer les modifications"
+msgstr "Sauvegarder les Modifications"
 
 #: .\templates\workgroup\workgroup_list.html:9
 msgid "Workgroups List"
-msgstr "Liste des groupes de travail"
+msgstr "Liste des Groupes de Travail"
 
 #: .\templates\workgroup\workgroup_list.html:26
 msgid "No workgroups available."
 msgstr "Aucun groupe de travail disponible."
+
+#: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\contrib\staticfiles\apps.py:9
+msgid "Static Files"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\contrib\syndication\apps.py:7
+msgid "Syndication"
+msgstr ""
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: .\venv\Lib\site-packages\django\core\paginator.py:30
+msgid "…"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:50
+msgid "That page number is not an integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:52
+msgid "That page number is less than 1"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:54
+msgid "That page contains no results"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:22
+msgid "Enter a valid value."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:104
+#: .\venv\Lib\site-packages\django\forms\fields.py:752
+msgid "Enter a valid URL."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:165
+msgid "Enter a valid integer."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:176
+msgid "Enter a valid email address."
+msgstr ""
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: .\venv\Lib\site-packages\django\core\validators.py:259
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:267
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:279
+#: .\venv\Lib\site-packages\django\core\validators.py:287
+#: .\venv\Lib\site-packages\django\core\validators.py:316
+msgid "Enter a valid IPv4 address."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:296
+#: .\venv\Lib\site-packages\django\core\validators.py:317
+msgid "Enter a valid IPv6 address."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:308
+#: .\venv\Lib\site-packages\django\core\validators.py:315
+msgid "Enter a valid IPv4 or IPv6 address."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:351
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:357
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:392
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:401
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:410
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:420
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:438
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:461
+#: .\venv\Lib\site-packages\django\forms\fields.py:347
+#: .\venv\Lib\site-packages\django\forms\fields.py:386
+msgid "Enter a number."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:463
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:468
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:473
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:544
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:605
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1423
+#: .\venv\Lib\site-packages\django\forms\models.py:893
+msgid "and"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1425
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\constraints.py:17
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:128
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:129
+msgid "This field cannot be null."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:130
+msgid "This field cannot be blank."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:131
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:135
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:173
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1094
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1095
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1097
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1147
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1149
+msgid "String (unlimited)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1253
+msgid "Comma-separated integers"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1354
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1358
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1493
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1362
+msgid "Date (without time)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1489
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1497
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1502
+msgid "Date (with time)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1626
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1628
+msgid "Decimal number"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1789
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1793
+msgid "Duration"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1845
+msgid "Email address"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1870
+msgid "File path"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1948
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1950
+msgid "Floating point number"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1990
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1992
+msgid "Integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2088
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2105
+msgid "Small integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2113
+msgid "IPv4 address"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2144
+msgid "IP address"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2237
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2238
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2240
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2291
+msgid "Positive big integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2306
+msgid "Positive integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2321
+msgid "Positive small integer"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2337
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2373
+msgid "Text"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2448
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2452
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2456
+msgid "Time"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2564
+msgid "URL"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2588
+msgid "Raw binary data"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2653
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2655
+msgid "Universally unique identifier"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:232
+msgid "File"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:393
+msgid "Image"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:26
+msgid "A JSON object"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:28
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:919
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:921
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1212
+msgid "One-to-one relationship"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1269
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1271
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1319
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: .\venv\Lib\site-packages\django\forms\boundfield.py:184
+msgid ":?.!"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:91
+msgid "This field is required."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:298
+msgid "Enter a whole number."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:467
+#: .\venv\Lib\site-packages\django\forms\fields.py:1241
+msgid "Enter a valid date."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:490
+#: .\venv\Lib\site-packages\django\forms\fields.py:1242
+msgid "Enter a valid time."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:517
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:551
+msgid "Enter a valid duration."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:552
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:621
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:622
+msgid "No file was submitted."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:623
+msgid "The submitted file is empty."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:625
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:630
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:694
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:857
+#: .\venv\Lib\site-packages\django\forms\fields.py:949
+#: .\venv\Lib\site-packages\django\forms\models.py:1566
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:951
+#: .\venv\Lib\site-packages\django\forms\fields.py:1070
+#: .\venv\Lib\site-packages\django\forms\models.py:1564
+msgid "Enter a list of values."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1071
+msgid "Enter a complete value."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1310
+msgid "Enter a valid UUID."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1340
+msgid "Enter a valid JSON."
+msgstr ""
+
+#. Translators: This is the default suffix added to form field labels
+#: .\venv\Lib\site-packages\django\forms\forms.py:98
+msgid ":"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\forms.py:244
+#: .\venv\Lib\site-packages\django\forms\forms.py:328
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:63
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:67
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:72
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:484
+#: .\venv\Lib\site-packages\django\forms\formsets.py:491
+msgid "Order"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:886
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:891
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:898
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:907
+msgid "Please correct the duplicate values below."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1338
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1429
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1568
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\utils.py:226
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:463
+msgid "Clear"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:464
+msgid "Currently"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:465
+msgid "Change"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:794
+msgid "Unknown"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:795
+msgid "Yes"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:796
+msgid "No"
+msgstr ""
+
+#. Translators: Please do not add spaces around commas.
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:861
+msgid "yes,no,maybe"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:891
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:908
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:910
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:912
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:914
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:916
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:918
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:73
+msgid "p.m."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:74
+msgid "a.m."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:79
+msgid "PM"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:80
+msgid "AM"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:152
+msgid "midnight"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:154
+msgid "noon"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:12
+msgid "Saturday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:16
+msgid "Mon"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:21
+msgid "Sat"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:22
+msgid "Sun"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:25
+msgid "January"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:26
+msgid "February"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:27
+msgid "March"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:28
+msgid "April"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:29
+msgid "May"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:30
+msgid "June"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:31
+msgid "July"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:32
+msgid "August"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:33
+msgid "September"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:34
+msgid "October"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:35
+msgid "November"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:36
+msgid "December"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:39
+msgid "jan"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:40
+msgid "feb"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:41
+msgid "mar"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:42
+msgid "apr"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:43
+msgid "may"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:44
+msgid "jun"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:45
+msgid "jul"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:46
+msgid "aug"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:47
+msgid "sep"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:48
+msgid "oct"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:49
+msgid "nov"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:50
+msgid "dec"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\ipv6.py:8
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\text.py:84
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\text.py:269
+msgid "or"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: .\venv\Lib\site-packages\django\utils\text.py:288
+#: .\venv\Lib\site-packages\django\utils\timesince.py:135
+msgid ", "
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:111
+msgid "Forbidden"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:112
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:116
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:122
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:127
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a rel=\"noreferrer"
+"\" …> for links to third-party sites."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:136
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:142
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:148
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:44
+msgid "No year specified"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:64
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:115
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:94
+msgid "No month specified"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:147
+msgid "No day specified"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:194
+msgid "No week specified"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:349
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:380
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:652
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:692
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:169
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\static.py:38
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\static.py:40
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\static.py:79
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:7
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:220
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:221
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" rel=\"noopener"
+"\">DEBUG=True</a> is in your settings file and you have not configured any "
+"URLs."
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:229
+msgid "Django Documentation"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:230
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:238
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:239
+msgid "Get started with Django"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:247
+msgid "Django Community"
+msgstr ""
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:248
+msgid "Connect, get help, or contribute"
+msgstr ""

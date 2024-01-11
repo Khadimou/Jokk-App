@@ -252,7 +252,7 @@
             </div>
         </div>
     {% else %}
-        <p>{% trans 'This feature is only available to premium users.' %}</p>
+        <p class="messages">{% trans 'Workgroup with assistant feature is only available to premium users.' %}</p>
     {% endif %}
     <!-- Affichage des messages d'erreur -->
     {% if messages %}
@@ -281,12 +281,39 @@
                 }
             }
 
+            // Fonction pour réafficher le paragraphe
+            function showPremiumMessage() {
+                if (messagesDiv) {
+                    messagesDiv.style.display = 'block';
+                }
+            }
+
             // Ajouter des écouteurs d'événements
             if (openCreateWorkgroupModalBtn) {
                 openCreateWorkgroupModalBtn.addEventListener('click', hideMessages);
             }
             if (openCreateWorkgroupWithAssistantModalBtn) {
                 openCreateWorkgroupWithAssistantModalBtn.addEventListener('click', hideMessages);
+            }
+
+            // Quand l'utilisateur clique sur <span> (x) ou en dehors de la modale, réaffichez le message
+            span.onclick = function() {
+                modal.style.display = "none";
+                showPremiumMessage();
+            }
+            spanAssistant.onclick = function() {
+                modalAssistant.style.display = "none";
+                showPremiumMessage();
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    showPremiumMessage();
+                } else if (event.target == modalAssistant) {
+                    modalAssistant.style.display = "none";
+                    showPremiumMessage();
+                }
             }
         });
         // Obtenez les modales
