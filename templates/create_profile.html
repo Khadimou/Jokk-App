@@ -113,6 +113,7 @@
 
             {% csrf_token %}
             {{ form|crispy }}
+	   
             <div class="form-group d-flex justify-content-between align-items-center">
                 <button type="submit" class="btn btn-primary">{% trans 'Save Profile' %}</button>
                 <a class="btn btn-link" href="{% url 'home' %}">{% trans 'Skip' %}</a>

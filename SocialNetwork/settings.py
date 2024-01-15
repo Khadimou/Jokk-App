@@ -15,7 +15,12 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://jokk.net',
+    'https://www.jokk.net',
+    # Ajoutez ici d'autres domaines de confiance si nécessaire
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -26,12 +31,19 @@ SECRET_KEY = "django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-STRIPE_SECRET_KEY_TEST = "sk_test_51OVgNXAdLeMTD97Qe3iLusl97vCjzbl4FgAt9bPHesdBFj72c2LNoEgnj9uQp411ICJvsiv0FJQ7IF5vkYxLl7OR00nkEaM5Sj"
+ALLOWED_HOSTS = ['134.209.196.111','jokk.net','www.jokk.net']
+STRIPE_SECRET_KEY_TEST = "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"
 PRODUCT_PRICE = "price_1OVkV9AdLeMTD97QWtMtNKpT"
-MONTHLY_SUBSCRIPTION_PRICE = "price_1OVkWXAdLeMTD97QhbGypGSI"
-WEEKLY_SUBSCRIPTION_PRICE = "price_1OWGNpAdLeMTD97QttADIitQ"
-REDIRECT_DOMAIN = 'http://127.0.0.1:8000/'
+MONTHLY_SUBSCRIPTION_PRICE = "price_1OXMQZAdLeMTD97Q5pGRGWyo"
+WEEKLY_SUBSCRIPTION_PRICE = "price_1OXMRDAdLeMTD97QiLTnEYJV"
+REDIRECT_DOMAIN = '134.209.196.111'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'jokkteam@gmail.com'
+EMAIL_HOST_PASSWORD = 'gmez nymt nrwd wuzk'
+
 
 # Application definition
 
@@ -48,7 +60,8 @@ INSTALLED_APPS = [
     "smart_mentor",
     "mentoring_app",
     'crispy_bootstrap4',
-    'user_payment'
+    'user_payment',
+    'django_countries',
 ]
 
 MIDDLEWARE = [
@@ -83,22 +96,28 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "SocialNetwork.wsgi.application"
-ASGI_APPLICATION = 'SocialNetwork.routing.application'
-
+ASGI_APPLICATION = 'SocialNetwork.asgi.application'
 allowed_origins=['*']
+AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'jokk',
+        'USER': 'jokk',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
-
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
     },
 }
 
@@ -121,23 +140,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'workgroup': {  # Remplacez 'myapp' par le nom de votre application ou '__name__'
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -175,12 +177,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
+
 
 #STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
 
 
 

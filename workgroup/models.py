@@ -14,13 +14,13 @@ class WorkGroup(models.Model):
     with_assistant = models.BooleanField(default=False)
     description = models.TextField(max_length=200, blank=True)
     avatar = models.ImageField(upload_to='avatars_workgroup/', blank=True)
-    members = models.ManyToManyField(User, through='WorkGroupMember', related_name='invited_to_workgroups')
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='WorkGroupMember', related_name='invited_to_workgroups')
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_workgroups', null=True)
     assistants = models.ManyToManyField(OpenAIAssistant, blank=True, related_name='workgroups')
 
 class WorkGroupMember(models.Model):
     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('denied', 'Denied')])
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     workgroup = models.ForeignKey(WorkGroup, on_delete=models.CASCADE)
     # Vous pouvez ajouter d'autres champs si nécessaire
     class Meta:
@@ -46,7 +46,7 @@ class MessageAudio(models.Model):
         return f"Audio message from {self.user.username} in {self.workgroup.name}"
 
 class UserOnlineStatus(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='online_status')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='online_status')
     is_online = models.BooleanField(default=False)
 
     def set_online(self):

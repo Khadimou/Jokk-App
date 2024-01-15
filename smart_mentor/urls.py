@@ -14,6 +14,7 @@ urlpatterns = [
     path('clear-chat/', views.clear_chat, name='clear_chat'),
     path('my-assistants/',views.my_assistants,name='my_assistants'),
     path('api/', include(router.urls)),
+    path('terms/', views.terms, name='terms'),
     path('api/search-users/', SearchUsersAPIView.as_view(), name='search-users'),
     path('api/send_message/', views.send_message, name='send_message'),
     path('send_reply/', views.send_reply, name='send_reply'),

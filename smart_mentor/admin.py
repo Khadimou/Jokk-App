@@ -1,10 +1,10 @@
 from django.contrib import admin
 
 from mentoring_app.models import Notification
-from smart_mentor.models import Profile, OpenAIAssistant, Message, Follow
+from smart_mentor.models import Profile, OpenAIAssistant, Message, Follow, CustomUser
 
 # Register your models here.
-#admin.site.register(Profile)
+admin.site.register(CustomUser)
 admin.site.register(OpenAIAssistant)
 admin.site.register(Message)
 admin.site.register(Follow)

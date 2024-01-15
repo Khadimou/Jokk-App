@@ -1,5 +1,5 @@
 import json
-
+from django.contrib.auth import get_user_model
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -71,6 +71,7 @@ def get_notifications(request):
 @login_required
 @require_POST
 def send_invitation(request):
+    User = get_user_model()
     try:
         data = json.loads(request.body)
         username = data['username']
@@ -180,11 +181,10 @@ def is_valid_assistant_name(user, name):
     Vérifie si le nom de l'assistant correspond à un assistant existant créé par l'utilisateur.
     """
     return OpenAIAssistant.objects.filter(user=user, name=name).exists()
+
+@csrf_exempt
 @login_required
 def create_workgroup(request):
-    # Vérifier si l'utilisateur est premium
-    if not request.user.appuser.is_premium:
-        return redirect('product_page')
 
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)

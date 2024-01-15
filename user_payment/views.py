@@ -8,27 +8,8 @@ from user_payment.models import UserPayment, AppUser
 import stripe
 import time
 
-# @login_required(login_url='login')
-# def product_page(request):
-#     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
-#     if request.method == 'POST':
-#         checkout_session = stripe.checkout.Session.create(
-#             payment_method_types = ['card'],
-#             line_items = [
-#                 {
-#                     'price': settings.PRODUCT_PRICE,
-#                     'quantity': 1,
-#                 },
-#             ],
-#             mode = 'payment',
-#             customer_creation = 'always',
-#             success_url = settings.REDIRECT_DOMAIN + '/payment_successful?session_id={CHECKOUT_SESSION_ID}',
-#             cancel_url = settings.REDIRECT_DOMAIN + '/payment_cancelled',
-#         )
-#         return redirect(checkout_session.url, code=303)
-#     return render(request, 'user_payment/product_page.html')
-
 @login_required(login_url='login')
+@csrf_exempt
 def product_page(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
 
@@ -182,6 +163,25 @@ def stripe_webhook(request):
             app_user.save()
         except AppUser.DoesNotExist:
             pass
+    elif event['type'] == 'invoice.payment_failed':
+    	invoice = event['data']['object']
+    	customer_id = invoice.customer
+
+    	try:
+        	app_user = AppUser.objects.get(stripe_customer_id=customer_id)
+        	app_user.failed_payment_attempts += 1
+        	app_user.save()
+
+        	# Si le nombre d'échecs atteint un seuil, annuler l'abonnement
+        	if app_user.failed_payment_attempts >= 2:  # Exemple de seuil
+            		stripe.Subscription.delete(app_user.stripe_subscription_id)
+            		app_user.is_premium = False
+            		app_user.stripe_subscription_id = None
+            		app_user.failed_payment_attempts = 0  # Réinitialiser le compteur
+            		app_user.save()
+    	except AppUser.DoesNotExist:
+        	pass  # Gérer l'exception si nécessaire
+
 
     return HttpResponse(status=200)
 

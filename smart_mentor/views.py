@@ -2,14 +2,14 @@ import datetime
 import json
 import mimetypes
 import time
-
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-
+from .models import CustomUser  # Adjust the import path according to your project structure
 from workgroup.models import WorkGroup
 from .models import Profile, OpenAIAssistant, Follow
 from .utils import scrape_website, text_to_pdf, upload_to_openai, create_chat_thread, process_message_with_citations, \
@@ -36,6 +36,8 @@ from django.conf import settings
 from PyPDF2 import PdfReader
 import os
 
+def terms(request):
+    return render(request, 'terms.html')
 
 def my_assistants(request):
     assistants = OpenAIAssistant.objects.filter(user=request.user)
@@ -58,12 +60,15 @@ def handle_pdf_file(file_path):
             text += page.extract_text()
         return text
 
+@csrf_exempt
 def scrape_view(request):
     context = {'file_id': None}
+
     if not request.user.appuser.is_premium:
         return redirect('product_page')
         # Option 2: Afficher un message d'erreur
         #return HttpResponse("This feature is reserved for premium users.", status=403)
+
     if request.method == "POST":
         # Handle URL scraping
         if 'scrape' in request.POST:
@@ -112,7 +117,6 @@ def chat_view(request):
     file_id = request.GET.get('file_id')
     assistant_name = request.GET.get('assistant_name')
     context = {'file_id': file_id, 'error': None, 'messages': request.session.get('messages', [])}
-    # Check if an assistant with this name already exists
     if OpenAIAssistant.objects.filter(name=assistant_name).exists():
         context['error'] = 'An assistant with this name already exists. Please choose a different name.'
         return render(request, 'smart_mentor/scrape.html', context)
@@ -264,6 +268,8 @@ def change_theme(request):
         return JsonResponse({"theme": request.session['theme']})
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
+
+@csrf_exempt
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -300,9 +306,10 @@ def delete_account(request):
     # Si la méthode n'est pas POST, rediriger vers une page de confirmation ou une page d'erreur
     return render(request, 'confirm_delete_account.html')
 
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = LoginForm(request.POST or None)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -349,12 +356,16 @@ def create_profile(request):
 
     return render(request, 'create_profile.html', {'form': form})
 
+from django.shortcuts import get_object_or_404
+
 def profile_view(request, user_id=None):
     if user_id is None:
-        profile = Profile.objects.get(user=request.user)
+        user = request.user
     else:
-        profile = Profile.objects.get(user_id=user_id)
+        user = get_object_or_404(CustomUser, pk=user_id)
+    profile = get_object_or_404(Profile, user=user)
     return render(request, 'profile.html', {'profile': profile})
+
 
 @login_required
 def edit_profile(request):
@@ -443,8 +454,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         # Filtrer les messages où l'utilisateur est soit l'expéditeur soit le destinataire
         return self.queryset.filter(Q(sender=user) | Q(recipient=user))
+
+
 @login_required
 def messaging_view(request):
+    User = get_user_model()
     users = User.objects.exclude(id=request.user.id)
     messages = Message.objects.filter(recipient=request.user)
 
@@ -485,6 +499,7 @@ def messaging_view(request):
 
 @login_required
 def get_messages(request, username):
+    User = get_user_model()
     current_user = request.user
     other_user = get_object_or_404(User, username=username)
 
@@ -585,6 +600,7 @@ from rest_framework.decorators import api_view
 
 @login_required
 def sendMessage(request):
+    User = get_user_model()
     if request.method == 'POST':
         recipient_id = request.POST.get('recipient_id')
         message_text = request.POST.get('message_text')
@@ -635,6 +651,7 @@ from rest_framework.response import Response
 
 @require_POST
 def send_reply(request):
+    User = get_user_model()
     data = json.loads(request.body)
     message_text = data.get('text')
     recipient_id = data.get('recipientId')  # ID du destinataire
@@ -673,6 +690,7 @@ def mark_message_as_read(request, message_id):
 @require_POST
 @login_required
 def mark_conversation_as_read(request, username):
+    User = get_user_model()
     recipient = request.user
     sender = User.objects.get(username=username)
 
@@ -681,6 +699,7 @@ def mark_conversation_as_read(request, username):
 
     return JsonResponse({'status': 'success'})
 def get_user_info(request):
+    User = get_user_model()
     username = request.GET.get('username', None)
     if username:
         try:
@@ -697,6 +716,7 @@ def get_user_info(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 def get_user_id(request):
+    User = get_user_model()
     username = request.GET.get('username')
     if username:
         try:
@@ -710,6 +730,7 @@ def get_user_id(request):
 @login_required
 @require_POST
 def follow_toggle(request):
+    User = get_user_model()
     user_id = request.POST.get('user_id')
     try:
         followed_user = User.objects.get(pk=user_id)

@@ -2,7 +2,13 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.conf import settings
 from django_countries.fields import CountryField
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
 
 class Profile(models.Model):
     GENDER_CHOICES = (
@@ -11,16 +17,18 @@ class Profile(models.Model):
         ('OTHER', _('Other')),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     first_login = models.BooleanField(default=True)
     is_mentor = models.BooleanField(default=False)
     avatar = models.ImageField(upload_to='avatars/', blank=True, default='avatars/pp.svg')
     birthdate = models.DateField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    country = CountryField(blank_label='(select country)', blank=True)
+    #city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
+    #region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)
+    country = CountryField(blank_label='(Select a country)', blank=True)
     education_level = models.CharField(max_length=100, blank=True)
     skills = models.TextField(max_length=100, blank=True)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True)
     bio = models.TextField(max_length=100, blank=True)
     social_media_links = models.URLField(max_length=200, blank=True)
 
@@ -52,8 +60,8 @@ class OpenAIAssistant(models.Model):
         return self.name
 
 class Message(models.Model):
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-    recipient = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     text = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)

@@ -40,7 +40,7 @@ class Mentor(models.Model):
         return self.Fields
 
 class Availability(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=10)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -50,7 +50,7 @@ class Availability(models.Model):
 
 
 class Response(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     question = models.TextField()
     answer = models.TextField()
 

@@ -4,7 +4,7 @@ import os
 from bs4 import BeautifulSoup
 import requests
 import pdfkit
-
+from django.conf import settings
 from openai import OpenAI
 import logging
 
@@ -40,10 +40,12 @@ def scrape_website(url):
     return soup.get_text()
 
 def text_to_pdf(text, filename):
-    path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    # Construction du chemin complet
+    pdf_path = os.path.join(settings.MEDIA_ROOT, filename)
+    path_wkhtmltopdf = '/usr/bin/wkhtmltopdf'
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
-    pdfkit.from_string(text, filename, configuration=config)
-    return filename
+    pdfkit.from_string(text, pdf_path, configuration=config)
+    return pdf_path
 
 def upload_to_openai(filepath):
     """Upload a file to OpenAI and return its file ID."""

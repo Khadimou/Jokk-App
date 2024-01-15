@@ -84,6 +84,9 @@
                 {% csrf_token %}
                 <h2>{% trans "Create Your Account" %}</h2>
                 {{ form|crispy }}
+		<div class="terms">
+        		<p>{% trans 'Read the '%}<a href="{% url 'terms' %}">{% trans 'terms and conditions of use'%}</a>.</p>
+    		</div>
                 <button type="submit" class="btn-signup">{% trans "Register" %}</button>
             </form>
             <div class="signup-links">

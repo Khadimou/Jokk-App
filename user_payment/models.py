@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, Group, Permission, User
 from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
+from django.conf import settings
 
 class AppUserManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -27,9 +28,10 @@ class AppUserManager(BaseUserManager):
         return user
 
 class AppUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     is_premium = models.BooleanField(default=False)
     country = models.CharField(max_length=100)
+    failed_payment_attempts = models.IntegerField(default=0)
     stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True)  # Ajouté pour gérer l'ID de l'abonnement Stripe
 
     def __str__(self):

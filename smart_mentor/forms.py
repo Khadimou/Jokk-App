@@ -2,12 +2,14 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-
+from django_countries.widgets import CountrySelectWidget
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.utils.translation import get_language
-
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 from smart_mentor.models import Profile
+from django.core.mail import send_mail
 
 
 class LoginForm(forms.Form):
@@ -31,8 +33,28 @@ class SignUpForm(UserCreationForm):
         label="I accept the conditions and terms of use"
     )
 
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        user_model = get_user_model()
+        if user_model.objects.filter(email=email).exists():
+            raise ValidationError("Un compte avec cet e-mail existe déjà.")
+        return email
+
+    def save(self, commit=True):
+        user = super(SignUpForm, self).save(commit=commit)
+        if commit:
+            # Envoyer l'e-mail
+            send_mail(
+                'Welcome to our web application!',
+                'Your account has been successfully created.',
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
+        return user
+
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'accept_terms')
 
 
@@ -56,6 +78,9 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+  	# Set the widget for the 'country' field to 'CountrySelectWidget'
+        self.fields['country'].widget = CountrySelectWidget()
+	#country = forms.ModelChoiceField(queryset=Country.objects.all(), required=False)
         current_language = get_language() or settings.LANGUAGE_CODE
         date_format = settings.DATE_FORMATS.get(current_language, '%Y-%m-%d')
 
@@ -66,6 +91,6 @@ class ProfileForm(forms.ModelForm):
         self.fields['birthdate'].input_formats = [date_format]
 
         # Ajout de la traduction pour les champs si nécessaire
-        # for field_name in self.fields:
-        #     field = self.fields[field_name]
-        #     field.widget.attrs['placeholder'] = _(field.label)
+        for field_name in self.fields:
+             field = self.fields[field_name]
+             field.widget.attrs['placeholder'] = _(field.label)
