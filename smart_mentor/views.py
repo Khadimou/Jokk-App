@@ -461,6 +461,15 @@ def messaging_view(request):
     User = get_user_model()
     users = User.objects.exclude(id=request.user.id)
     messages = Message.objects.filter(recipient=request.user)
+    # Récupérer les followers de l'utilisateur connecté
+    user_followers = Follow.objects.filter(followed=request.user).select_related('follower')
+
+    # Préparer les données pour le template
+    followers_data = [{
+        'username': follower.follower.username,
+        'profile_picture_url': follower.follower.profile.avatar.url,  # Assurez-vous que cette propriété existe
+        'user_id': follower.follower.id
+    } for follower in user_followers]
 
     conversations = {}
     for message in messages:
@@ -493,7 +502,8 @@ def messaging_view(request):
 
     context = {
         'users': users,
-        'conversations': sorted_conversations  # Pass the sorted conversations
+        'conversations': sorted_conversations,
+        'followers': followers_data  
     }
     return render(request, 'messaging.html', context)
 

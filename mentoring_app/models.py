@@ -71,6 +71,7 @@ class Notification(models.Model):
         # Autres types si nécessaire
         ('room_launched','Room launched'),
         ('mentor_promotion', 'Mentor Promotion'),
+	('renewal_reminder', 'Renewal Reminder'),
     )
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='invitation')
 

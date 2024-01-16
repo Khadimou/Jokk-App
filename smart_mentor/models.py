@@ -6,6 +6,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django_countries.fields import CountryField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -23,8 +25,6 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', blank=True, default='avatars/pp.svg')
     birthdate = models.DateField(null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    #city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
-    #region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)
     country = CountryField(blank_label='(Select a country)', blank=True)
     education_level = models.CharField(max_length=100, blank=True)
     skills = models.TextField(max_length=100, blank=True)
@@ -35,17 +35,15 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=CustomUser)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
 
 
 class OpenAIAssistant(models.Model):

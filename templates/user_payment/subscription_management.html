@@ -1,0 +1,37 @@
+{% extends "base_site.html" %} <!-- Replace with your base template -->
+{% load i18n %}
+
+{% block content %}
+    <div class="container">
+        <h2>{% trans 'Subscription Management' %}</h2>
+        <p>{% trans 'User:' %} {{ app_user.user.username }}</p>
+        <p>{% trans 'Subscription Status:' %} {% if app_user.is_premium %} Premium {% else %} Standard {% endif %}</p>
+        <p>{% trans 'Subscription End Date:' %} {{ app_user.subscription_end_date }}</p>
+        <p>{% trans 'Country:' %} {{ app_user.country }}</p>
+        <p>{% trans 'Failed Payment Attempts:' %} {{ app_user.failed_payment_attempts }}</p>
+        
+        <h3>{% trans 'Payment History' %}</h3>
+        <ul>
+            {% for payment in user_payments %}
+                <li>
+                    {% if payment.payment_bool %}
+                        - {% trans 'Payment Successful' %}
+                    {% else %}
+                        - {% trans 'Payment Failed' %}
+                    {% endif %}
+                    {% if payment.stripe_subscription_payment %}
+                        - {% trans 'Subscription Payment' %}
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>{% trans 'No payments made.' %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+  
+  <p>{% trans 'You can cancel your subscription at any time ' %}</p>
+  <a href="{% url 'cancel_page' %}" class="btn btn-danger">{% trans 'Cancel Subscription' %}</a>
+        
+  <!-- Add your subscription management content here -->
+  <!-- You can access context variables passed from the view -->
+{% endblock %}

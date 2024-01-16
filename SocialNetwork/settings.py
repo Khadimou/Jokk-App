@@ -44,7 +44,15 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'jokkteam@gmail.com'
 EMAIL_HOST_PASSWORD = 'gmez nymt nrwd wuzk'
 
+from celery.schedules import crontab
 
+CELERY_BEAT_SCHEDULE = {
+    'send-renewal-notifications-daily': {
+        'task': 'user_payment.views.send_renewal_notifications',
+        'schedule': crontab(hour=0, minute=0),  # Planifier pour s'exécuter tous les jours à minuit
+    },
+}
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
 # Application definition
 
 INSTALLED_APPS = [
@@ -62,6 +70,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'user_payment',
     'django_countries',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [

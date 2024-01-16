@@ -185,3 +185,43 @@ def stripe_webhook(request):
 
     return HttpResponse(status=200)
 
+from django.utils import timezone
+from datetime import timedelta
+from celery import shared_task
+
+@shared_task
+def send_renewal_notifications():
+    current_time = timezone.now()
+    upcoming_renewal_time = current_time + timedelta(days=1)
+
+    # Trouver tous les abonnements qui se renouvellent dans les 24 prochaines heures
+    users_with_upcoming_renewals = AppUser.objects.filter(
+        stripe_subscription_id__isnull=False,
+        subscription_end_date__lte=upcoming_renewal_time
+    )
+
+    for user in users_with_upcoming_renewals:
+        # Créer et envoyer la notification
+        Notification.objects.create(
+            recipient=user.user,
+            title="Renew your subscription soon",
+            body="Your subscription will be renewed automatically within 24 hours.",
+	    read=False,
+            type="renewal_reminder"
+        )
+
+
+@login_required
+def subscription_management(request):
+    # Récupérer l'instance AppUser de l'utilisateur connecté
+    app_user = AppUser.objects.get(user=request.user)
+
+    # Récupérer les paiements liés à l'utilisateur
+    user_payments = app_user.userpayment_set.all()
+
+    context = {
+        'app_user': app_user,
+        'user_payments': user_payments,
+    }
+
+    return render(request, 'user_payment/subscription_management.html', context)

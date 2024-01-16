@@ -487,17 +487,19 @@
                 return cookieValue;
             }
 
-            fetchNotifications();
+            setInterval(fetchNotifications, 60000);
 
             function fetchNotifications() {
                 fetch('{% url 'get-notifications' %}')
                     .then(response => response.json())
                     .then(data => {
+			console.log("Notifications data:", data);
                         updateNotificationsDropdown(data.notifications, data.unread_count);
                     });
             }
 
             function updateNotificationsDropdown(notifications, unreadCount) {
+		console.log("Updating notifications dropdown with:", notifications);
                 const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
 
                 notifications.forEach(notification => {
@@ -524,7 +526,18 @@
                             await markAsRead(notification.id);
                             showNotificationDetails(notification); // Afficher le modal
                         });
-                    } else {
+                    } else if (notification.type === 'renewal_reminder') {
+                        // Set the href to the subscription management page or relevant page
+                        notificationElement.href = `/subscription_management/`;
+
+                        // Add a click event listener
+                        notificationElement.addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            await markAsRead(notification.id);
+                            window.location.href = this.href; // Redirect to the subscription management page
+                        });
+                    } 
+		      else {
                         // Gérer les notifications pour les rooms lancés
                         notificationElement.href = `/workgroups/${notification.workgroup_id}/`;
                         notificationElement.addEventListener('click', async function(e) {
@@ -658,7 +671,7 @@
                     }
 
                     // Mise à jour de la liste de notifications pour refléter le changement
-                    fetchNotifications();
+                    setInterval(fetchNotifications, 60000);
                 }
             }
 

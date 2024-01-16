@@ -15,6 +15,20 @@
 
         <div class="messaging-container">
             <aside class="sidebar">
+		<div class="followers-list">
+                    <h3>{% trans 'My Colleagues' %}</h3>
+                    {% for follower in followers %}
+                        <div class="follower" data-user-id="{{ follower.user_id }}" data-username="{{ follower.username }}">
+                            <img class="follower-image" src="{{ follower.profile_picture_url }}" alt="{{ follower.username }} Picture" style="width: 50px; height: 50px;">
+                            <div class="follower-details">
+                                <p class="follower-name">{{ follower.username }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>{% trans 'No colleagues' %}</p>
+                    {% endfor %}
+
+                </div>
                 <!-- Sidebar: Liste des conversations -->
                 <h2>{% trans 'Messagerie' %}</h2>
                 <div class="search-bar">
@@ -367,6 +381,13 @@
                 const replyInput = document.getElementById('reply-input');
                 replyInput.value = '';
             }
+
+	    document.querySelectorAll('.follower').forEach(follower => {
+                follower.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    startConversation(username);
+                });
+            });
 
             function getCookie(name) {
                 let cookieValue = null;

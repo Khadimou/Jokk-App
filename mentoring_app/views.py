@@ -107,10 +107,19 @@ def mentor_page(request):
 
 from django.shortcuts import get_object_or_404
 
+from django.shortcuts import redirect
+from django.contrib.sessions.models import Session
+
 def register_page(request):
     user = request.user
     user_profile = get_object_or_404(Profile, user=user)
 
+    # Vérifier si l'utilisateur a déjà des réponses
+    if Response.objects.filter(user=user).exists():
+        return redirect('result_page')  # Rediriger vers result_page si des réponses existent
+
+    # Gérer le nombre de clics sur "Register"
+    register_clicks = request.session.get('register_clicks', 0)
     if request.method == 'POST':
         form = MentorForm(request.POST)
         if form.is_valid():
@@ -120,9 +129,19 @@ def register_page(request):
 
             questions = generate_questions(mentor_instance.Fields, mentor_instance.Degree)
             request.session['questions'] = questions
-            return render(request, 'mentoring_app/questions_page.html', {'questions': questions})
+
+            # Incrementer le nombre de clics sur "Register"
+            register_clicks += 1
+            request.session['register_clicks'] = register_clicks
+
+            # Rediriger vers questions_page pour le premier clic, result_page pour les suivants
+            if register_clicks <= 1:
+                return render(request, 'mentoring_app/questions_page.html', {'questions': questions})
+            else:
+                return redirect('result_page')
     else:
         form = MentorForm()
+
     return render(request, 'mentoring_app/result_page.html', {'form': form})
 
 # def evaluate_answers(request):

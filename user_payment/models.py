@@ -32,6 +32,7 @@ class AppUser(models.Model):
     is_premium = models.BooleanField(default=False)
     country = models.CharField(max_length=100)
     failed_payment_attempts = models.IntegerField(default=0)
+    subscription_end_date = models.DateTimeField(null=True, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True)  # Ajouté pour gérer l'ID de l'abonnement Stripe
 
     def __str__(self):
