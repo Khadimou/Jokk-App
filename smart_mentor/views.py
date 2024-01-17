@@ -60,7 +60,7 @@ def handle_pdf_file(file_path):
             text += page.extract_text()
         return text
 
-@csrf_exempt
+
 def scrape_view(request):
     context = {'file_id': None}
 
@@ -112,7 +112,7 @@ def scrape_view(request):
             os.remove(pdf_path)
 
     return render(request, 'smart_mentor/scrape.html', context)
-@csrf_exempt
+#@csrf_exempt
 def chat_view(request):
     file_id = request.GET.get('file_id')
     assistant_name = request.GET.get('assistant_name')

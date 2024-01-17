@@ -1,0 +1,140 @@
+{% extends 'base_site.html' %}
+{% load i18n %}
+
+{% block extrahead %}
+    <title>{% trans 'Verification Payment' %}</title>
+    <!-- Ajouter Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Styles pour le container */
+        .payment-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: white;
+            text-align: center;
+        }
+
+        /* Styles pour le formulaire et les éléments */
+        #payment-form {
+            margin-top: 20px;
+        }
+
+        #card-element {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f7f7f7;
+            margin-bottom: 20px;
+        }
+
+        #submit-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #submit-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Styles pour les messages */
+        #payment-messages {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <h2>{% trans 'Verification Payment' %}</h2>
+    <form id="payment-form">
+        <div id="card-element">
+            <!-- Stripe Elements will go here -->
+        </div>
+        <button id="submit-button">{% trans 'Pay' %}</button>
+    </form>
+	
+    <div id="payment-messages"></div>
+    <div id="card-errors" role="alert"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var stripe = Stripe('{{ stripe_public_key }}');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.mount('#card-element');
+
+        var form = document.getElementById('payment-form');
+	var paymentMessages = document.getElementById('payment-messages');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+	    paymentMessages.textContent = '';
+	    document.getElementById('submit-button').disabled = true;
+            stripe.confirmCardPayment('{{ client_secret }}', {
+                payment_method: {
+                    card: card,
+                    billing_details: {
+                        // Add customer billing details here
+                    }
+                }
+            }).then(function(result) {
+		document.getElementById('submit-button').disabled = false;
+                if (result.error) {
+		    // Afficher l'erreur
+            	    paymentMessages.textContent = result.error.message;
+            	    paymentMessages.style.color = 'red';
+                    // Show error to your customer
+                    console.log(result.error.message);
+                } else {
+                    // The payment has been processed!
+                    if (result.paymentIntent.status === 'succeeded') {
+                        // Show a success message to your
+                        paymentMessages.textContent = 'Payment succeeded!';
+	                paymentMessages.style.color = 'green';
+			// Redirect to a success page, or update the payment status on your page
+			window.location.href = '{% url "payment_successful" %}';
+                    }
+                }
+            });
+        });
+
+       {% comment %} if (result.error) {
+            var errorElement = document.getElementById('card-errors');
+            errorElement.textContent = result.error.message;
+        } else {
+            errorElement.textContent = '';
+            // Autres traitements...
+        }
+
+        if (result.paymentIntent.status === 'succeeded') {
+            // Option 1: Envoyer une requête AJAX pour traiter le paiement réussi
+            fetch('/path_to_payment_success_handler', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Assurez-vous d'inclure le jeton CSRF pour la sécurité
+                },
+                body: JSON.stringify({ paymentIntentId:
+                    result.paymentIntent.id })
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                // Rediriger l'utilisateur ou mettre à jour la page en conséquence
+                });
+
+            // Option 2: Redirection vers une page de succès
+            // window.location.href = '/path_to_success_page';
+        }{% endcomment %}
+    </script>
+{% endblock %}

@@ -282,17 +282,28 @@
                 <i class="fas fa-comments fa-lg"></i>
             </a>
             <!-- Onglet Notifications -->
-            <div style="position: relative;">
-
+             <div style="position: relative;">
                 <a class="nav-link" href="#" id="notificationDropdownToggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white; text-decoration: none;">
                     <i class="fa fa-bell" id="notificationIcon" style="font-size: 1.5em;"></i>
                     <span id="notificationBadge" class="badge badge-danger"></span>
                 </a>
 
-
                 <div class="dropdown-menu" aria-labelledby="notificationDropdownToggle">
-                    <!-- Ici, insérez dynamiquement les notifications -->
+                    <!-- Conteneur pour les notifications dynamiques -->
+                    <div id="notificationContainer"></div>
 
+                    <!-- Lien 'See All Notifications' -->
+                    <a href="{% url 'all_notifications' %}" class="dropdown-item">
+                        {% trans "See all notifications" %}
+                    </a>
+
+                    <!-- Séparateur -->
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Bouton 'Clear All' -->
+                    <a href="#" id="clearAllNotifications" class="dropdown-item">
+                        {% trans "Clear all" %}
+                    </a>
                 </div>
             </div>
 
@@ -487,7 +498,7 @@
                 return cookieValue;
             }
 
-            setInterval(fetchNotifications, 60000);
+            fetchNotifications();
 
             function fetchNotifications() {
                 fetch('{% url 'get-notifications' %}')
@@ -499,8 +510,9 @@
             }
 
             function updateNotificationsDropdown(notifications, unreadCount) {
-		console.log("Updating notifications dropdown with:", notifications);
-                const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
+                
+		const notificationsContainer = document.getElementById('notificationContainer');
+		notificationsContainer.innerHTML = '';                
 
                 notifications.forEach(notification => {
                     const notificationElement = document.createElement('a');
@@ -547,7 +559,7 @@
                         });
                     }
 
-                    notificationsDropdown.appendChild(notificationElement);
+                    notificationsContainer.appendChild(notificationElement);
                 });
 
 
@@ -559,25 +571,7 @@
                     notificationBadge.style.display = 'none'; // Cachez le badge s'il n'y a pas de notifications non lues
                 }
 
-                // Ajoutez le lien 'See All Notifications'
-                const allNotificationsElement = document.createElement('a');
-                allNotificationsElement.href = '{% url 'all_notifications' %}';
-                allNotificationsElement.classList.add('dropdown-item');
-                allNotificationsElement.textContent = '{% trans "See all notifications" %}';
-                notificationsDropdown.appendChild(allNotificationsElement);
-
-                // Ajoutez un séparateur
-                const divider = document.createElement('div');
-                divider.classList.add('dropdown-divider');
-                notificationsDropdown.appendChild(divider);
-
-                // Ajoutez le bouton 'Clear All'
-                const clearAllElement = document.createElement('a');
-                clearAllElement.href = '#';
-                clearAllElement.id = 'clearAllNotifications';
-                clearAllElement.classList.add('dropdown-item');
-                clearAllElement.textContent = '{% trans "Clear all" %}';
-                notificationsDropdown.appendChild(clearAllElement);
+               
 
                 document.getElementById('clearAllNotifications').addEventListener('click', function(e) {
                     e.preventDefault();
@@ -590,9 +584,9 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === 'success') {
-                                // Supprimez toutes les notifications du menu déroulant
-                                const notificationsDropdown = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdownToggle"]');
-                                notificationsDropdown.innerHTML = '';
+                                // Supprimez uniquement les notifications du conteneur de notifications
+            			const notificationsContainer = document.getElementById('notificationContainer');
+            			notificationsContainer.innerHTML = '';
                                 // Mettre à jour le compteur de notifications
                                 updateNotificationCounter();
                             }
@@ -671,7 +665,7 @@
                     }
 
                     // Mise à jour de la liste de notifications pour refléter le changement
-                    setInterval(fetchNotifications, 60000);
+                    fetchNotifications();
                 }
             }
 
@@ -684,8 +678,59 @@
                 notificationCounter.style.display = newCount > 0 ? 'inline-block' : 'none';
             }
 
+		let websocket;
+		const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+		const ws_path = `${ws_scheme}://${window.location.host}/ws/notifications/`;
 
-// Appeler la fonction pour charger le nombre de messages non lus
+		function connectWebSocket() {
+		    websocket = new WebSocket(ws_path);
+
+		    websocket.onopen = function() {
+		        console.log("Connected to WebSocket");
+		    };
+
+	            websocket.onmessage = function(e) {
+		        const data = JSON.parse(e.data);
+		        console.log("Notification reçue:", data);
+		        // ... Traiter la notification ...
+			const notification = data.content;
+
+                    // Mettez à jour l'interface utilisateur avec la nouvelle notification
+                    // Par exemple, ajoutez la notification au notificationsContainer
+                    const notificationElement = document.createElement('a');
+                    notificationElement.setAttribute('data-id', notification.id);
+                    notificationElement.classList.add('dropdown-item');
+                    if (!notification.read) {
+                        notificationElement.classList.add('notification-unread');
+                    }
+                    notificationElement.textContent = notification.title;
+                    // ... Plus de code pour gérer le comportement des notifications ...
+
+                    const notificationsContainer = document.getElementById('notificationContainer');
+                    notificationsContainer.prepend(notificationElement); // Ajoutez la notification au début du conteneur
+
+                    updateNotificationCounter();
+		    };
+
+		    websocket.onerror = function(error) {
+		        console.error('WebSocket Error:', error);
+		    };
+
+		    websocket.onclose = function(e) {
+	            console.error('Chat socket closed unexpectedly. Trying to reconnect...');
+        	// Tentative de reconnexion après 5 secondes
+	            setTimeout(function() {
+            		connectWebSocket();
+	            }, 5000);
+		    };
+		}
+
+	    // Initialiser la connexion WebSocket
+	    {#connectWebSocket();#}
+
+            
+
+	    // Appeler la fonction pour charger le nombre de messages non lus
             fetchUnreadMessagesCount();
 
             function fetchUnreadMessagesCount() {

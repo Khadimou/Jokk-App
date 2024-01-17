@@ -5,6 +5,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ["134.209.196.111",]
 
+SECRET_KEY = config("SECRET_KEY")
+
 ROOT_URLCONF = f'{config("SocialNetwork")}.urls'
 
 WSGI_APPLICATION = f'{config("SocialNetwork")}.wsgi.application'
@@ -52,4 +54,4 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'CodingWithMitch Team <noreply@codingwithmitch.com>'
 
 
-BASE_URL = "http://134.209.196.111"
+BASE_URL = "https://134.209.196.111"

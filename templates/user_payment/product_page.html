@@ -63,8 +63,7 @@
 
     <div class="container">
         {% if user.is_authenticated %}
-{#            <h1>{% trans 'The feature you are trying to access is reserved for premium users.' %}</h1>#}
-            <form enctype="multipart/form-data" method="post" role="product_page" class="payment-form">
+            <form enctype="multipart/form-data" method="post" role="form" class="payment-form">
                 {% csrf_token %}
                 <h2>{% trans 'Hi' %} {{ user }}{% trans '! To proceed, select your payment type and click the button' %}</h2>
 

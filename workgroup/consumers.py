@@ -12,6 +12,28 @@ from django.templatetags.static import static
 
 from workgroup.models import WorkGroup, MessageAudio
 
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        # Connectez-vous au groupe de notification spécifique à l'utilisateur
+        self.group_name = f'notifications_{self.scope["user"].id}'
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Quittez le groupe à la déconnexion
+        await self.channel_layer.group_discard(
+            self.group_name,
+            self.channel_name
+        )
+
+    async def receive_notification(self, event):
+        # Recevoir une notification depuis le backend
+        notification = event['notification']
+        await self.send(text_data=json.dumps(notification))
+
 logger = logging.getLogger('workgroup')
 User = get_user_model()
 class ChatConsumer(AsyncWebsocketConsumer):

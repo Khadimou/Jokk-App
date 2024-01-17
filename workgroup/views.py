@@ -17,7 +17,6 @@ from smart_mentor.utils import create_chat_thread, create_assistant
 from workgroup.forms import RevisionForm
 from workgroup.models import WorkGroup, WorkGroupMember, ChatRoom, UserOnlineStatus
 
-
 # Create your views here.
 def revision_group(request):
     if request.method == 'POST':
@@ -185,6 +184,7 @@ def is_valid_assistant_name(user, name):
 @csrf_exempt
 @login_required
 def create_workgroup(request):
+    User = get_user_model()
 
     if request.method == 'POST':
         form = RevisionForm(request.POST, request.FILES)
@@ -393,6 +393,7 @@ def chat_room(request, chat_room_id):
     # Récupérer le premier assistant associé au WorkGroup, si disponible
     assistant = workgroup.assistants.first() if workgroup.assistants.exists() else None
     assistant_user = None
+    User = get_user_model()
     if workgroup.with_assistant:
         assistant_user, _ = User.objects.get_or_create(username=assistant.name)
 

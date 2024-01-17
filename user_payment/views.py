@@ -9,7 +9,35 @@ import stripe
 import time
 
 @login_required(login_url='login')
-@csrf_exempt
+def verify_payment(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
+
+    if request.method == 'POST':
+        try:
+            user_payment = UserPayment.objects.get(app_user=request.user.appuser, payment_bool=True)
+        except UserPayment.DoesNotExist:
+            # Le paiement de vérification n'a pas été confirmé
+            return HttpResponse("Your verification payment has not been confirmed. Please try again or use another card.")
+        try:
+            # Créer un paiement de vérification
+            intent = stripe.PaymentIntent.create(
+                amount=000,  # Montant minimal en centimes (0 USD ici)
+                currency='usd',
+                # Autres paramètres nécessaires...
+            )
+            # Vous pouvez envoyer client_secret à votre frontend pour compléter le paiement
+            return render(request, 'user_payment/verify_payment.html', {
+                'client_secret': intent.client_secret,
+                'stripe_public_key': settings.STRIPE_PUBLIC_KEY
+            })
+
+        except stripe.error.StripeError as e:
+            # Gérer l'erreur
+            return HttpResponse(status=400, content=str(e))
+
+    return render(request, 'user_payment/verify_payment.html')
+
+@login_required(login_url='login')
 def product_page(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
 
@@ -24,21 +52,23 @@ def product_page(request):
         else:
             price_id = settings.MONTHLY_SUBSCRIPTION_PRICE  # ID de prix pour l'abonnement mensuel
 
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price': price_id,
-                'quantity': 1,
-            }],
-            subscription_data={
-                'trial_period_days': 1,
-            },
-            mode='subscription',
-            success_url=success_url,
-            cancel_url=cancel_url,
-        )
-
-        return redirect(checkout_session.url, code=303)
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price': price_id,
+                    'quantity': 1,
+                }],
+                subscription_data={
+                    'trial_period_days': 1,  # Un jour d'essai gratuit
+                },
+                mode='subscription',
+                success_url=success_url,
+                cancel_url=cancel_url,
+            )
+            return redirect(checkout_session.url, code=303)
+        except stripe.error.StripeError as e:
+            return HttpResponse(status=400, content=str(e))
 
     return render(request, 'user_payment/product_page.html')
 
@@ -181,6 +211,16 @@ def stripe_webhook(request):
             		app_user.save()
     	except AppUser.DoesNotExist:
         	pass  # Gérer l'exception si nécessaire
+    elif event['type'] == 'payment_intent.succeeded':
+        intent = event['data']['object']
+        # Traiter le paiement réussi
+        # Par exemple, marquer le paiement de vérification comme réussi dans votre base de données
+        try:
+            user_payment = UserPayment.objects.get(stripe_payment_intent_id=intent.id)
+            user_payment.payment_bool = True
+            user_payment.save()
+        except UserPayment.DoesNotExist:
+            pass  # Paiement ou utilisateur non trouvé
 
 
     return HttpResponse(status=200)
