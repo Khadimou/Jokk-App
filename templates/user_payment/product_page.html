@@ -9,6 +9,12 @@
 
 {% block extra_styles %}
     <style>
+
+	.trial-message {
+            text-align: center; /* Centrer le texte dans le trial-message */
+            margin-top: 50px; /* Ajouter une marge en haut */
+            
+        }
         .container {
             display: flex;
             justify-content: center;
@@ -61,11 +67,14 @@
 
 {% block content %}
 
+	<div class="trial-message">
+                <h2> {% trans '✨ Free trial day! ✨' %} </h2>
+                <h3> {% trans 'Get full access for 24 hours free of charge. Subscribe now and discover everything we have to offer!' %} </h3>
+                <p> {% trans 'Note: You can cancel the subscription at any time in your account settings.' %} </p>
+        </div>
+
     <div class="container">
         {% if user.is_authenticated %}
-		<h2> {% trans '✨ Free trial day! ✨' %} </h2>
-		<h3> {% trans 'Get full access for 24 hours free of charge. Subscribe now and discover everything we have to offer!' %} </h3>
-		<p> {% trans 'Note: You can cancel the subscription at any time in your account settings.' %} </p>
             <form enctype="multipart/form-data" method="post" role="form" class="payment-form">
                 {% csrf_token %}
                 <h2>{% trans 'Hi' %} {{ user }}{% trans '! To proceed, select your payment type and click the button' %}</h2>
