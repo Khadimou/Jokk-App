@@ -9,6 +9,7 @@ urlpatterns = [
     path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('cancel-subscription/',views.cancel_subscription,name='cancel_subscription'),
+    path('subscription_info/', views.subscription_info, name='subscription_info'),
     path('cancel/',views.cancel_page,name='cancel_page'),
     path('subscription-cancelled-successfully/', views.subscription_cancelled_successfully, name='subscription_cancelled_successfully'),
 ]

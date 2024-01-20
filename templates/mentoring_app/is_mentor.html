@@ -60,55 +60,61 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.10/index.global.min.js'></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var existingEvents = JSON.parse('{{ calendar_events|escapejs }}');
-            var selectedSlots = [];
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                selectable: true,
-                allDaySlot: false,
-                slotDuration: '00:30:00',
-                slotLabelInterval: '01:00',
-                slotMinTime: '08:00:00',
-                slotMaxTime: '18:00:00',
-                events: existingEvents,  // Ajoutez les événements existants ici
-                select: function(info) {
-                    var dayOfWeek = info.startStr.split('T')[0];
-                    var startTime = info.startStr.split('T')[1].substring(0, 5);
-                    var endTime = info.endStr.split('T')[1].substring(0, 5);
-                    var eventId = dayOfWeek + '-' + startTime + '-' + endTime;
+	console.log('{{ calendar_events|escapejs }}'); // Affiche la chaîne avant la conversion
+	try {
+	    var existingEvents = JSON.parse('{{ calendar_events|escapejs }}');
+	} catch(e) {
+	    console.error("Erreur lors de la conversion JSON:", e);
+	    var existingEvents = []; // Utilisez un tableau vide ou une valeur par défaut
+	}
 
-                    if (!selectedSlots.some(slot => slot.eventId === eventId)) {
-                        selectedSlots.push({
-                            eventId: eventId,
-                            dayOfWeek: dayOfWeek,
-                            startTime: startTime,
-                            endTime: endTime
-                        });
-                        calendar.addEvent({
-                            id: eventId,
-                            start: info.startStr,
-                            end: info.endStr,
-                            color: '#28a745'
-                        });
-                    }
+    var existingEvents = JSON.parse('{{ calendar_events|escapejs }}');
+    var selectedSlots = [];
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        selectable: true,
+        allDaySlot: false,
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00',
+        slotMinTime: '08:00:00',
+        slotMaxTime: '18:00:00',
+        events: existingEvents,
+        select: function(info) {
+            var start = info.start;
+            var end = info.end;
+            var eventId = start.toISOString() + '-' + end.toISOString();
 
-                    document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
-                },
-                eventClick: function(info) {
-                    var event = info.event;
-                    if (event) {
-                        var index = selectedSlots.findIndex(slot => slot.eventId === event.id);
-                        if (index > -1) {
-                            selectedSlots.splice(index, 1);
-                            event.remove();
-                        }
-                    }
-                    document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
-                }
-            });
-            calendar.render();
-        });
+            if (!selectedSlots.some(slot => slot.eventId === eventId)) {
+                selectedSlots.push({
+                    eventId: eventId,
+                    start: start.toISOString(),
+                    end: end.toISOString()
+                });
+                calendar.addEvent({
+                    id: eventId,
+                    start: start,
+                    end: end,
+                    color: '#28a745'
+                });
+            }
+
+            document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
+        },
+        eventClick: function(info) {
+            var event = info.event;
+            var index = selectedSlots.findIndex(slot => slot.eventId === event.id);
+            if (index > -1) {
+                selectedSlots.splice(index, 1);
+                event.remove();
+            }
+
+            document.getElementById('availability-slots').value = JSON.stringify(selectedSlots);
+        }
+    });
+    calendar.render();
+});
+
     </script>
 {% endblock %}
 

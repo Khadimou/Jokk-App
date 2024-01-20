@@ -1,0 +1,65 @@
+{% extends 'base_site.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_styles %}
+    <style>
+        .mentor-profile-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .profile-picture {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border: 3px solid #ddd;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .profile-picture {
+                width: 200px; /* Taille ajustée pour les petits écrans */
+                height: 200px;
+            }
+        }
+
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'nav_home.html' %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="container my-4">
+        <div class="mentor-profile-card p-4 shadow">
+            <div class="row">
+                <!-- Section Photo -->
+                <div class="col-md-4 text-center">
+                    <img src="{{ mentor.profile.avatar.url }}" alt="{% trans 'Profile Picture' %}" class="img-fluid rounded-circle profile-picture">
+                </div>
+
+                <!-- Section Informations -->
+                <div class="col-md-8">
+                    <h2>{{ mentor.first_name }} {{ mentor.last_name }}</h2>
+                    <p>{{ mentor.profile.description }}</p>
+                    <ul class="list-unstyled">
+                        <li><strong>{% trans 'Phone:' %}</strong> {{ mentor.profile.phone }}</li>
+                        <li><strong>{% trans 'Address:' %}</strong> {{ mentor.profile.address }}</li>
+                        <li><strong>{% trans 'Skills:' %}</strong> {{ mentor.Skills }}</li>
+                        <li><strong>{% trans 'Objectives:' %}</strong> {{ mentor.Objectives }}</li>
+                        <li><strong>{% trans 'Job:' %}</strong> {{ mentor.Job }}</li>
+                        <!-- Ajoutez d'autres champs si nécessaire -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+	{% comment %}        <button class="btn btn-primary" data-mentor-id="{{ mentor.id }}">{% trans 'Send a request' %}</button>{% endcomment %}
+
+    </div>
+
+{% endblock %}

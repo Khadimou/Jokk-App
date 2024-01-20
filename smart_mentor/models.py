@@ -31,6 +31,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     bio = models.TextField(max_length=100, blank=True)
     social_media_links = models.URLField(max_length=200, blank=True)
+    mentor_notification_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username

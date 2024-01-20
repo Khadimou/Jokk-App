@@ -9,6 +9,9 @@ from mentoring_app.utils import calculate_matching_score_optimized
 from smart_mentor.utils import generate_questions, evaluate
 
 from .forms import AvailabilityForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 def availability_view(request):
     if request.method == 'POST':
@@ -61,21 +64,24 @@ def redirect_mentor(request):
         return redirect('login')
 
 def my_page(request):
-    # Obtenez les créneaux de disponibilité de l'utilisateur
-    availability_slots = Availability.objects.filter(user=request.user).values(
-        'day_of_week', 'start_time', 'end_time'
-    )
+    try:
+        availability_slots = Availability.objects.filter(user=request.user).values(
+            'day_of_week', 'start_time', 'end_time'
+        )
 
-    # Convertissez les créneaux en format adapté pour FullCalendar
-    calendar_events =  json.dumps([
-        {
-            'start': slot['day_of_week'] + 'T' + str(slot['start_time']),
-            'end': slot['day_of_week'] + 'T' + str(slot['end_time']),
-            'color': '#28a745'  # Couleur pour les créneaux enregistrés
-        }
-        for slot in availability_slots
-    ])
-    return render(request,'mentoring_app/is_mentor.html', {'calendar_events': calendar_events})
+        calendar_events = json.dumps([
+            {
+                'start': slot['day_of_week'] + 'T' + str(slot['start_time']),
+                'end': slot['day_of_week'] + 'T' + str(slot['end_time']),
+                'color': '#28a745'  # Couleur pour les créneaux enregistrés
+            }
+            for slot in availability_slots
+        ])
+    except Exception as e:
+        logger.error("Erreur lors de la récupération ou du formatage des créneaux de disponibilité: %s", e)
+        calendar_events = "[]"  # Utilisez un tableau vide en cas d'erreur
+
+    return render(request, 'mentoring_app/is_mentor.html', {'calendar_events': calendar_events})
 
 def mentee_page(request):
     return render(request, 'mentoring_app/mentee_page.html')
@@ -265,3 +271,9 @@ def all_notifications(request):
     else:
         # Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
         return redirect('login')
+
+def view_mentor_profile(request, mentor_id):
+    mentor = get_object_or_404(Mentor, pk=mentor_id)
+    is_mentor = isinstance(request.user, Mentor)
+
+    return render(request, 'mentoring_app/view_mentor_profile.html', {'mentor': mentor,'is_mentor': is_mentor})

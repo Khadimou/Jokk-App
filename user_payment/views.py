@@ -7,6 +7,8 @@ from django.http import HttpResponse
 from user_payment.models import UserPayment, AppUser
 import stripe
 import time
+import datetime
+from mentoring_app.models import Notification
 
 @login_required(login_url='login')
 def verify_payment(request):
@@ -89,8 +91,14 @@ def cancel_subscription(request):
             # Mettre à jour les informations de l'utilisateur dans la base de données
             app_user.is_premium = False
             app_user.stripe_subscription_id = None
+            app_user.subscription_end_date = datetime.now()
             app_user.save()
-
+            Notification.objects.create(
+                recipient=app_user.user,
+                title="Premium Status Updated",
+                body="Your premium status has been changed. Please check your subscription.",
+                type="premium_status_change"
+            )
             # Rediriger vers une page de confirmation ou de succès
             return redirect('subscription_cancelled_successfully')
 
@@ -155,6 +163,19 @@ def stripe_webhook(request):
         # Invalid signature
         return HttpResponse(status=400)
 
+    if event['type'] == 'customer.subscription.created' or event['type'] == 'customer.subscription.updated':
+        subscription = event['data']['object']
+
+        try:
+            app_user = AppUser.objects.get(stripe_subscription_id=subscription.id)
+            # Mettre à jour la date de fin de l'abonnement
+            # Convertir le timestamp de Stripe (en secondes) en date/heure
+            subscription_end_date = datetime.fromtimestamp(subscription.current_period_end)
+            app_user.subscription_end_date = subscription_end_date
+            app_user.save()
+        except AppUser.DoesNotExist:
+            pass  # Utilisateur non trouvé
+
     # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
@@ -183,6 +204,12 @@ def stripe_webhook(request):
             app_user.is_premium = False
             app_user.stripe_subscription_id = None
             app_user.save()
+            Notification.objects.create(
+            recipient=app_user.user,
+            title="Premium Status Updated",
+            body="Your premium status has been changed. Please check your subscription.",
+            type="premium_status_change"
+            )
         except AppUser.DoesNotExist:
             pass  # Subscription not found
     elif event['type'] == 'customer.subscription.updated':
@@ -193,22 +220,26 @@ def stripe_webhook(request):
             app_user.save()
         except AppUser.DoesNotExist:
             pass
-    elif event['type'] == 'invoice.payment_failed':
+    elif event['type'] == ['invoice.payment_failed', 'invoice.payment_action_required']:
     	invoice = event['data']['object']
     	customer_id = invoice.customer
 
     	try:
-        	app_user = AppUser.objects.get(stripe_customer_id=customer_id)
-        	app_user.failed_payment_attempts += 1
-        	app_user.save()
+            app_user = AppUser.objects.get(stripe_customer_id=customer_id)
+            app_user.failed_payment_attempts += 1
+            app_user.save()
+            if app_user.failed_payment_attempts >= 2:
+               stripe.Subscription.delete(app_user.stripe_subscription_id)
+               app_user.is_premium = False
+               app_user.stripe_subscription_id = None
+               app_user.failed_payment_attempts = 0
+               app_user.save()
+               Notification.objects.create(
+                 recipient=app_user.user,
+                 title="Premium Status Updated",
+                 body="Your premium status has been changed. Please check your subscription.",
+                 type="premium_status_change")
 
-        	# Si le nombre d'échecs atteint un seuil, annuler l'abonnement
-        	if app_user.failed_payment_attempts >= 2:  # Exemple de seuil
-            		stripe.Subscription.delete(app_user.stripe_subscription_id)
-            		app_user.is_premium = False
-            		app_user.stripe_subscription_id = None
-            		app_user.failed_payment_attempts = 0  # Réinitialiser le compteur
-            		app_user.save()
     	except AppUser.DoesNotExist:
         	pass  # Gérer l'exception si nécessaire
     elif event['type'] == 'payment_intent.succeeded':
@@ -265,3 +296,13 @@ def subscription_management(request):
     }
 
     return render(request, 'user_payment/subscription_management.html', context)
+
+@login_required
+def subscription_info(request):
+    app_user = request.user.appuser
+    context = {
+        'is_premium': app_user.is_premium,
+        'subscription_end_date': app_user.subscription_end_date,
+        # Ajoutez d'autres informations si nécessaire
+    }
+    return render(request, 'user_payment/subscription_info.html', context)

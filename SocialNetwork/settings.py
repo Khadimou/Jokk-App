@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
+DEBUG = config('DEBUG', default=False, cast=bool)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
@@ -26,10 +28,13 @@ CSRF_TRUSTED_ORIGINS = [
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j"
+SECRET_KEY = config("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ROOT_URLCONF = f'{config("PROJECT_NAME")}.urls'
+
+WSGI_APPLICATION = f'{config("PROJECT_NAME")}.wsgi.application'
+
+ASGI_APPLICATION = f'{config("PROJECT_NAME")}.routing.application'
 
 ALLOWED_HOSTS = ['134.209.196.111','jokk.net','www.jokk.net']
 STRIPE_SECRET_KEY_TEST = "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"
@@ -42,8 +47,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'jokkteam@gmail.com'
-EMAIL_HOST_PASSWORD = 'gmez nymt nrwd wuzk'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 from celery.schedules import crontab
 
@@ -68,6 +73,7 @@ INSTALLED_APPS = [
     "workgroup",
     "smart_mentor",
     "mentoring_app",
+    'storages',
     'crispy_bootstrap4',
     'user_payment',
     'django_countries',
@@ -84,8 +90,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
 ]
-
-ROOT_URLCONF = "SocialNetwork.urls"
 
 TEMPLATES = [
     {
@@ -105,8 +109,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "SocialNetwork.wsgi.application"
-ASGI_APPLICATION = 'SocialNetwork.asgi.application'
 allowed_origins=['*']
 AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 # Database
@@ -115,13 +117,14 @@ AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'jokk',
-        'USER': 'jokk',
-        'PASSWORD': 'password',
+        'NAME': config("DB_NAME"),
+        'USER': config("DB_USER"),
+        'PASSWORD': config("DB_PASSWORD"),
         'HOST': 'localhost',
         'PORT': '',
     }
 }
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -186,13 +189,28 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_URL = '/static/'
-STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_LOCATION = config('AWS_LOCATION')
+AWS_DEFAULT_ACL = 'public-read'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 
-#STATIC_ROOT = BASE_DIR / 'static'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/'
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/media/'
+
+TEMP = os.path.join(BASE_DIR, 'temp')
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
+#MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
 
 
 
@@ -201,3 +219,4 @@ MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+BASE_URL = "https://134.209.196.111"

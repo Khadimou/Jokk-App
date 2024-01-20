@@ -64,12 +64,12 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['avatar', 'birthdate', 'gender', 'country', 'skills', 'phone', 'bio', 'social_media_links']
+        fields = ['avatar', 'birthdate', 'gender', 'skills', 'phone', 'bio', 'social_media_links']
         labels = {
             'avatar': _('Avatar'),
             'birthdate': _('Birthdate'),
             'gender': _('Gender'),
-            'country': _('Country'),
+#            'country': _('Country'),
             'skills': _('Skills'),
             'phone': _('Phone'),
             'bio': _('Biography'),
@@ -79,7 +79,7 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
   	# Set the widget for the 'country' field to 'CountrySelectWidget'
-        self.fields['country'].widget = CountrySelectWidget()
+ #       self.fields['country'].widget = CountrySelectWidget()
 	#country = forms.ModelChoiceField(queryset=Country.objects.all(), required=False)
         current_language = get_language() or settings.LANGUAGE_CODE
         date_format = settings.DATE_FORMATS.get(current_language, '%Y-%m-%d')

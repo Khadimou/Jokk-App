@@ -548,7 +548,15 @@
                             await markAsRead(notification.id);
                             window.location.href = this.href; // Redirect to the subscription management page
                         });
-                    } 
+                    } else if (notification.type === 'premium_status_change') {
+    // Rediriger vers la page de gestion de l'abonnement ou une page d'information
+			  notificationElement.href = '/subscription_info/';
+		          notificationElement.addEventListener('click', async function(e) {
+	                	e.preventDefault();
+			        await markAsRead(notification.id);
+			        window.location.href = this.href;
+			    });
+			}  
 		      else {
                         // Gérer les notifications pour les rooms lancés
                         notificationElement.href = `/workgroups/${notification.workgroup_id}/`;

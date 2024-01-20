@@ -100,7 +100,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message_type = text_data_json.get('type')
 
             if message_type == "call_started":
-                await self.broadcast_call_started()
+                caller_id = self.scope["user"].id
+                await self.broadcast_call_started(caller_id)
 
             if message_type in ["store_offer", "store_candidate", "store_user"]:
                 # Gérer les messages WebRTC
@@ -129,14 +130,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    async def broadcast_call_started(self):
+    async def broadcast_call_started(self, caller_id):
         # Envoyer un message à tous les utilisateurs dans la room indiquant que l'appel a commencé
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': 'chat.call_started',  # Modifiez le 'type' ici pour qu'il corresponde à une méthode de gestion dans votre consommateur
+                'type': 'chat.call_started',
+                'caller_id': caller_id
             }
         )
+
 
     async def chat_call_started(self, event):
         # Envoyer le message à WebSocket

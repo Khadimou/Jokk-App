@@ -20,7 +20,7 @@ import PyPDF2
 from django.contrib.auth import login, logout
 from .forms import SignUpForm, ProfileForm
 from openai import OpenAI
-
+from mentoring_app.models import Notification
 
 client = OpenAI(api_key = os.environ.get('OPENAI_API_KEY'))
 
@@ -316,10 +316,8 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                # Vérifiez si l'utilisateur a déjà un profil
                 try:
                     profile = Profile.objects.get(user=user)
-                    # Vérifiez si c'est la première connexion
                     if profile.first_login:
                         profile.first_login = False
                         profile.save()
@@ -327,7 +325,6 @@ def login_view(request):
                     else:
                         return redirect('home')
                 except Profile.DoesNotExist:
-                    # S'il n'y a pas de profil, redirigez vers 'create_profile'
                     return redirect('create_profile')
             else:
                 messages.error(request, 'Nom d’utilisateur ou mot de passe incorrect.')

@@ -868,7 +868,7 @@
                 audioContainer.appendChild(audioElement);
                 chatLog.appendChild(audioContainer);
                 chatLog.scrollTop = chatLog.scrollHeight;
-            }else if (data.type === "call_started") {
+            }else if (data.type === "call_started" && data.caller_id !== userId) {
                 // L'appel a été démarré par un utilisateur
                 callStarted = true;
 
@@ -884,10 +884,69 @@
                     callStatusIndicator.style.display = "block";
                 }
 
+		{#playRingtone();#} // Jouer une sonnerie
+                showCallNotification(data.caller_id); // Afficher la notification d'appel
+
                 handleSignallingData(data);
             }
         };
     }
+
+     // Afficher la notification d'appel
+        function showCallNotification(from) {
+            const callAlert = document.createElement('div');
+            callAlert.innerHTML = `<p>{% trans 'Incoming call from' %} ${from}</p>
+                           <button onclick="answerCall(true)">{% trans 'Pick up' %}</button>
+                           <button onclick="answerCall(false)">{% trans 'Deny' %}</button>`;
+            document.body.appendChild(callAlert);
+        }
+
+	// Créez une instance de AudioContext
+	var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        var ringtoneBuffer = null;
+
+	function loadRingtone(url) {
+	    fetch(url)
+	        .then(response => response.arrayBuffer())
+	        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+	        .then(audioBuffer => {
+	            ringtoneBuffer = audioBuffer;
+	        });
+	}
+
+	function playRingtone() {
+		if (ringtoneBuffer) {
+	        var source = audioContext.createBufferSource();
+	        source.buffer = ringtoneBuffer;
+	        source.connect(audioContext.destination);
+	        source.start(0);
+	        // Arrêter la sonnerie après 60 secondes
+	        setTimeout(() => {
+	            source.stop();
+	        }, 60000);
+	    }
+	}
+
+	function stopRingtone() {
+	    if (audioContext && audioContext.state !== 'closed') {
+	        audioContext.close(); // Ferme l'AudioContext, arrêtant ainsi la sonnerie
+	    }
+	}
+
+        // Répondre à l'appel
+        function answerCall(join) {
+            if (join) {
+                // Logic to join the call
+                joinCall();
+            } else {
+                // Envoyer une réponse au serveur indiquant que l'utilisateur a refusé l'appel
+                sendData({ type: "answer_call", join: false });
+            }
+            // Supprimer la notification d'appel de l'UI
+            // ...
+        }
+
 
     connectWebSocket();
 

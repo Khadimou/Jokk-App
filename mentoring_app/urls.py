@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('mentoring_page/',views.mentoring_page,name='mentoring_page'),
     path('register_page/',views.register_page,name='register_page'),
+    path('mentor/profile/<int:mentor_id>/', views.view_mentor_profile, name='view_mentor_profile'),
     path('result/', views.result_page, name='result_page'),
     path('evaluate/', views.evaluate_answers, name='evaluate'),
     path('waiting/', views.waiting_page, name='waiting'),
