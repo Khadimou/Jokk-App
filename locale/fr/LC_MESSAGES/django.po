@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-11 23:10+0100\n"
+"POT-Creation-Date: 2024-01-20 14:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,76 +18,72 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\SocialNetwork\settings.py:149
+#: .\SocialNetwork\settings.py:164
 msgid "English"
 msgstr ""
 
-#: .\SocialNetwork\settings.py:150
+#: .\SocialNetwork\settings.py:165
 msgid "French"
 msgstr ""
 
-#: .\smart_mentor\forms.py:47
+#: .\smart_mentor\forms.py:69
 msgid "Avatar"
 msgstr "Avatar"
 
-#: .\smart_mentor\forms.py:48
+#: .\smart_mentor\forms.py:70
 msgid "Birthdate"
 msgstr "Date de naissance"
 
-#: .\smart_mentor\forms.py:49
+#: .\smart_mentor\forms.py:71
 msgid "Gender"
 msgstr "Genre"
 
-#: .\smart_mentor\forms.py:50
-msgid "Country"
-msgstr "Pays"
-
-#: .\smart_mentor\forms.py:51 .\templates\mentoring_app\mentee_page.html:45
+#: .\smart_mentor\forms.py:73 .\templates\mentoring_app\mentee_page.html:45
 msgid "Skills"
 msgstr "Compétences"
 
-#: .\smart_mentor\forms.py:52
+#: .\smart_mentor\forms.py:74
 msgid "Phone"
 msgstr "Téléphone"
 
-#: .\smart_mentor\forms.py:53
+#: .\smart_mentor\forms.py:75
 msgid "Biography"
 msgstr "Biographie"
 
-#: .\smart_mentor\forms.py:54
+#: .\smart_mentor\forms.py:76
 msgid "Social Media Links"
 msgstr "Liens réseaux sociaux"
 
-#: .\smart_mentor\forms.py:64
+#: .\smart_mentor\forms.py:89
 msgid "MM/DD/YYYY"
 msgstr "JJ/MM/AAAA"
 
-#: .\smart_mentor\forms.py:64
+#: .\smart_mentor\forms.py:89
 msgid "JJ/MM/AAAA"
 msgstr "JJ/MM/AAAA"
 
-#: .\smart_mentor\models.py:9
+#: .\smart_mentor\models.py:17
 msgid "Male"
 msgstr "Homme"
 
-#: .\smart_mentor\models.py:10
+#: .\smart_mentor\models.py:18
 msgid "Female"
 msgstr "Femme"
 
-#: .\smart_mentor\models.py:11
+#: .\smart_mentor\models.py:19
 msgid "Other"
 msgstr "Autre"
 
-#: .\templates\all_notifications.html:49
+#: .\templates\all_notifications.html:51
 msgid "Notifications"
 msgstr "Notifications"
 
-#: .\templates\all_notifications.html:56
+#: .\templates\all_notifications.html:58
 #: .\templates\notification_detail.html:12
 msgid "Received on: "
 msgstr "Reçu le: "
 
-#: .\templates\all_notifications.html:60
+#: .\templates\all_notifications.html:62
 msgid "No notifications."
 msgstr "Aucune notification"
 
@@ -98,7 +94,9 @@ msgstr "Confirmer la suppression du compte"
 #: .\templates\confirm_delete_account.html:11
 msgid ""
 "Are you sure you want to delete your account? This action cannot be undone."
-msgstr "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut être annulée."
+msgstr ""
+"Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut être "
+"annulée."
 
 #: .\templates\confirm_delete_account.html:15
 msgid "Delete my account"
@@ -114,11 +112,11 @@ msgstr "Annuler"
 msgid "Create Your Profile"
 msgstr "Créez votre profil"
 
-#: .\templates\create_profile.html:117
+#: .\templates\create_profile.html:118
 msgid "Save Profile"
 msgstr "Sauvegarder le profil"
 
-#: .\templates\create_profile.html:118
+#: .\templates\create_profile.html:119
 msgid "Skip"
 msgstr "Sauter"
 
@@ -140,14 +138,16 @@ msgstr "Votre Plateforme d'Apprentissage Personnalisée"
 
 #: .\templates\default.html:207
 msgid "Connect and Thrive – Build Your Virtual Classroom Today!"
-msgstr "Connectez-vous et Prospérez – Construisez Votre Classe Virtuelle Aujourd'hui !"
+msgstr ""
+"Connectez-vous et Prospérez – Construisez Votre Classe Virtuelle "
+"Aujourd'hui !"
 
 #: .\templates\default.html:210
 msgid "Welcome Back!"
 msgstr "Bon Retour !"
 
-#: .\templates\default.html:212 .\templates\home.html:318
-#: .\templates\signup.html:90
+#: .\templates\default.html:212 .\templates\home.html:329
+#: .\templates\signup.html:93
 msgid "Login"
 msgstr "Connexion"
 
@@ -169,11 +169,12 @@ msgid ""
 "believe that every individual has potential to share with the world. Our "
 "mission is to facilitate that sharing."
 msgstr ""
-"Jokk est un mot en Wolof qui signifie se connecter avec quelqu'un. Chez Jokk, "
-"nous croyons que chaque individu a un potentiel à partager avec le monde. Notre "
-"mission est de faciliter ce partage."
+"Jokk est un mot en Wolof qui signifie se connecter avec quelqu'un. Chez "
+"Jokk, nous croyons que chaque individu a un potentiel à partager avec le "
+"monde. Notre mission est de faciliter ce partage."
 
 #: .\templates\delete_account.html:10 .\templates\delete_account.html:11
+#: .\templates\user_payment\subscription_management.html:33
 msgid "Cancel Subscription"
 msgstr "Annuler l'Abonnement"
 
@@ -209,93 +210,93 @@ msgstr "Assistants"
 msgid "My Assistants"
 msgstr "Mes Assistants"
 
-#: .\templates\home.html:281 .\templates\home.html:370
+#: .\templates\home.html:281 .\templates\home.html:381
 #: .\venv\Lib\site-packages\django\contrib\messages\apps.py:15
 msgid "Messages"
 msgstr "Messages"
 
-#: .\templates\home.html:308
+#: .\templates\home.html:297
+msgid "See all notifications"
+msgstr "Voir toutes les notifications"
+
+#: .\templates\home.html:305
+msgid "Clear all"
+msgstr "Tout effacer"
+
+#: .\templates\home.html:319
 msgid "User"
 msgstr "Utilisateur"
 
-#: .\templates\home.html:313
+#: .\templates\home.html:324
 msgid "My profile"
 msgstr "Mon profil"
 
-#: .\templates\home.html:314
+#: .\templates\home.html:325
 msgid "Account"
 msgstr "Compte"
 
-#: .\templates\home.html:316
+#: .\templates\home.html:327
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: .\templates\home.html:331
+#: .\templates\home.html:342
 msgid "Find users or workgroups"
 msgstr "Trouver des utilisateurs ou des groupes de travail"
 
-#: .\templates\home.html:333
+#: .\templates\home.html:344
 msgid "Search..."
 msgstr "Rechercher..."
 
-#: .\templates\home.html:334
+#: .\templates\home.html:345
 msgid "Search"
 msgstr "Rechercher"
 
-#: .\templates\home.html:340 .\templates\mentoring_app\mentoring_page.html:62
+#: .\templates\home.html:351 .\templates\mentoring_app\mentoring_page.html:62
 msgid "Virtual Classroom"
 msgstr "Classe Virtuelle"
 
-#: .\templates\home.html:341
+#: .\templates\home.html:352
 msgid "Create Workgroups"
 msgstr "Créer des Groupes de Travail"
 
-#: .\templates\home.html:345 .\templates\home.html:346
+#: .\templates\home.html:356 .\templates\home.html:357
 #: .\templates\mentoring_app\mentoring_page.html:67
 msgid "Mentoring"
 msgstr "Mentorat"
 
-#: .\templates\home.html:350 .\templates\home.html:352
+#: .\templates\home.html:361 .\templates\home.html:363
 msgid "Smart Assistant"
 msgstr "Assistant Intelligent"
 
-#: .\templates\home.html:361
+#: .\templates\home.html:372
 msgid "Your browser does not support HTML5 videos."
 msgstr "Votre navigateur ne prend pas en charge les vidéos HTML5."
 
-#: .\templates\home.html:389
+#: .\templates\home.html:400
 msgid "No messages"
 msgstr "Pas de messages"
 
-#: .\templates\home.html:401
+#: .\templates\home.html:412
 msgid "Send Message"
 msgstr "Envoyer le Message"
 
-#: .\templates\home.html:418
+#: .\templates\home.html:429
 msgid "Accept"
 msgstr "Accepter"
 
-#: .\templates\home.html:419
+#: .\templates\home.html:430 .\templates\workgroup\discussion_room.html:901
 msgid "Deny"
 msgstr "Refuser"
 
-#: .\templates\home.html:420
+#: .\templates\home.html:431
 msgid "Close"
 msgstr "Fermer"
 
-#: .\templates\home.html:554
-msgid "See all notifications"
-msgstr "Voir toutes les notifications"
-
-#: .\templates\home.html:567
-msgid "Clear all"
-msgstr "Tout effacer"
-
-#: .\templates\home.html:764
+#: .\templates\home.html:830
 msgid "Personalised Learning Platform"
 msgstr "Plateforme d'Apprentissage Personnalisée"
 
-#: .\templates\home.html:764
+#: .\templates\home.html:830
 msgid "All rights reserved!"
 msgstr "Tous droits réservés !"
 
@@ -323,7 +324,7 @@ msgstr "Définissez ici vos horaires de disponibilité !"
 msgid "Save Availability"
 msgstr "Enregistrer la Disponibilité"
 
-#: .\templates\mentoring_app\matching.html:6
+#: .\templates\mentoring_app\matching.html:12
 msgid "My Mentor"
 msgstr "Mon Mentor"
 
@@ -343,12 +344,14 @@ msgstr "Prénom : "
 msgid "Name:"
 msgstr "Nom :"
 
-#: .\templates\mentoring_app\matching.html:31 .\templates\profile.html:71
-#: .\templates\search_results.html:97
+#: .\templates\mentoring_app\matching.html:31
+#: .\templates\mentoring_app\view_mentor_profile.html:52
+#: .\templates\profile.html:71 .\templates\search_results.html:97
 msgid "Skills:"
 msgstr "Compétences :"
 
 #: .\templates\mentoring_app\matching.html:32
+#: .\templates\mentoring_app\view_mentor_profile.html:54
 msgid "Job:"
 msgstr "Emploi :"
 
@@ -356,13 +359,13 @@ msgstr "Emploi :"
 msgid "Rating: "
 msgstr "Évaluation : "
 
-#: .\templates\mentoring_app\matching.html:35
-msgid "Send a request"
-msgstr "Envoyer une demande"
-
-#: .\templates\mentoring_app\matching.html:37
+#: .\templates\mentoring_app\matching.html:38
 msgid "View full profile"
 msgstr "Voir le profil complet"
+
+#: .\templates\mentoring_app\matching.html:42
+msgid "No mentor found for now"
+msgstr "Aucun mentor n'a été trouvé pour l'instant"
 
 #: .\templates\mentoring_app\mentee_page.html:5
 msgid "Mentee Page"
@@ -432,7 +435,7 @@ msgstr "Page Mentor"
 msgid "Fill in this form to start:"
 msgstr "Remplissez ce formulaire pour commencer :"
 
-#: .\templates\mentoring_app\mentor_page.html:71 .\templates\signup.html:87
+#: .\templates\mentoring_app\mentor_page.html:71 .\templates\signup.html:90
 msgid "Register"
 msgstr "S'inscrire"
 
@@ -449,7 +452,8 @@ msgstr "Choisissez votre chapeau :"
 msgid ""
 "Be a mentee and boost your skills / Become a mentor and share your knowledge"
 msgstr ""
-"Soyez un mentoré et améliorez vos compétences / Devenez un mentor et partagez vos connaissances"
+"Soyez un mentoré et améliorez vos compétences / Devenez un mentor et "
+"partagez vos connaissances"
 
 #: .\templates\mentoring_app\mentoring_page.html:63
 msgid "Mentor"
@@ -495,6 +499,25 @@ msgstr "Félicitations, vous avez réussi l'évaluation !"
 msgid "Unfortunately, you did not pass. Please try again!"
 msgstr "Malheureusement, vous n'avez pas réussi. Veuillez réessayer !"
 
+#: .\templates\mentoring_app\view_mentor_profile.html:42
+msgid "Profile Picture"
+msgstr "Photo de profil"
+
+#: .\templates\mentoring_app\view_mentor_profile.html:50
+#: .\templates\profile.html:75
+msgid "Phone:"
+msgstr "Téléphone :"
+
+#: .\templates\mentoring_app\view_mentor_profile.html:51
+msgid "Address:"
+msgstr "Adresse:"
+
+#: .\templates\mentoring_app\view_mentor_profile.html:53
+#, fuzzy
+#| msgid "Career Objectives"
+msgid "Objectives:"
+msgstr "Objectifs de Carrière"
+
 #: .\templates\mentoring_app\waiting_page.html:12
 msgid "We are in the process of correcting your test"
 msgstr "Nous sommes en train de corriger votre test"
@@ -512,22 +535,30 @@ msgid "Find users to message..."
 msgstr "Trouver des utilisateurs à contacter..."
 
 #: .\templates\messaging.html:19
+msgid "My Colleagues"
+msgstr "Mes collègues"
+
+#: .\templates\messaging.html:28
+msgid "No colleagues"
+msgstr "Aucun collègue"
+
+#: .\templates\messaging.html:33
 msgid "Messagerie"
 msgstr "Messagerie"
 
-#: .\templates\messaging.html:21
+#: .\templates\messaging.html:35
 msgid "Search conversations..."
 msgstr "Rechercher des conversations..."
 
-#: .\templates\messaging.html:37
+#: .\templates\messaging.html:51
 msgid "No conversations"
 msgstr "Aucune conversation"
 
-#: .\templates\messaging.html:60
+#: .\templates\messaging.html:74
 msgid "Type a message..."
 msgstr "Tapez un message..."
 
-#: .\templates\messaging.html:61 .\templates\smart_mentor\chat.html:169
+#: .\templates\messaging.html:75 .\templates\smart_mentor\chat.html:169
 #: .\templates\workgroup\discussion_room.html:314
 msgid "Send"
 msgstr "Envoyer"
@@ -549,16 +580,13 @@ msgid "Gender:"
 msgstr "Sexe :"
 
 #: .\templates\profile.html:63
+#: .\templates\user_payment\subscription_management.html:10
 msgid "Country:"
 msgstr "Pays :"
 
 #: .\templates\profile.html:67 .\templates\search_results.html:93
 msgid "Education Level:"
 msgstr "Niveau d'Éducation :"
-
-#: .\templates\profile.html:75
-msgid "Phone:"
-msgstr "Téléphone :"
 
 #: .\templates\profile.html:79 .\templates\search_results.html:101
 msgid "Bio:"
@@ -610,7 +638,15 @@ msgstr "Inscription"
 msgid "Create Your Account"
 msgstr "Créer Votre Compte"
 
-#: .\templates\signup.html:90
+#: .\templates\signup.html:88
+msgid "Read the "
+msgstr "Lire les "
+
+#: .\templates\signup.html:88
+msgid "terms and conditions of use"
+msgstr "conditions d'utilisation"
+
+#: .\templates\signup.html:93
 msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
@@ -635,7 +671,8 @@ msgid ""
 "Hey, Can you suggest some questions based on the data, to be answered to "
 "assess my understanding?"
 msgstr ""
-"Hé, pouvez-vous suggérer des questions basées sur les données, pour évaluer ma compréhension ?"
+"Hé, pouvez-vous suggérer des questions basées sur les données, pour évaluer "
+"ma compréhension ?"
 
 #: .\templates\smart_mentor\chat.html:138
 msgid "Can you give me a brief summary of what the data is about ?"
@@ -643,7 +680,9 @@ msgstr "Pouvez-vous me donner un bref résumé de ce que sont les données ?"
 
 #: .\templates\smart_mentor\chat.html:141
 msgid "Can you give me some clues to help me solve these questions?"
-msgstr "Pouvez-vous me donner quelques indices pour m'aider à résoudre ces questions ?"
+msgstr ""
+"Pouvez-vous me donner quelques indices pour m'aider à résoudre ces "
+"questions ?"
 
 #: .\templates\smart_mentor\chat.html:159
 msgid "Type a message"
@@ -659,7 +698,8 @@ msgstr "Aucun assistant n'a encore été créé !"
 
 #: .\templates\smart_mentor\scrape.html:52
 msgid "Give knowledge to your assistant here then test it with chatting"
-msgstr "Donnez des connaissances à votre assistant ici, puis testez-le en discutant"
+msgstr ""
+"Donnez des connaissances à votre assistant ici, puis testez-le en discutant"
 
 #: .\templates\smart_mentor\scrape.html:54
 msgid "Scrape Website"
@@ -709,6 +749,32 @@ msgstr "Sauvegarder et discuter avec l'assistant"
 msgid "Feed assistant first"
 msgstr "Alimenter l'assistant d'abord"
 
+#: .\templates\terms.html:5
+msgid "Terms & Conditions"
+msgstr "Conditions générales d'utilisation"
+
+#: .\templates\terms.html:6
+msgid "This page contains the terms and conditions of use of our service."
+msgstr "Cette page contient les conditions d'utilisation de notre service."
+
+#: .\templates\terms.html:7
+msgid "By registering on our platform, you agree to abide by these conditions."
+msgstr "En vous inscrivant sur notre plateforme, vous acceptez de respecter ces conditions."
+
+#: .\templates\terms.html:9
+msgid "Privacy Policy"
+msgstr "Politique de confidentialité"
+
+#: .\templates\terms.html:10
+msgid ""
+"We take the protection of your personal data seriously and comply with the "
+"GDPR."
+msgstr "Nous prenons au sérieux la protection de vos données personnelles et nous nous conformons à la loi sur la protection des données."
+
+#: .\templates\terms.html:15
+msgid "Back to Registration"
+msgstr "Retour à l'inscription"
+
 #: .\templates\user_payment\cancel_subscription.html:5
 msgid "Cancel subscription"
 msgstr "Annuler l'abonnement"
@@ -730,38 +796,57 @@ msgid "Thanks for your order "
 msgstr "Merci pour votre commande "
 
 #: .\templates\user_payment\payment_successful.html:16
-msgid "You are officially a premium Jokk member !!"
+#, fuzzy
+#| msgid "You are officially a premium Jokk member !!"
+msgid "You are officialy a premium Jokk member !!"
 msgstr "Vous êtes officiellement un membre premium de Jokk !!"
 
-#: .\templates\user_payment\product_page.html:69
+#: .\templates\user_payment\product_page.html:66
+msgid "✨ Free trial day! ✨"
+msgstr "✨ Journée d'essai gratuite ! ✨"
+
+#: .\templates\user_payment\product_page.html:67
+msgid ""
+"Get full access for 24 hours free of charge. Subscribe now and discover "
+"everything we have to offer!"
+msgstr "Bénéficiez d'un accès complet et gratuit pendant 24 heures. Abonnez-vous et découvrez notre offre!"
+
+#: .\templates\user_payment\product_page.html:68
+msgid ""
+"Note: You can cancel the subscription at any time in your account settings."
+msgstr "Note : Vous pouvez annuler l'abonnement à tout moment dans les paramètres de votre compte."
+
+#: .\templates\user_payment\product_page.html:71
 msgid "Hi"
 msgstr "Salut"
 
-#: .\templates\user_payment\product_page.html:69
+#: .\templates\user_payment\product_page.html:71
 msgid "! To proceed, select your payment type and click the button"
-msgstr "! Pour continuer, sélectionnez votre type de paiement et cliquez sur le bouton"
+msgstr ""
+"! Pour continuer, sélectionnez votre type de paiement et cliquez sur le "
+"bouton"
 
-#: .\templates\user_payment\product_page.html:79
+#: .\templates\user_payment\product_page.html:81
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: .\templates\user_payment\product_page.html:85
+#: .\templates\user_payment\product_page.html:87
 msgid "Weekly Subscription"
 msgstr "Abonnement Hebdomadaire"
 
-#: .\templates\user_payment\product_page.html:87
+#: .\templates\user_payment\product_page.html:89
 msgid "Monthly Subscription"
 msgstr "Abonnement Mensuel"
 
-#: .\templates\user_payment\product_page.html:91
+#: .\templates\user_payment\product_page.html:93
 msgid "Proceed to Payment"
 msgstr "Procéder au Paiement"
 
-#: .\templates\user_payment\product_page.html:94
+#: .\templates\user_payment\product_page.html:96
 msgid "You are not logged in..."
 msgstr "Vous n'êtes pas connecté..."
 
-#: .\templates\user_payment\product_page.html:95
+#: .\templates\user_payment\product_page.html:97
 msgid "Log in"
 msgstr "Se connecter"
 
@@ -777,49 +862,136 @@ msgstr "Votre abonnement a été annulé avec succès."
 msgid "Return to Home"
 msgstr "Retour à l'Accueil"
 
+#: .\templates\user_payment\subscription_info.html:6
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription Information"
+msgstr "Abonnement"
+
+#: .\templates\user_payment\subscription_info.html:7
+msgid "Status:"
+msgstr "Statut :"
+
+#: .\templates\user_payment\subscription_info.html:9
+msgid "Your subscription will end on:"
+msgstr "Votre abonnement prendra fin le :"
+
+#: .\templates\user_payment\subscription_management.html:6
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription Management"
+msgstr "Abonnement"
+
+#: .\templates\user_payment\subscription_management.html:7
+#, fuzzy
+#| msgid "User"
+msgid "User:"
+msgstr "Utilisateur"
+
+#: .\templates\user_payment\subscription_management.html:8
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription Status:"
+msgstr "Abonnement"
+
+#: .\templates\user_payment\subscription_management.html:9
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription End Date:"
+msgstr "Abonnement"
+
+#: .\templates\user_payment\subscription_management.html:11
+msgid "Failed Payment Attempts:"
+msgstr "Tentatives de paiement échouées :"
+
+#: .\templates\user_payment\subscription_management.html:13
+msgid "Payment History"
+msgstr "Historique des paiements"
+
+#: .\templates\user_payment\subscription_management.html:18
+msgid "Payment Successful"
+msgstr "Paiement réussi"
+
+#: .\templates\user_payment\subscription_management.html:20
+msgid "Payment Failed"
+msgstr "Paiement échoué"
+
+#: .\templates\user_payment\subscription_management.html:23
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription Payment"
+msgstr "Abonnement"
+
+#: .\templates\user_payment\subscription_management.html:27
+msgid "No payments made."
+msgstr "Aucun paiement n'a été effectué."
+
+#: .\templates\user_payment\subscription_management.html:32
+#, fuzzy
+#| msgid "Are you sure you want to cancel your subscription?"
+msgid "You can cancel your subscription at any time "
+msgstr "Êtes-vous sûr de vouloir annuler votre abonnement ?"
+
+#: .\templates\user_payment\verify_payment.html:5
+#: .\templates\user_payment\verify_payment.html:58
+#, fuzzy
+#| msgid "Proceed to Payment"
+msgid "Verification Payment"
+msgstr "Procéder au Paiement"
+
+#: .\templates\user_payment\verify_payment.html:63
+msgid "Pay"
+msgstr "Payer"
+
 #: .\templates\workgroup\classroom.html:205
+#, fuzzy
+#| msgid "Subscription"
+msgid "Description:"
+msgstr "Abonnement"
+
+#: .\templates\workgroup\classroom.html:207
 msgid "Members:"
 msgstr "Membres :"
 
-#: .\templates\workgroup\classroom.html:226
+#: .\templates\workgroup\classroom.html:228
 msgid "Add members"
 msgstr "Ajouter des membres"
 
-#: .\templates\workgroup\classroom.html:231
+#: .\templates\workgroup\classroom.html:233
 msgid "Add Members"
 msgstr "Ajouter des Membres"
 
-#: .\templates\workgroup\classroom.html:232
+#: .\templates\workgroup\classroom.html:234
 msgid "Search for users..."
 msgstr "Rechercher des utilisateurs..."
 
-#: .\templates\workgroup\classroom.html:239
+#: .\templates\workgroup\classroom.html:241
 msgid "Launch Discussion Room"
 msgstr "Lancer la Salle de Discussion"
 
-#: .\templates\workgroup\classroom.html:241
-#: .\templates\workgroup\classroom.html:254
+#: .\templates\workgroup\classroom.html:243
+#: .\templates\workgroup\classroom.html:256
 msgid "Discussion Rooms"
 msgstr "Salles de Discussion"
 
-#: .\templates\workgroup\classroom.html:245
-#: .\templates\workgroup\classroom.html:258
+#: .\templates\workgroup\classroom.html:247
+#: .\templates\workgroup\classroom.html:260
 msgid "Join Room"
 msgstr "Rejoindre la Salle"
 
-#: .\templates\workgroup\classroom.html:267
+#: .\templates\workgroup\classroom.html:269
 msgid "Refuse"
 msgstr "Refuser"
 
-#: .\templates\workgroup\classroom.html:272
+#: .\templates\workgroup\classroom.html:274
 msgid "Join"
 msgstr "Rejoindre"
 
-#: .\templates\workgroup\classroom.html:282
+#: .\templates\workgroup\classroom.html:284
 msgid "Edit"
 msgstr "Modifier"
 
-#: .\templates\workgroup\classroom.html:283
+#: .\templates\workgroup\classroom.html:285
 #: .\venv\Lib\site-packages\django\forms\formsets.py:499
 msgid "Delete"
 msgstr "Supprimer"
@@ -848,7 +1020,9 @@ msgstr "Vos Groupes de Travail"
 msgid ""
 "Working groups are a kind of virtual classroom in which you can add your "
 "colleagues and share your knowledge "
-msgstr "Les groupes de travail sont une sorte de salle de classe virtuelle où vous pouvez ajouter vos collègues et partager vos connaissances "
+msgstr ""
+"Les groupes de travail sont une sorte de salle de classe virtuelle où vous "
+"pouvez ajouter vos collègues et partager vos connaissances "
 
 #: .\templates\workgroup\create_group.html:213
 msgid "Create a workgroup"
@@ -864,8 +1038,11 @@ msgid "Create"
 msgstr "Créer"
 
 #: .\templates\workgroup\create_group.html:255
-msgid "This feature is only available to premium users."
-msgstr "Cette fonctionnalité est uniquement disponible pour les utilisateurs premium."
+#, fuzzy
+#| msgid "This feature is only available to premium users."
+msgid "Workgroup with assistant feature is only available to premium users."
+msgstr ""
+"Cette fonctionnalité est uniquement disponible pour les utilisateurs premium."
 
 #: .\templates\workgroup\discussion_room.html:5
 msgid "Chat Room"
@@ -896,22 +1073,27 @@ msgid ""
 "Questions for requesting the assistant: (You should always start with the "
 "key word assistant)"
 msgstr ""
-"Questions pour demander de l'aide à l'assistant : (Vous devriez toujours commencer par le mot-clé assistant)"
+"Questions pour demander de l'aide à l'assistant : (Vous devriez toujours "
+"commencer par le mot-clé assistant)"
 
 #: .\templates\workgroup\discussion_room.html:334
 msgid ""
 "Assistant, Can you suggest some questions based on the data, to be answered "
 "to assess my understanding?"
 msgstr ""
-"Assistant, pouvez-vous suggérer des questions basées sur les données, pour évaluer ma compréhension ?"
+"Assistant, pouvez-vous suggérer des questions basées sur les données, pour "
+"évaluer ma compréhension ?"
 
 #: .\templates\workgroup\discussion_room.html:337
 msgid "Assistant Can you give me a brief summary of what the data is about ?"
-msgstr "Assistant, pouvez-vous me donner un bref résumé de ce que sont les données ?"
+msgstr ""
+"Assistant, pouvez-vous me donner un bref résumé de ce que sont les données ?"
 
 #: .\templates\workgroup\discussion_room.html:340
 msgid "Assistant Can you give me some clues to help me solve these questions?"
-msgstr "Assistant, pouvez-vous me donner des indices pour m'aider à résoudre ces questions ?"
+msgstr ""
+"Assistant, pouvez-vous me donner des indices pour m'aider à résoudre ces "
+"questions ?"
 
 #: .\templates\workgroup\discussion_room.html:350
 msgid "Leave"
@@ -920,6 +1102,14 @@ msgstr "Quitter"
 #: .\templates\workgroup\discussion_room.html:884
 msgid "Call in progress"
 msgstr "Appel en cours"
+
+#: .\templates\workgroup\discussion_room.html:899
+msgid "Incoming call from"
+msgstr "Appel entrant de"
+
+#: .\templates\workgroup\discussion_room.html:900
+msgid "Pick up"
+msgstr "Décrocher"
 
 #: .\templates\workgroup\edit_workgroup.html:7
 msgid "Edit Workgroup"
@@ -2135,3 +2325,9 @@ msgstr ""
 #: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:248
 msgid "Connect, get help, or contribute"
 msgstr ""
+
+#~ msgid "Country"
+#~ msgstr "Pays"
+
+#~ msgid "Send a request"
+#~ msgstr "Envoyer une demande"
