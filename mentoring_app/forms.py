@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
 
-from .models import Matching, Availability
+from .models import Matching, Availability, CoachingRequest
 
 
 class MatchingForm(forms.ModelForm):
@@ -21,3 +21,8 @@ class AvailabilityForm(forms.ModelForm):
     class Meta:
         model = Availability
         fields = ['day_of_week', 'start_time', 'end_time']
+
+class CoachingRequestForm(forms.ModelForm):
+    class Meta:
+        model = CoachingRequest
+        fields = ['mentor', 'mentee']

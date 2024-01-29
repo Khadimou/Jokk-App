@@ -29,6 +29,7 @@ class AppUserManager(BaseUserManager):
 
 class AppUser(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    has_been_premium = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
     country = models.CharField(max_length=100)
     failed_payment_attempts = models.IntegerField(default=0)

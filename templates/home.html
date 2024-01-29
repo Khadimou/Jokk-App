@@ -3,7 +3,7 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% trans 'Online revision platform' %}{% endblock %}
+{% block title %}{% trans 'Jokk platform' %}{% endblock %}
 
 {% block extra_styles %}
     <style>
@@ -448,7 +448,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 
     <script>
-        var currentLanguage = "{{ request.LANGUAGE_CODE }}";
+        var coachingRequestId = localStorage.getItem('coachingRequestId');
+    console.log("ID de CoachingRequest récupéré du localStorage:", coachingRequestId);
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('search_user').addEventListener('keyup', function() {
                 const query = this.value;
@@ -504,7 +505,7 @@
                 fetch('{% url 'get-notifications' %}')
                     .then(response => response.json())
                     .then(data => {
-			console.log("Notifications data:", data);
+			
                         updateNotificationsDropdown(data.notifications, data.unread_count);
                     });
             }
@@ -522,8 +523,16 @@
                         notificationElement.classList.add('notification-unread');
                     }
                     notificationElement.textContent = notification.title;
-
-                    if (notification.type === 'mentor_promotion') {
+		     // Ajouter un cas pour le type "follow"
+if (notification.type === 'follow') {
+            notificationElement.href = `/profile/${notification.sender_id}/`;
+            notificationElement.addEventListener('click', async function(e) {
+                e.preventDefault();
+                await markAsRead(notification.id);
+                window.location.href = this.href;
+            });
+        }
+                    else if (notification.type === 'mentor_promotion') {
                         // Gérer les notifications de promotion de mentor
                         notificationElement.href = '/my_page/';
                         notificationElement.addEventListener('click', async function(e) {
@@ -556,7 +565,17 @@
 			        await markAsRead(notification.id);
 			        window.location.href = this.href;
 			    });
-			}  
+			} else if (notification.type === 'coaching_request') {
+
+    if (typeof coachingRequestId !== 'undefined') {
+        notificationElement.href = `/coaching_request/${coachingRequestId}/`;
+        notificationElement.addEventListener('click', async function(e) {
+            e.preventDefault();
+            await markAsRead(notification.id);
+            window.location.href = this.href;
+        });
+    }
+}
 		      else {
                         // Gérer les notifications pour les rooms lancés
                         notificationElement.href = `/workgroups/${notification.workgroup_id}/`;

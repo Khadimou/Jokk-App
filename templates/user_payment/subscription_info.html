@@ -1,10 +1,14 @@
 {% extends 'base_site.html' %}
 {% load i18n %}
 
+{% block navbar %}
+{% include 'nav_home.html' %}
+{% endblock %}
+
 {% block content %}
     <div class="subscription-info-container">
         <h1>{% trans 'Subscription Information' %}</h1>
-        <p>{% trans 'Status:' %} {{ 'Premium' if is_premium else 'Standard' }}</p>
+        <p>{% trans 'Status:' %}  {% if is_premium %}Premium{% else %}Standard{% endif %}</p>
         {% if is_premium %}
             <p>{% trans 'Your subscription will end on:' %} {{ subscription_end_date|date:"Y-m-d" }}</p>
         {% endif %}

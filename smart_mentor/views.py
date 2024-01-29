@@ -21,6 +21,7 @@ from django.contrib.auth import login, logout
 from .forms import SignUpForm, ProfileForm
 from openai import OpenAI
 from mentoring_app.models import Notification
+from user_payment.models import AppUser
 
 client = OpenAI(api_key = os.environ.get('OPENAI_API_KEY'))
 
@@ -60,58 +61,74 @@ def handle_pdf_file(file_path):
             text += page.extract_text()
         return text
 
+import tempfile
+from storages.backends.s3boto3 import S3Boto3Storage
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+import mimetypes
 
 def scrape_view(request):
     context = {'file_id': None}
 
     if not request.user.appuser.is_premium:
         return redirect('product_page')
-        # Option 2: Afficher un message d'erreur
-        #return HttpResponse("This feature is reserved for premium users.", status=403)
-
+    
     if request.method == "POST":
+        # Utilisez S3Boto3Storage pour le stockage en production et FileSystemStorage pour le développement/local
+        if settings.USE_S3:
+            storage = S3Boto3Storage()
+        else:
+            storage = FileSystemStorage()
+
+        def handle_pdf_path(pdf_path, is_temporary=False):
+            file_id = upload_to_openai(pdf_path)
+            context['file_id'] = file_id
+            if is_temporary:
+                os.remove(pdf_path)  # Supprimez le fichier temporaire après l'upload
+        
         # Handle URL scraping
         if 'scrape' in request.POST:
             url = request.POST.get('website_url')
             scraped_text = scrape_website(url)
-            pdf_path = text_to_pdf(scraped_text, "scraped_content.pdf")
-            file_id = upload_to_openai(pdf_path)
-            context['file_id'] = file_id
-            os.remove(pdf_path)
+
+            # Générer le fichier PDF dans un fichier temporaire
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+                text_to_pdf(scraped_text, tmp.name)
+                handle_pdf_path(tmp.name, is_temporary=True)
+        
         # Handle file upload
         elif 'upload' in request.POST and request.FILES:
             uploaded_file = request.FILES['file']
-            fs = FileSystemStorage()
-            filename = fs.save(uploaded_file.name, uploaded_file)
-            uploaded_file_path = os.path.join(settings.MEDIA_ROOT, filename)
+            filename = storage.save(uploaded_file.name, uploaded_file)
+            file_url = storage.url(filename)
 
-            # Determine the file type
-            file_type, _ = mimetypes.guess_type(uploaded_file_path)
-            #print(file_type)
-
-            text_content = ""
-            if file_type and (file_type.startswith('audio') or file_type.startswith('video')):
-                text_content = transcribe_file(uploaded_file_path)
-                pdf_path = text_to_pdf(text_content, "transcribed_content.pdf")
-            elif file_type in ['application/pdf']:
-                text_content = handle_pdf_file(uploaded_file_path)
-                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
-            elif file_type in ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
-                text_content = handle_docx_file(uploaded_file_path)
-                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
-            elif file_type in ['text/plain']:
-                text_content = handle_text_file(uploaded_file_path)
-                pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
-
-            # Upload the PDF to OpenAI
-            file_id = upload_to_openai(pdf_path)
-            context['file_id'] = file_id
-
-            # Clean up the files after uploading
-            os.remove(uploaded_file_path)
-            os.remove(pdf_path)
+            # Traitez le fichier en fonction de son type
+            file_type, _ = mimetypes.guess_type(file_url)
+            text_content = process_uploaded_file(file_type, uploaded_file_path)
+            pdf_path = text_to_pdf(text_content, "uploaded_content.pdf")
+            handle_pdf_path(pdf_path, is_temporary=not settings.USE_S3)
 
     return render(request, 'smart_mentor/scrape.html', context)
+
+def process_uploaded_file(file_type, uploaded_file_path):
+    text_content = ""
+    if file_type and (file_type.startswith('audio') or file_type.startswith('video')):
+        text_content = transcribe_file(uploaded_file_path)
+    elif file_type in ['application/pdf']:
+        text_content = handle_pdf_file(uploaded_file_path)
+    elif file_type in ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+        text_content = handle_docx_file(uploaded_file_path)
+    elif file_type in ['text/plain']:
+        text_content = handle_text_file(uploaded_file_path)
+    return text_content
+
+def delete_assistant(request, assistant_id):
+    if request.method == 'POST':
+        assistant = get_object_or_404(OpenAIAssistant, pk=assistant_id, user=request.user)
+        assistant.delete()
+        messages.success(request, 'Assistant successfully deleted.')
+    return redirect('my_assistants')
+
 #@csrf_exempt
 def chat_view(request):
     file_id = request.GET.get('file_id')
@@ -341,15 +358,24 @@ def logout_view(request):
 
 @login_required
 def create_profile(request):
+    # Check if the user already has a profile
+    try:
+        existing_profile = Profile.objects.get(user=request.user)
+        # Redirect to some other view or handle the existing profile
+        # Maybe you want to allow the user to edit their existing profile
+        return redirect('edit_profile')  # Replace 'edit_profile' with the appropriate view
+    except Profile.DoesNotExist:
+        pass
+
+    # Handle profile creation
+    profile = get_object_or_404(Profile, user=request.user)
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            profile = form.save(commit=False)
-            profile.user = request.user
-            profile.save()
-            return redirect('home')
+            form.save()
+            return redirect('home', user_id=request.user.id)
     else:
-        form = ProfileForm()
+        form = ProfileForm(instance=profile)
 
     return render(request, 'create_profile.html', {'form': form})
 
@@ -361,7 +387,21 @@ def profile_view(request, user_id=None):
     else:
         user = get_object_or_404(CustomUser, pk=user_id)
     profile = get_object_or_404(Profile, user=user)
-    return render(request, 'profile.html', {'profile': profile})
+    # Récupérer les followers et following
+    followers = Follow.objects.filter(followed=user).select_related('follower')
+    following = Follow.objects.filter(follower=user).select_related('followed')
+    # Compter les followers et following
+    followers_count = Follow.objects.filter(followed=user).count()
+    following_count = Follow.objects.filter(follower=user).count()
+
+    context = {
+        'profile': profile,
+        'followers': followers,
+        'following': following,
+        'followers_count': followers_count,
+        'following_count': following_count
+    }
+    return render(request, 'profile.html', context)
 
 
 @login_required
@@ -392,13 +432,15 @@ def searching(request):
         ).select_related('user')
 
         for profile in profile_results:
+            is_following = Follow.objects.filter(follower=request.user, followed=profile.user).exists()
             results.append({
                 'type': 'profile',
                 'username': profile.user.username,
                 'avatar': profile.avatar if profile.avatar else None,
                 'bio': profile.bio,
                 'social_media_links': profile.social_media_links,
-                'id': profile.id,
+                'id': profile.user.id,  # Assurez-vous d'utiliser l'ID de l'utilisateur et non de l'objet profil
+                'is_following': is_following,
                 # ... autres champs du profil
             })
 
@@ -734,8 +776,8 @@ def get_user_id(request):
     return JsonResponse({'status': 'error', 'message': 'Username not provided'})
 
 
-@login_required
 @require_POST
+@login_required
 def follow_toggle(request):
     User = get_user_model()
     user_id = request.POST.get('user_id')
@@ -743,11 +785,21 @@ def follow_toggle(request):
         followed_user = User.objects.get(pk=user_id)
         follow, created = Follow.objects.get_or_create(follower=request.user, followed=followed_user)
 
-        if not created:
+        if created:
+            # Créer et envoyer une notification
+            notification = Notification(
+                recipient=followed_user,
+                sender=request.user,
+                body="You have a new Follower",
+                title=f"{request.user.username} followed you.",
+                type="follow"  # Assurez-vous d'ajouter 'follow' à TYPE_CHOICES dans votre modèle Notification
+            )
+            notification.save()
+
+            followed = True
+        else:
             follow.delete()
             followed = False
-        else:
-            followed = True
 
         return JsonResponse({'status': 'ok', 'followed': followed})
     except User.DoesNotExist:

@@ -80,8 +80,14 @@
                                 <h2>{{ result.username }}</h2>
 
                                 <!-- Bouton Follow -->
-                                <div class="follow-button-container text-right">
-                                    <button id="followButton" class="btn btn-primary" data-user-id="{{ result.id }}">+ {% trans 'Follow' %}</button>
+<div class="follow-button-container text-right">
+    <button class="follow-button btn btn-primary" data-user-id="{{ result.id }}">
+        {% if result.is_following %}
+            - {% trans 'Unfollow' %}
+        {% else %}
+            + {% trans 'Follow' %}
+        {% endif %}
+    </button>
                                 </div>
 
                                 <ul class="list-unstyled">
@@ -183,43 +189,95 @@
     {% endif %}
 {% endblock %}
 
-{% block extra_scripts %}
+
+{% block extra_scripts %}                
 <script>
     var currentLanguage = "{{ request.LANGUAGE_CODE }}";
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Gestion des boutons de participation aux groupes de travail
         const joinButtons = document.querySelectorAll('.join-workgroup-btn');
-
         joinButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const workgroupId = this.getAttribute('data-workgroup-id');
-                {#console.log("Workgroup ID:", workgroupId);#}
-                const url = `/${currentLanguage}/join_workgroup/${workgroupId}/`;
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ workgroup_id: workgroupId })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        const joinContainer = document.getElementById(`join-container-${workgroupId}`);
-                        if (data.status === 'success') {
-                            joinContainer.innerHTML = '<div class="alert alert-info">{% trans 'Pending' %}</div>';
-                        } else if (data.status === 'error') {
-                            joinContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            });
+            button.addEventListener('click', handleJoinWorkgroupClick);
         });
 
-        // Définissez getCookie en dehors des événements DOMContentLoaded pour qu'elle soit accessible globalement
+        // Gestion des boutons Follow
+        const followButtons = document.querySelectorAll('.follow-button');
+        followButtons.forEach(button => {
+            button.addEventListener('click', handleFollowClick);
+        });
+
+        // Fonction pour gérer les clics sur les boutons Join Workgroup
+        function handleJoinWorkgroupClick(e) {
+            e.preventDefault();
+            const workgroupId = this.getAttribute('data-workgroup-id');
+            const url = `/${currentLanguage}/join_workgroup/${workgroupId}/`;
+            joinWorkgroup(url, workgroupId);
+        }
+
+        // Fonction pour rejoindre un groupe de travail
+        function joinWorkgroup(url, workgroupId) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ workgroup_id: workgroupId })
+            })
+            .then(response => response.json())
+            .then(data => handleJoinResponse(data, workgroupId))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Gestion de la réponse après tentative de rejoindre un groupe de travail
+        function handleJoinResponse(data, workgroupId) {
+            const joinContainer = document.getElementById(`join-container-${workgroupId}`);
+            if (data.status === 'success') {
+                joinContainer.innerHTML = '<div class="alert alert-info">En Attente</div>';
+            } else if (data.status === 'error') {
+                joinContainer.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            }
+        }
+
+        // Fonction pour gérer les clics sur les boutons Follow
+        function handleFollowClick() {
+            var userId = this.getAttribute('data-user-id');
+            var csrftoken = getCookie('csrftoken');
+            console.log("User ID:", userId);  // Débogage
+            toggleFollow(`/${currentLanguage}/follow_toggle/`, userId, csrftoken, this);
+        }
+
+        // Fonction pour suivre ou ne plus suivre un utilisateur
+        function toggleFollow(url, userId, csrftoken, button) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'user_id=' + encodeURIComponent(userId)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => updateFollowButton(data, button))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Mettre à jour le texte du bouton Follow/Unfollow
+        function updateFollowButton(data, button) {
+            if (data.status === 'ok') {
+                button.textContent = data.followed ? '- Unfollow' : '+ Follow';
+            } else {
+                console.error(data.message);
+            }
+        }
+
+        // Fonction pour obtenir un cookie
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -234,40 +292,7 @@
             }
             return cookieValue;
         }
-
-        document.getElementById('followButton').addEventListener('click', function() {
-            var userId = this.getAttribute('data-user-id');
-            var csrftoken = getCookie('csrftoken');  // Obtenez le token CSRF
-
-            console.log("User ID:", userId);  // Affichez l'ID de l'utilisateur pour le débogage
-
-            fetch(`/${currentLanguage}/follow_toggle/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'user_id=' + encodeURIComponent(userId)  // Assurez-vous d'encoder la valeur
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.status === 'ok') {
-                        // Mettre à jour le texte du bouton
-                        this.textContent = data.followed ? '- Unfollow' : '+ Follow';
-                    } else {
-                        console.error(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-
-
     });
-
 </script>
+                       
 {% endblock %}

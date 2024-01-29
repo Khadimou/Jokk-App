@@ -40,13 +40,35 @@ class Mentor(models.Model):
         return self.Fields
 
 class Availability(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    mentor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=10)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
     def __str__(self):
         return f"{self.user.username} available on {self.day_of_week} from {self.start_time} to {self.end_time}"
+
+class CoachingRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    )
+
+    mentor = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='coaching_requests_mentor', on_delete=models.CASCADE)
+    mentee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='coaching_requests_mentee', on_delete=models.CASCADE)
+    selected_dates = models.JSONField()  # Utilisez JSONField pour stocker une liste de dates
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    
+     # DateField pour stocker la date de la session de coaching.
+    date = models.DateField(auto_now_add=True)
+    available_dates = models.ManyToManyField('Availability')
+
+    # TimeField pour stocker l'heure de la session de coaching.
+    time = models.TimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Coaching request from {self.mentee} to {self.mentor} - Status: {self.status}"
 
 
 class Response(models.Model):
@@ -65,14 +87,17 @@ class Notification(models.Model):
     body = models.TextField()
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    coaching_request_id = models.IntegerField(null=True, blank=True)
     TYPE_CHOICES = (
         ('invitation', 'Invitation'),
         ('join_request', 'Join Request'),
+        ('coaching_request', 'Coaching Request'),
         # Autres types si nécessaire
         ('room_launched','Room launched'),
         ('mentor_promotion', 'Mentor Promotion'),
 	('renewal_reminder', 'Renewal Reminder'),
         ('premium_status_change','Premium Status'),
+        ('follow','Follow'),
     )
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='invitation')
 

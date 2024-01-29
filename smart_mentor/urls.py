@@ -11,6 +11,7 @@ router.register(r'messages', views.MessageViewSet)
 
 urlpatterns = [
     path('login/', views.login_view, name='login'),
+    path('delete_assistant/<int:assistant_id>/', views.delete_assistant, name='delete_assistant'),
     path('clear-chat/', views.clear_chat, name='clear_chat'),
     path('my-assistants/',views.my_assistants,name='my_assistants'),
     path('api/', include(router.urls)),

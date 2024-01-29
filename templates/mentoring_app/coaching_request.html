@@ -1,0 +1,67 @@
+{% extends "base_site.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% trans 'User request' %}{% endblock %}
+{% block extra_styles %}
+    <style>
+        .content-text-color {
+            color: #0097B2;
+        }
+    </style>
+{% endblock %}
+
+{% block navbar %}
+{% include 'nav_mentoring.html' %}
+{% endblock %}
+
+{% block content %}
+    <!-- Section de gestion des demandes de coaching -->
+    <section class="container mt-5 content-text-color">
+        <h2>{% trans 'Managing coaching sessions'%}</h2>
+        <p>{% trans 'You can accept or decline coaching requests here:' %}</p>
+
+        <table class="table table-bordered table-striped content-text-color">
+            <thead>
+            <tr>
+                <th>{% trans 'Mentore' %}</th>
+                <th>{% trans 'Date' %}</th>
+                <th>{% trans 'Time' %}</th>
+                <th>{% trans 'Status' %}</th>
+                <th>{% trans 'Actions' %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if coaching_requests %}
+                {% for request in coaching_requests %}
+                    <tr>
+                        <td>{{ request.mentee.first_name }} {{ request.mentee.last_name }}</td>
+                        <td>{{ request.date }}</td>
+                        <td>{{ request.time }}</td>
+                        <td>{{ request.status }}</td>
+                        <td>
+                            <form method="post" action="{% url 'accept_request' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="coaching_request_id" value="{{ request.id }}">
+                                <button type="submit" class="btn btn-success">{% trans 'Accept' %}</button>
+                            </form>
+                            <!-- Formulaire pour refuser la demande -->
+                            <form method="post" action="{% url 'reject_request' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="coaching_request_id" value="{{ request.id }}">
+                                <button type="submit" class="btn btn-danger">{% trans 'Deny' %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">{% trans 'No applications pending at the moment.' %}</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </section>
+
+{% endblock %}
+

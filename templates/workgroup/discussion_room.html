@@ -311,6 +311,7 @@
                     <i class="fas fa-microphone"></i>
                 </button>
                 <button id="chat-message-submit" class="btn btn-primary">{% trans 'Send' %}</button>
+                
                 <button id="start-call-button" class="btn btn-success">{% trans 'Start Video Call' %}</button>
                 <button id="join-call" class="btn btn-success" onclick="joinCall()" disabled style="display:none;">{% trans 'Join Call' %}</button>
                 <!-- Ajouter un indicateur d'état d'appel ici -->
@@ -616,6 +617,7 @@
     // Utilisez cette fonction pour afficher le message de l'assistant dans le chat
     function displayAssistantMessage(assistantName, assistantAvatarUrl, message) {
         const chatLog = document.querySelector('#chat-log');
+console.log(assistantAvatarUrl)
         const waitingMessage = chatLog.querySelector('.message-waiting');
         if (waitingMessage) {
             chatLog.removeChild(waitingMessage);
@@ -789,6 +791,7 @@
                 const chatLog = document.querySelector('#chat-log');
                 const messageContainer = document.createElement('div');
                 messageContainer.classList.add('chat-message');
+console.log("Chat message avatar URL:", data.avatar_url);
 
 
                 // Si un avatar est fourni
@@ -799,6 +802,7 @@
                     avatarImage.classList.add('avatar');
                     messageContainer.appendChild(avatarImage);
                 } else {
+		avatarImage.src = "{% static 'images/assistant_avatar.png' %}";
                     console.log("Aucun avatar fourni pour ce message."); // Débogage : indiquer l'absence d'avatar
                 }
 
@@ -830,6 +834,7 @@
                 data.users.forEach(function(user) {
                     const memberDiv = document.createElement('div');
                     memberDiv.classList.add('member');
+console.log("User list avatar URL for", user.username, ":", user.avatar_url);
 
                     const statusIndicator = document.createElement('span');
                     statusIndicator.classList.add('status-indicator');
@@ -837,7 +842,10 @@
                     statusIndicator.classList.add(user.is_online ? 'online' : 'offline');
 
                     const avatarImg = document.createElement('img');
-                    avatarImg.src = user.avatar_url;
+ 
+		    avatarImg.src = user.avatar_url || "https://ams3.digitaloceanspaces.com/jokk.bucket/open-chat-static/avatars/pp.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=DO00YYLY29YGUVGW9CAW%2F20240122%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20240122T005954Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=1be36e809ff83b043c6c6bc263e7b32526fb27b67588047ae0a1887a714398b8";
+                    avatarImg.onerror = () => { avatarImg.src = "https://ams3.digitaloceanspaces.com/jokk.bucket/open-chat-static/avatars/pp.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=DO00YYLY29YGUVGW9CAW%2F20240122%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20240122T005954Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=1be36e809ff83b043c6c6bc263e7b32526fb27b67588047ae0a1887a714398b8"; };
+                    
                     avatarImg.alt = `${user.username}`;
                     avatarImg.classList.add('avatar');
 

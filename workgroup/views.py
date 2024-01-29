@@ -60,6 +60,7 @@ def get_notifications(request):
         'body': notification.body,
         'read': notification.read,  # Ajoutez l'état de lecture
         'type': notification.type,
+        'sender_id': notification.sender.id if notification.sender else None,
         'workgroup_id': notification.workgroup_id if notification.workgroup else None
     } for notification in notifications]
 
@@ -181,6 +182,20 @@ def is_valid_assistant_name(user, name):
     """
     return OpenAIAssistant.objects.filter(user=user, name=name).exists()
 
+
+import uuid
+
+User = get_user_model()
+
+def create_assistant_user(assistant_name):
+    # Generate a unique placeholder email
+    placeholder_email = f"assistant_{uuid.uuid4()}@example.com"
+    assistant_user, created = User.objects.get_or_create(
+        username=assistant_name,
+        defaults={'email': placeholder_email}
+    )
+    return assistant_user
+
 @csrf_exempt
 @login_required
 def create_workgroup(request):
@@ -209,8 +224,9 @@ def create_workgroup(request):
 
             # Traitement supplémentaire pour ajouter l'assistant
             if 'create_with_assistant' in request.POST:
+                assistant_name = request.POST.get('assistant_name', '').strip()
                 # Récupérer ou créer l'assistant utilisateur
-                assistant_user, _ = User.objects.get_or_create(username=assistant_name)
+                assistant_user = create_assistant_user(assistant_name)
                 # Vérifiez si l'assistant est déjà membre du groupe
                 if not WorkGroupMember.objects.filter(user=assistant_user, workgroup=workgroup).exists():
                     WorkGroupMember.objects.create(
@@ -395,7 +411,7 @@ def chat_room(request, chat_room_id):
     assistant_user = None
     User = get_user_model()
     if workgroup.with_assistant:
-        assistant_user, _ = User.objects.get_or_create(username=assistant.name)
+        assistant_user = create_assistant_user(assistant.name)
 
     # Vérifier si l'utilisateur est membre du groupe de travail
     if not workgroup.members.filter(id=request.user.id).exists() and request.user != workgroup.creator:

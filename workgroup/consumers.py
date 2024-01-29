@@ -11,6 +11,8 @@ from django.core.files.base import ContentFile
 from django.templatetags.static import static
 
 from workgroup.models import WorkGroup, MessageAudio
+from django.conf import settings
+
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -168,6 +170,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event['message']))
 
     # Dans votre méthode de consommateur
+    @database_sync_to_async
+    def get_avatar_url(self, user):
+        if user.profile.avatar:
+        # Si l'utilisateur a un avatar personnalisé, utilisez son URL
+           return user.profile.avatar.url
+        else:
+        # Sinon, utilisez l'URL de l'image par défaut sur DigitalOcean Spaces
+           default_avatar_path = 'avatars/pp.svg'  # Chemin de l'image par défaut dans le bucket
+           return f'{settings.MEDIA_URL}{default_avatar_path}'
+
     @database_sync_to_async
     def get_avatar_url(self, user):
         avatar_url = user.profile.avatar.url if user.profile.avatar else static('images/pp.svg')

@@ -66,12 +66,13 @@
 {% endblock %}
 
 {% block content %}
-
+	{% if not user.appuser.has_been_premium %}
 	<div class="trial-message">
                 <h2> {% trans '✨ Free trial day! ✨' %} </h2>
                 <h3> {% trans 'Get full access for 24 hours free of charge. Subscribe now and discover everything we have to offer!' %} </h3>
                 <p> {% trans 'Note: You can cancel the subscription at any time in your account settings.' %} </p>
         </div>
+	{% endif %}
 
     <div class="container">
         {% if user.is_authenticated %}

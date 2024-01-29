@@ -2,9 +2,9 @@ import json
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.contrib.auth import get_user_model
 from mentoring_app.forms import MatchingForm, MentorForm
-from mentoring_app.models import Matching, Response, Notification, Availability
+from mentoring_app.models import Matching, Response, Notification, Availability, CoachingRequest
 from mentoring_app.utils import calculate_matching_score_optimized
 from smart_mentor.utils import generate_questions, evaluate
 
@@ -150,39 +150,6 @@ def register_page(request):
 
     return render(request, 'mentoring_app/result_page.html', {'form': form})
 
-# def evaluate_answers(request):
-#     if request.method == 'POST':
-#         questions = request.session.get('questions', [])
-#         user_answers = {question: request.POST.get(f'answer_{index}') for index, question in enumerate(questions, start=1)}
-#         print(user_answers)
-#
-#         # Evaluate the user's answers
-#         evaluation_results = evaluate( user_answers)
-#
-#         score = 0
-#         total_questions = len(questions)
-#
-#         # Increment score for correct answers
-#         for question, result in evaluation_results.items():
-#             if result == 'correct':
-#                 score += 1
-#             else:
-#                 score += 0
-#
-#
-#         if total_questions > 0:
-#             score_out_of_10 = (score / total_questions) * 10
-#         else:
-#             score_out_of_10 = 0
-#
-#         # Clear session data
-#         if 'questions' in request.session:
-#             del request.session['questions']
-#
-#         messages.success(request, f'You scored {score_out_of_10}/10!')
-#         return render(request, 'mentoring_app/result_page.html', {'score': score_out_of_10})
-#     return redirect('register_page')
-
 def evaluate_answers(request):
     if request.method == 'POST':
         questions = request.session.get('questions', [])
@@ -272,8 +239,104 @@ def all_notifications(request):
         # Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
         return redirect('login')
 
-def view_mentor_profile(request, mentor_id):
-    mentor = get_object_or_404(Mentor, pk=mentor_id)
-    is_mentor = isinstance(request.user, Mentor)
 
-    return render(request, 'mentoring_app/view_mentor_profile.html', {'mentor': mentor,'is_mentor': is_mentor})
+from django.http import JsonResponse
+# Supposons que cette fonction est appelée lorsqu'une demande de coaching est créée
+def create_coaching_request_notification(mentor, mentee, coaching_request):
+    Notification.objects.create(
+        recipient=mentor,
+        sender=mentee,
+        title="New Coaching Request",
+        body="You have received a new coaching request from " + mentee.username,
+        type="coaching_request",
+        coaching_request_id=coaching_request.id  # Définir l'ID de la demande
+    )
+
+from datetime import datetime
+
+def send_request(request):
+    User = get_user_model()
+    if request.method == "POST":
+        # Récupérer les informations de la requête (ajuster selon votre besoin)
+        mentor_id = request.POST.get("mentor_id")
+        mentee_id = request.user.id  # Supposons que le demandeur est l'utilisateur connecté
+        selected_dates = request.POST.getlist("selected_dates")
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        # Trouver les instances User pour mentor et mentee
+        try:
+            mentor = User.objects.get(id=mentor_id)
+            mentee = request.user
+             # Convert the date and time strings to appropriate objects
+            date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+            time_obj = datetime.strptime(time, "%H:%M:%S").time()
+            # Création de la demande de coaching
+            mentor_availabilities = Availability.objects.filter(mentor=mentor)
+            available_dates = [a for a in mentor_availabilities if str(a.day_of_week) in selected_dates]
+
+            if not available_dates:
+               return JsonResponse({"error": "No available dates match"}, status=400)
+            coaching_request = CoachingRequest.objects.create(
+            mentor_id=mentor_id,
+            mentee=mentee,
+            selected_dates=selected_dates,
+            status='pending'
+            )
+            coaching_request.save()
+            Notification.objects.create(
+        recipient=mentor,
+        sender=mentee,
+        title="New Coaching Request",
+        body="You have received a new coaching request from " + mentee.username,
+        type="coaching_request",
+        coaching_request_id=coaching_request.id  # Définir l'ID de la demande
+    )
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # Vous pouvez ajouter ici un envoi d'email ou de notification push
+
+        return JsonResponse({"success": "Request sent successfully",
+    "coaching_request_id": coaching_request.id })
+
+    return JsonResponse({"error": "Unauthorized method"}, status=405)
+
+def coaching_request(request, request_id):
+    # Assurez-vous que l'utilisateur est authentifié et a le droit de voir cette demande
+    coaching_request = get_object_or_404(CoachingRequest, id=request_id)
+    sessions = Availability.objects.filter(mentor=coaching_request.mentor)
+    dates = [session.date for session in sessions]
+
+    # Vérifiez si l'utilisateur a les autorisations nécessaires pour voir cette demande
+    if not request.user == coaching_request.mentor and not request.user.is_staff:
+        return render(request, 'unauthorized.html', {'message': 'You do not have permission to view this request.'})  # Rendu d'une page d'erreur ou de non autorisation
+
+    context = {
+        'mentor_usr': coaching_request.mentor.username,
+        'selected_dates': coaching_request.selected_dates,  # Supposons que ce soit une liste de dates
+        'coaching_request': coaching_request,
+    }
+
+    return render(request, 'mentoring_app/coaching_request.html', context)
+
+def user_request_view(request, notification_id):
+    # Mark the notification as read when it's clicked
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.read = True
+    notification.save()
+
+    coaching_requests = CoachingRequest.objects.filter(mentor=request.user, status="Pending")
+    if request.method == "POST":
+        form = CoachingRequestForm(request.POST)
+        if form.is_valid():
+            coaching_request = form.save(commit=False)
+            coaching_request.status = "Pending"
+            coaching_request.save()
+            return redirect('mentoring_app/coaching_request.html')
+    else:
+        form = CoachingRequestForm()
+    context = {
+        'form': form,
+        'coaching_requests': coaching_requests,
+    }
+    return render(request, 'mentoring_app/coaching_request.html', context)

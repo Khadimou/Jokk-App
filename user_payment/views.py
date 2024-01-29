@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from user_payment.models import UserPayment, AppUser
 import stripe
 import time
-import datetime
+from datetime import datetime
 from mentoring_app.models import Notification
 
 @login_required(login_url='login')
@@ -44,26 +44,30 @@ def product_page(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
 
     if request.method == 'POST':
+        # Configuration des URLs de redirection
         success_url = request.build_absolute_uri(reverse('payment_successful')) + '?session_id={CHECKOUT_SESSION_ID}'
         cancel_url = request.build_absolute_uri(reverse('payment_cancelled'))
 
-        subscription_type = request.POST.get('subscription_type', 'monthly')  # 'weekly' ou 'monthly'
+        subscription_type = request.POST.get('subscription_type', 'monthly')
+        app_user = AppUser.objects.get(user=request.user)
 
+        # Déterminer le price_id en fonction du type d'abonnement et de l'historique premium de l'utilisateur
         if subscription_type == 'weekly':
-            price_id = settings.WEEKLY_SUBSCRIPTION_PRICE  # ID de prix pour l'abonnement hebdomadaire
+            price_id = settings.WEEKLY_PREMIUM if app_user.has_been_premium else settings.WEEKLY_SUBSCRIPTION_PRICE
+        elif subscription_type == 'monthly':
+            price_id = settings.MONTHLY_PREMIUM if app_user.has_been_premium else settings.MONTHLY_SUBSCRIPTION_PRICE
         else:
-            price_id = settings.MONTHLY_SUBSCRIPTION_PRICE  # ID de prix pour l'abonnement mensuel
+            return HttpResponse("Type d'abonnement non valide.", status=400)
 
         try:
+            # Créer une session de paiement Stripe sans période d'essai si l'utilisateur a déjà été premium
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
                     'price': price_id,
                     'quantity': 1,
                 }],
-                subscription_data={
-                    'trial_period_days': 1,  # Un jour d'essai gratuit
-                },
+                subscription_data={} if app_user.has_been_premium else {'trial_period_days': 1},
                 mode='subscription',
                 success_url=success_url,
                 cancel_url=cancel_url,
@@ -76,6 +80,7 @@ def product_page(request):
 
 def cancel_page(request):
     return render(request, 'user_payment/cancel_subscription.html')
+
 @login_required(login_url='login')
 def cancel_subscription(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
@@ -150,11 +155,12 @@ def stripe_webhook(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
     payload = request.body
     signature_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    endpoint_secret = 'whsec_EbeyahQE5YhsB1FKj4qWBlu6NpxAZjn4'
     event = None
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, signature_header, settings.STRIPE_WEBHOOK_SECRET_TEST
+            payload, signature_header, settings.STRIPE_SECRET_KEY_TEST, endpoint_secret
         )
     except ValueError as e:
         # Invalid payload

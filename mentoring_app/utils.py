@@ -47,12 +47,12 @@ def calculate_matching_score_optimized(mentore):
     top_3_mentors = top_mentors[:3]
     top_3_mentors_info = [{
         'Score': score,
-        'FirstName': mentor.first_name,
-        'LastName': mentor.last_name,
+        'FirstName': mentor.profile.user.first_name,  # Accès à first_name via User
+        'LastName': mentor.profile.user.last_name,
         'Skills': mentor.Skills,
         'Job': mentor.Job,
-        'Rating': mentor.Rating,
-        'ID': mentor.id
+        #'Rating': mentor.Rating,
+        'ID': mentor.profile.user.id
     } for score, mentor in top_3_mentors]
 
     return top_3_mentors_info

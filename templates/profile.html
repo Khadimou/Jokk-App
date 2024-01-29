@@ -3,7 +3,46 @@
 {% load static %}
 
 {% block extra_styles %}
-    <style>
+<style>
+    	 .followers-container, .following-container {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+       
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        margin-left: auto;
+        margin-right: auto;
+        
+    }
+
+    .followers-container:hover, .following-container:hover {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .followers-count, .following-count {
+        font-weight: bold;
+        color: #0056b3;
+        font-size: 24px; /* Ajuster la taille de police si nécessaire */
+    }
+
+    #followersList, #followingList {
+        list-style-type: none;
+        padding-left: 0;
+        display: none;
+        max-height: 100px; 
+        overflow-y: auto; /* Ajouter une barre de défilement si nécessaire */
+    }
+
+    .list-hidden li {
+        padding: 2px 0;
+    }
+
+    .list-hidden li:hover {
+        background-color: #e9ecef;
+    }
+
         .profile-card {
             background-color: #fff;
             border-radius: 8px;
@@ -46,6 +85,26 @@
                     {% endif %}
                 </div>
 
+		<div class="followers-container">
+    <h3>{% trans 'Followers' %}</h3>
+    <p class="followers-count" onclick="toggleFollowersList()">{{ followers_count }}</p>
+    <ul id="followersList" class="list-hidden">
+        {% for follower in followers %}
+            <li>{{ follower.follower.username }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="following-container">
+    <h3>{% trans 'Following' %}</h3>
+    <p class="following-count" onclick="toggleFollowingList()">{{ following_count }}</p>
+    <ul id="followingList" class="list-hidden">
+        {% for follow in following %}
+            <li>{{ follow.followed.username }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
                 <!-- Section Informations -->
                 <div class="col-md-8">
                     <h2>{{ profile.user.username }}</h2>
@@ -86,8 +145,25 @@
                 </div>
             </div>
         </div>
-        <!-- Bouton de modification du profil -->
+
+         <!-- Bouton de modification du profil (visible uniquement par l'utilisateur connecté) -->
+    {% if request.user == profile.user %}
         <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">{% trans 'Edit Profile' %}</a>
+    {% endif %}
     </div>
 {% endblock %}
 
+{% block extra_scripts %}
+<script>
+    function toggleFollowersList() {
+        var followersList = document.getElementById("followersList");
+        followersList.style.display = followersList.style.display === "none" ? "block" : "none";
+    }
+
+    function toggleFollowingList() {
+        var followingList = document.getElementById("followingList");
+        followingList.style.display = followingList.style.display === "none" ? "block" : "none";
+    }
+</script>
+
+{% endblock %}

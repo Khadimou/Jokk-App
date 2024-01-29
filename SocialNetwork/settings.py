@@ -12,9 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
 
-DEBUG = config('DEBUG', default=False, cast=bool)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
@@ -23,32 +21,31 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.jokk.net',
     # Ajoutez ici d'autres domaines de confiance si nécessaire
 ]
+USE_S3 = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = "django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j"
 
-ROOT_URLCONF = f'{config("PROJECT_NAME")}.urls'
-
-WSGI_APPLICATION = f'{config("PROJECT_NAME")}.wsgi.application'
-
-ASGI_APPLICATION = f'{config("PROJECT_NAME")}.routing.application'
-
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
 ALLOWED_HOSTS = ['134.209.196.111','jokk.net','www.jokk.net']
 STRIPE_SECRET_KEY_TEST = "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"
 STRIPE_PUBLIC_KEY = "pk_live_51OVgNXAdLeMTD97QAyg0aXIqFnoefXm2Z4J0gE1tQifmWyIDyD0xBtlMBDJ3rq4RkAqlPx2VLqx40TGxdsKSRtvm00rWTfvFnd"
 PRODUCT_PRICE = "price_1OVkV9AdLeMTD97QWtMtNKpT"
 MONTHLY_SUBSCRIPTION_PRICE = "price_1OXMQZAdLeMTD97Q5pGRGWyo"
 WEEKLY_SUBSCRIPTION_PRICE = "price_1OXMRDAdLeMTD97QiLTnEYJV"
+WEEKLY_PREMIUM = "price_1OcbJqAdLeMTD97QvyvoHI3s"
+MONTHLY_PREMIUM = "price_1OcbN7AdLeMTD97QN4ob5pZn"
 REDIRECT_DOMAIN = '134.209.196.111'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER ='jokkteam@gmail.com'
+EMAIL_HOST_PASSWORD ='gmez nymt nrwd wuzk'
 
 from celery.schedules import crontab
 
@@ -59,6 +56,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -73,11 +71,8 @@ INSTALLED_APPS = [
     "workgroup",
     "smart_mentor",
     "mentoring_app",
-    'storages',
     'crispy_bootstrap4',
-    'user_payment',
-    'django_countries',
-    'django_celery_beat',
+    'user_payment'
 ]
 
 MIDDLEWARE = [
@@ -90,6 +85,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.locale.LocaleMiddleware",
 ]
+
+ROOT_URLCONF = "SocialNetwork.urls"
 
 TEMPLATES = [
     {
@@ -109,6 +106,9 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = "SocialNetwork.wsgi.application"
+ASGI_APPLICATION = 'SocialNetwork.routing.application'
+
 allowed_origins=['*']
 AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 # Database
@@ -117,9 +117,9 @@ AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config("DB_NAME"),
-        'USER': config("DB_USER"),
-        'PASSWORD': config("DB_PASSWORD"),
+        'NAME': 'jokk',
+        'USER': 'jokk',
+        'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -189,29 +189,17 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL')
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-AWS_LOCATION = config('AWS_LOCATION')
-AWS_DEFAULT_ACL = 'public-read'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# URL à utiliser lors de la référence aux fichiers statiques situés dans STATIC_ROOT.
+STATIC_URL = '/static/'
 
+# Le chemin absolu vers le répertoire où collectstatic stockera les fichiers statiques pour la production.
+STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
 
-STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/'
-MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/media/'
+# URL de base à utiliser lors de la référence aux fichiers médias dans les modèles, etc.
+MEDIA_URL = '/media/'
 
-TEMP = os.path.join(BASE_DIR, 'temp')
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-#STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
-#MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
-
+# Le chemin absolu vers le répertoire où les fichiers téléchargés seront stockés.
+MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
 
 
 # Default primary key field type
@@ -219,4 +207,3 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-BASE_URL = "https://134.209.196.111"
