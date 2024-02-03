@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "workgroup",
     "smart_mentor",
     "mentoring_app",
+    'rest_framework',
+#    'api.apps.ApiConfig',
     'crispy_bootstrap4',
     'user_payment'
 ]
