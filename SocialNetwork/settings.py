@@ -31,7 +31,7 @@ SECRET_KEY = os.environ["SECRET"]#"django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['134.209.196.111','jokk.net','www.jokk.net']
+ALLOWED_HOSTS = ['*']
 STRIPE_SECRET_KEY_TEST = "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"
 STRIPE_PUBLIC_KEY = "pk_live_51OVgNXAdLeMTD97QAyg0aXIqFnoefXm2Z4J0gE1tQifmWyIDyD0xBtlMBDJ3rq4RkAqlPx2VLqx40TGxdsKSRtvm00rWTfvFnd"
 PRODUCT_PRICE = "price_1OVkV9AdLeMTD97QWtMtNKpT"
