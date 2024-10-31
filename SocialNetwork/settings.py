@@ -16,22 +16,23 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = [
-    'https://jokk.net',
-    'https://www.jokk.net',
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://jokk.net',
+#     'https://www.jokk.net',
     # Ajoutez ici d'autres domaines de confiance si nécessaire
-]
+# ]
 USE_S3 = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ["SECRET"]#"django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j"
+SECRET_KEY = os.environ.get("SECRET", "default-secret-key")
+ #"django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ALLOWED_HOSTS = ['*']
+DEBUG = True
+ALLOWED_HOSTS = []
 STRIPE_SECRET_KEY_TEST = "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"
 STRIPE_PUBLIC_KEY = "pk_live_51OVgNXAdLeMTD97QAyg0aXIqFnoefXm2Z4J0gE1tQifmWyIDyD0xBtlMBDJ3rq4RkAqlPx2VLqx40TGxdsKSRtvm00rWTfvFnd"
 PRODUCT_PRICE = "price_1OVkV9AdLeMTD97QWtMtNKpT"
