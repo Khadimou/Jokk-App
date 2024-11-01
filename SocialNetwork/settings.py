@@ -117,16 +117,16 @@ AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'jokk',
-        'USER': 'jokk',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'jokk',
+#         'USER': 'jokk',
+#         'PASSWORD': 'password',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
 
 CHANNEL_LAYERS = {
     'default': {
@@ -196,7 +196,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Le chemin absolu vers le répertoire où collectstatic stockera les fichiers statiques pour la production.
-STATIC_ROOT = '/home/webapps/jokk/Jokk_App/static/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # URL de base à utiliser lors de la référence aux fichiers médias dans les modèles, etc.
 MEDIA_URL = '/media/'
