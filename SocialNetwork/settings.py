@@ -27,7 +27,7 @@ USE_S3 = False
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET", "default-secret-key")
+SECRET_KEY = os.environ.get("SECRET", "QILcNAXJyN")
  #"django-insecure-sx*x4m+=8_5dlui2=1l47+a+9t!lr2tp9$7(#k@rnteg8t&o4j"
 
 # SECURITY WARNING: don't run with debug turned on in production!
