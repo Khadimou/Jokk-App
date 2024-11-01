@@ -15,13 +15,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-CSRF_COOKIE_SECURE = True
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://jokk.net',
-#     'https://www.jokk.net',
-    # Ajoutez ici d'autres domaines de confiance si nécessaire
-# ]
-USE_S3 = False
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -48,16 +42,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER ='jokkteam@gmail.com'
 EMAIL_HOST_PASSWORD ='gmez nymt nrwd wuzk'
 
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'send-renewal-notifications-daily': {
-        'task': 'user_payment.views.send_renewal_notifications',
-        'schedule': crontab(hour=0, minute=0),  # Planifier pour s'exécuter tous les jours à minuit
-    },
-}
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,8 +56,6 @@ INSTALLED_APPS = [
     "workgroup",
     "smart_mentor",
     "mentoring_app",
-    'rest_framework',
-#    'api.apps.ApiConfig',
     'crispy_bootstrap4',
     'user_payment'
 ]
@@ -113,27 +95,19 @@ WSGI_APPLICATION = "SocialNetwork.wsgi.application"
 ASGI_APPLICATION = 'SocialNetwork.routing.application'
 
 allowed_origins=['*']
-AUTH_USER_MODEL = 'smart_mentor.CustomUser'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'jokk',
-#         'USER': 'jokk',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 
@@ -156,6 +130,23 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'workgroup': {  # Remplacez 'myapp' par le nom de votre application ou '__name__'
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -192,18 +183,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-# URL à utiliser lors de la référence aux fichiers statiques situés dans STATIC_ROOT.
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Le chemin absolu vers le répertoire où collectstatic stockera les fichiers statiques pour la production.
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
+#STATIC_ROOT = BASE_DIR / 'static'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# URL de base à utiliser lors de la référence aux fichiers médias dans les modèles, etc.
-MEDIA_URL = '/media/'
-
-# Le chemin absolu vers le répertoire où les fichiers téléchargés seront stockés.
-MEDIA_ROOT = '/home/webapps/jokk/Jokk_App/media/'
 
 
 # Default primary key field type
