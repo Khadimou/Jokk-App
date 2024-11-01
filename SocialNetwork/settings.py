@@ -196,7 +196,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Le chemin absolu vers le répertoire où collectstatic stockera les fichiers statiques pour la production.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # URL de base à utiliser lors de la référence aux fichiers médias dans les modèles, etc.
